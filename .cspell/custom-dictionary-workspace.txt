@@ -1,0 +1,25 @@
+# Custom Dictionary Words
+auctioneerdashboard
+auctioneerlocation
+auctioneerprofile
+auctioneerprofilepage
+bluegreen
+Cagayan
+createauction
+fetchlocation
+fillinlocationfield
+flowbite
+fullname
+Makati
+Malabon
+Marikina
+Muntinlupa
+Parañaque
+Pasay
+Pasig
+Piñas
+Taguig
+tailwindcss
+Toastify
+uuidv
+viewprofile
