@@ -53,6 +53,7 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { useRouter } from 'vue-router';
+import { toast } from 'vue3-toastify';
 
 const email = ref('');
 const password = ref('');
@@ -70,13 +71,13 @@ const login = async () => {
     // Store tokens in localStorage or Vuex
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
-
+    localStorage.setItem('userType', user.userType);
 
     // Redirect based on userType
     if (user.userType === 'Bidder') {
-      router.push('/bidderdashboard');
+      router.replace('/bidderdashboard');
     } else if (user.userType === 'Auctioneer') {
-      router.push('/auctioneerdashboard');
+      router.replace('/auctioneerdashboard');
     } else {
       toast.error('Invalid user type'); 
     }

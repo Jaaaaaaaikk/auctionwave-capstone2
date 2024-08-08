@@ -205,7 +205,7 @@ const submitForm = async () => {
     const responseData = response.data;
     if (response.data.status === 201) {
       toast.success(responseData.json.message); 
-      router.push('/');
+      router.replace('/homepage');
     } else if (responseData && responseData.message) {
       toast.error(responseData.message);
     }

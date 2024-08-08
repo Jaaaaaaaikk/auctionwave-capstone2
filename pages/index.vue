@@ -7,7 +7,7 @@
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
-router.push('/homepage')
+router.replace('/homepage')
 </script>
 
 <style></style>

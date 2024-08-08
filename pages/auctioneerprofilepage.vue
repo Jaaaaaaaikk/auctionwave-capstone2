@@ -51,7 +51,7 @@ const fetchProfile = async () => {
         const token = localStorage.getItem('accessToken');
         if (!token) {
             console.error('No token found in local storage');
-            router.push('/login'); // Redirect to login page if no token
+            router.replace('/homepage'); // Redirect to login page if no token
             return;
         }
 
@@ -65,7 +65,7 @@ const fetchProfile = async () => {
     } catch (error) {
         console.error('Error fetching profile:', error.response ? error.response.data : error.message);
         if (error.response?.status === 401) {
-            router.push('/'); // Redirect to login page if token is invalid
+            router.replace('/homepage'); // Redirect to login page if token is invalid
         }
     }
 };

@@ -27,18 +27,18 @@
                       <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
                           <li>
                               <button @click="create_AuctionModal = true"
-                                  class="block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                  class="block py-2 pr-14 w-full hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                   Create Auction
                               </button>
                           </li>
                           <li>
                               <NuxtLink to="/viewauctions"
-                                  class="block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                  class="block px-4 py-2 w-full hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                   View Auctions</NuxtLink>
                           </li>
                           <li>
                               <NuxtLink to="/transactionhistory"
-                                  class="block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                  class="block px-4 py-2 w-full hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">
                                   Transaction History</NuxtLink>
                           </li>
                       </ul>
@@ -167,7 +167,7 @@ const toggleAuctionsDropdown = () => {
 
 function viewProfile() {
     profileDropdownOpen.value = false;
-    router.push('/auctioneerprofilepage');
+    router.replace('/auctioneerprofilepage');
     
 }
 
@@ -196,9 +196,10 @@ const logout = async () => {
         // Clear tokens from local storage or cookies if needed
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('accessToken'); // Assuming you have an access token
+        localStorage.removeItem('userType');
 
         // Redirect to home page or login page
-        router.push('/');
+        router.replace('/homepage');
     } catch (error) {
         console.error('Logout failed:', error);
         // Optionally show an error message to the user

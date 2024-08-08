@@ -3,9 +3,11 @@ auctioneerdashboard
 auctioneerlocation
 auctioneerprofile
 auctioneerprofilepage
+bidderdashboard
 bluegreen
 Cagayan
 createauction
+displayauctionlisting
 fetchlocation
 fillinlocationfield
 flowbite

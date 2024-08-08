@@ -136,7 +136,7 @@ const fetchLocation = async () => {
     const token = localStorage.getItem('accessToken');
     if (!token) {
       console.error('No token found in local storage');
-      router.push('/'); // Redirect to login page if no token
+      router.replace('/homepage'); // Redirect to login page if no token
       return;
     }
 
@@ -150,7 +150,7 @@ const fetchLocation = async () => {
   } catch (error) {
     console.error('Error fetching location:', error.response ? error.response.data : error.message);
     if (error.response?.status === 401) {
-      router.push('/'); // Redirect to login page if token is invalid
+      router.replace('/homepage'); // Redirect to login page if token is invalid
     }
   }
 };
@@ -159,7 +159,7 @@ const createAuction = async () => {
   const token = localStorage.getItem('accessToken');
   if (!token) {
     toast.error('No access token found. Please log in first.');
-    router.push('/'); // Redirect to login page if no token
+    router.replace('/'); // Redirect to login page if no token
     return;
   }
 

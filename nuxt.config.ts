@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 
-export default ({
+export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
   css: ['~/assets/tailwind.css'],
@@ -10,9 +10,4 @@ export default ({
       autoprefixer: {},
     },
   },
-  serverMiddleware: [
-    {
-      path: '/api/login', handler: '~/server/api/login.js'
-    }
-  ],
 });
