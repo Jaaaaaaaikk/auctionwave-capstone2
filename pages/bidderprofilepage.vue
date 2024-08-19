@@ -39,11 +39,22 @@
         <hr class="w-full">
       </div>
       <div class="bg-white w-3/5 mx-auto my-6 px-12 py-12 rounded-lg items-start">
-        <div class="mr-6">
+        <div class="flex justify-between items-center mb-4">
           <div class="text-2xl font-medium">About</div>
+          <div class="flex gap-2">
+            <button @click="toggleEdit" :class="{'bg-blue-500 px-3 py-1 rounded-3xl': !isEditing, 'bg-transparent border-none': isEditing}" 
+                    class="text-white focus:outline-none mr-4">
+              <span v-if="!isEditing">Edit</span>
+              <span v-if="isEditing" class="text-red-500 text-2xl">X</span>
+            </button>
+            <button v-if="isEditing" @click="saveAbout" class="bg-green-500 text-white px-3 py-1 rounded-3xl">Save</button>
+          </div>
         </div>
-        <div class="mr-6">
-          <div class="font-normal my-4">{{ profile.about }}</div>
+        <div>
+          <div v-if="isEditing">
+            <textarea v-model="editAbout" rows="4" class="w-full border border-gray-300 p-2 rounded-3xl"></textarea>
+          </div>
+          <div v-else class="font-normal my-4">{{ profile.about }}</div>
         </div>
         <div class="flex justify-center my-8">
           <hr class="w-full">
@@ -65,6 +76,8 @@ const profile = ref({
   categories: [],
   about: ''
 });
+const isEditing = ref(false);
+const editAbout = ref('');
 
 const fetchProfile = async () => {
   try {
@@ -79,8 +92,35 @@ const fetchProfile = async () => {
       }
     });
     profile.value = response.data.profile;
+    editAbout.value = profile.value.about;
   } catch (error) {
     console.error('Error fetching profile:', error.message);
+  }
+};
+
+const saveAbout = async () => {
+  try {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      console.error('No token found in local storage');
+      return;
+    }
+    await axios.put('/api/update_about_in_profile', { about: editAbout.value }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    profile.value.about = editAbout.value;
+    isEditing.value = false;
+  } catch (error) {
+    console.error('Error saving about:', error.message);
+  }
+};
+
+const toggleEdit = () => {
+  isEditing.value = !isEditing.value;
+  if (isEditing.value) {
+    editAbout.value = profile.value.about;
   }
 };
 

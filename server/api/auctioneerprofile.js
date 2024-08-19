@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     const pool = await getPool();
 
     // Query to get user profile from the Users table
-    const [user] = await pool.query('SELECT firstname, middlename, lastname, email, location FROM Users WHERE user_id = ?', [userId]);
+    const [user] = await pool.query('SELECT firstname, middlename, lastname, email, location, about FROM Users WHERE user_id = ?', [userId]);
 
     if (!user.length) {
       throw createError({ statusCode: 404, message: 'User not found' });
@@ -30,6 +30,7 @@ export default defineEventHandler(async (event) => {
         fullname: `${user[0].firstname} ${user[0].middlename ? user[0].middlename + ' ' : ''}${user[0].lastname}`,
         email: user[0].email,
         location: user[0].location,
+        about: user[0].about
       }
     };
   } catch (error) {

@@ -58,6 +58,7 @@ import { toast } from 'vue3-toastify';
 const email = ref('');
 const password = ref('');
 const router = useRouter();
+const errorMessage = ref('');
 
 const login = async () => {
   try {
@@ -79,14 +80,14 @@ const login = async () => {
     } else if (user.userType === 'Auctioneer') {
       router.replace('/auctioneerdashboard');
     } else {
-      toast.error('Invalid user type'); 
+      toast.error('Invalid user type');
     }
   } catch (error) {
     if (error.response && error.response.data) {
       errorMessage.value = error.response.data.message;
       toast.error(errorMessage.value);
     } else {
-      toast.error('An unexpected error occurred'); 
+      toast.error('An unexpected error occurred');
     }
   }
 };

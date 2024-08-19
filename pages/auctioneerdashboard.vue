@@ -13,10 +13,11 @@
               <div class="text-center md:text-left">
                   <h2 class="text-2xl font-semibold mb-4">You don't have created auctions yet.</h2>
                   <p class="text-gray-700 dark:text-gray-300 mb-4">Click the button below to create one.</p>
-                  <NuxtLink to="/createauctions" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                  <button @click="create_AuctionModal = true" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
                       Create Auction
-                  </NuxtLink>
+                  </button>
               </div>
+              <CreateAuction_Modal v-if="create_AuctionModal" @close="create_AuctionModal = false" />
           </div>
       </section>
  </NuxtLayout>
@@ -24,6 +25,11 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import CreateAuction_Modal from '~/components/createauctionmodal.vue';
+
+const create_AuctionModal = ref(false);
 
 </script>
 

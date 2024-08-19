@@ -38,17 +38,9 @@
 
                     <!-- Search Input -->
                     <div class="relative flex-grow ml-2">
-                        <input type="text" id="search-dropdown"
+                        <input type="text" id="search-dropdown" v-model="searchTerm" @input="handleSearch"
                             class="block w-full p-3 text-sm text-gray-900 bg-gray-50 rounded-xl border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500"
-                            placeholder="Search name of auction, bidding-type..." />
-                        <button type="submit"
-                            class="absolute right-3 top-1 pr-1 br-b-2 bottom-2 px-3 text-sm font-medium text-white bg-gray-50 rounded-xl">
-                            <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                viewBox="0 0 20 20">
-                                <path stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
-                            </svg>
-                        </button>
+                            placeholder="Search for auctions..." />
                     </div>
                 </form>
             </div>
@@ -57,7 +49,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
                 <div v-for="listing in currentListings" :key="listing.listing_id"
                     class="bg-white p-4 rounded-lg shadow-md">
-                    <h3 class="text-lg font-semibold mb-2">{{ listing.name }}</h3>
+                    <h3 class="text-2xl font-semibold mb-5">{{ listing.name }}</h3>
                     <p class="text-gray-700 mb-2">Description: {{ listing.description }}</p>
                     <p class="text-gray-500 mb-2">Location: {{ listing.location }}</p>
                     <p class="text-gray-500 mb-4">Bidding Type: {{ listing.bidding_type }}</p>
@@ -107,17 +99,40 @@ const listings = ref([]);
 const pageSize = 5;
 const currentPage = ref(1);
 const selectedCategory = ref(null);
+const searchTerm = ref('');
 const dropdownOpen = ref(false);
 
 const fetchListings = async () => {
     try {
-        const params = { category: selectedCategory.value };
+        const params = { category: selectedCategory.value, search: searchTerm.value };
         const response = await axios.get('/api/displayauctionlisting', { params });
         listings.value = response.data;
     } catch (error) {
         console.error('Failed to fetch auction listings:', error);
     }
 };
+
+// Function to handle search input changes
+const handleSearch = () => {
+    selectedCategory.value = null; // Reset category selection
+    dropdownOpen.value = false;
+    currentPage.value = 1; // Reset to first page
+    debouncedSearch(); // Call debounced search
+};
+
+function debounce(fn, delay) {
+  let timeout;
+  return function (...args) {
+    if (timeout) clearTimeout(timeout);
+    timeout = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+// Debounced search handler
+const debouncedSearch = debounce(() => {
+  currentPage.value = 1; // Reset to first page
+  fetchListings(); // Fetch listings with the search term
+}, 300); // Delay set to 300ms for debouncing
 
 const currentListings = computed(() => {
     const start = (currentPage.value - 1) * pageSize;

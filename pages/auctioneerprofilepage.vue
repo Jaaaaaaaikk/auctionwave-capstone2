@@ -3,7 +3,8 @@
         <div class="min-h-screen bg-custom-white w-full mt-16">
             <div class="bg-white w-3/5 mx-auto px-12 py-12 rounded-lg flex items-start">
                 <div class="mr-6">
-                    <img class="w-48 rounded-full" src="../public/images/default-profile-image.png" alt="Profile Picture">
+                    <img class="w-48 rounded-full" src="../public/images/default-profile-image.png"
+                        alt="Profile Picture">
                 </div>
                 <div class="my-2 mx-8">
                     <h1 class="text-3xl font-medium mb-3">Auctioneer</h1>
@@ -31,6 +32,31 @@
             <div class="flex justify-center my-8">
                 <hr class="w-full">
             </div>
+            <div class="bg-white w-3/5 mx-auto my-6 px-12 py-12 rounded-lg items-start">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-2xl font-medium">About</div>
+                    <div class="flex gap-2">
+                        <button @click="toggleEdit"
+                            :class="{ 'bg-blue-500 px-3 py-1 rounded-3xl': !isEditing, 'bg-transparent border-none': isEditing }"
+                            class="text-white focus:outline-none mr-4">
+                            <span v-if="!isEditing">Edit</span>
+                            <span v-if="isEditing" class="text-red-500 text-2xl">X</span>
+                        </button>
+                        <button v-if="isEditing" @click="saveAbout"
+                            class="bg-green-500 text-white px-3 py-1 rounded-3xl">Save</button>
+                    </div>
+                </div>
+                <div>
+                    <div v-if="isEditing">
+                        <textarea v-model="editAbout" rows="4"
+                            class="w-full border border-gray-300 p-2 rounded-3xl"></textarea>
+                    </div>
+                    <div v-else class="font-normal my-4">{{ profile.about }}</div>
+                </div>
+                <div class="flex justify-center my-8">
+                    <hr class="w-full">
+                </div>
+            </div>
         </div>
     </NuxtLayout>
     <NuxtLayout name="footer"></NuxtLayout>
@@ -44,7 +70,11 @@ const profile = ref({
     fullname: '',
     email: '',
     location: '',
+    about: ''
 });
+
+const isEditing = ref(false);
+const editAbout = ref('');
 
 const fetchProfile = async () => {
     try {
@@ -68,6 +98,32 @@ const fetchProfile = async () => {
             router.replace('/homepage'); // Redirect to login page if token is invalid
         }
     }
+};
+
+const saveAbout = async () => {
+  try {
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      console.error('No token found in local storage');
+      return;
+    }
+    await axios.put('/api/update_about_in_profile', { about: editAbout.value }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    profile.value.about = editAbout.value;
+    isEditing.value = false;
+  } catch (error) {
+    console.error('Error saving about:', error.message);
+  }
+};
+
+const toggleEdit = () => {
+  isEditing.value = !isEditing.value;
+  if (isEditing.value) {
+    editAbout.value = profile.value.about;
+  }
 };
 
 onMounted(fetchProfile);
