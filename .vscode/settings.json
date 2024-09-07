@@ -1,20 +1,19 @@
 {
-    "cSpell.words": [
-        "axios",
-        "createauctionmodal",
-        "emailblastmodal",
-        "firstname",
-        "lastname",
-        "middlename",
-        "profilepage"
-    ],
-    "cSpell.customDictionaries": {
-        "custom-dictionary-workspace": {
-            "name": "custom-dictionary-workspace",
-            "path": "${workspaceFolder:auctionwave-final}/.cspell/custom-dictionary-workspace.txt",
-            "addWords": true,
-            "scope": "workspace"
-        }
-    },
-
+  "cSpell.words": [
+    "axios",
+    "createauctionmodal",
+    "emailblastmodal",
+    "firstname",
+    "lastname",
+    "middlename",
+    "profilepage"
+  ],
+  "cSpell.customDictionaries": {
+    "custom-dictionary-workspace": {
+      "name": "custom-dictionary-workspace",
+      "path": "${workspaceFolder:auctionwave-final}/.cspell/custom-dictionary-workspace.txt",
+      "addWords": true,
+      "scope": "workspace"
+    }
+  }
 }

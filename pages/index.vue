@@ -1,13 +1,10 @@
-<template>
-
-</template>
-
+<template></template>
 
 <script setup>
-import { useRouter } from 'vue-router'
+import { useRouter } from "vue-router";
 
-const router = useRouter()
-router.replace('/homepage')
+const router = useRouter();
+router.replace("/homepage");
 </script>
 
 <style></style>
