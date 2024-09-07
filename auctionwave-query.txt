@@ -1,0 +1,203 @@
+-- Create Users table
+CREATE TABLE Users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    firstname VARCHAR(100) NOT NULL,
+    middlename VARCHAR(100),
+    lastname VARCHAR(100) NOT NULL,
+    location ENUM('General Santos City', 'Quezon City', 'Butuan', 'Davao City', 'Zamboanga City', 'Iligan', 'Cotabato City', 'Tagum', 'Valencia', 'Pagadian', 'Panabo', 'Marawi', 'Koronadal', 'Malaybalay', 'Digos', 'Polomolok', 'Surigao City', 'Kidapawan', 'Mati', 'Ozamiz', 'Dipolog', 'Tacurong', 'Bislig', 'Bayugan', 'El Salvador', 'Lamitan', 'Tandag', 'Sultan Kudarat', 'Isabela City') NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    about TEXT,
+    user_type ENUM('Bidder', 'Auctioneer') NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Create Bidders table
+CREATE TABLE Bidders (
+    bidder_category_id INT AUTO_INCREMENT PRIMARY KEY,
+    bidder_id INT NOT NULL,
+    category_id INT NOT NULL,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES Categories(category_id) ON DELETE CASCADE
+);
+
+-- Create Categories table
+CREATE TABLE Categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_name VARCHAR(250) NOT NULL
+);
+
+-- Create UserTokens table
+CREATE TABLE UserTokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    userId INT NOT NULL,
+    token VARCHAR(512) NOT NULL,
+    expiresAt DATETIME NOT NULL,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    revokedAt DATETIME NULL,
+    FOREIGN KEY (userId) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+-- Create AuctionListings table
+CREATE TABLE AuctionListings (
+    listing_id INT AUTO_INCREMENT PRIMARY KEY,
+    auctioneer_id INT NOT NULL,
+    name VARCHAR(250) NOT NULL,
+    location VARCHAR(250) NOT NULL,
+    description TEXT,
+    starting_bid DECIMAL(10,2) NOT NULL,
+    bidding_type ENUM('Lowest-type', 'Offer-type') NOT NULL,
+    rarity ENUM('Common', 'Uncommon', 'Rare'),
+    status ENUM('Auction Pending', 'Auction Done') NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	uuid char(36) NOT NULL,
+    FOREIGN KEY (auctioneer_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+-- Create AuctionListingCategories table
+CREATE TABLE AuctionListingCategories (
+    listing_id INT NOT NULL,
+    category_id INT NOT NULL,
+    PRIMARY KEY (listing_id, category_id),
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES Categories(category_id) ON DELETE CASCADE
+);
+
+-- Create AuctionParticipants table
+CREATE TABLE AuctionParticipants (
+    participant_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,
+    bidder_id INT NOT NULL,
+    initial_joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_interaction_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_listing_bidder (listing_id, bidder_id)
+);
+
+
+CREATE TABLE Bids (
+    bid_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,
+    participant_id INT NOT NULL,
+    bid_amount DECIMAL(10,2) NOT NULL,
+    bid_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (participant_id) REFERENCES AuctionParticipants(participant_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE Offers (
+    offer_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,
+    bidder_id INT NOT NULL,
+    offer_amount DECIMAL(10,2),
+    comment TEXT,
+    offer_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    review_comment TEXT,
+    review_status ENUM('Pending', 'Reviewed') DEFAULT 'Pending',
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+
+
+SELECT * FROM users;
+SELECT * FROM bidders;
+SELECT * FROM usertokens;
+SELECT * FROM auctionlistings;
+SELECT * FROM auctionlistingcategories;
+SELECT * FROM auctionparticipants;
+SELECT * FROM bids;
+SELECT * FROM offers;
+
+
+
+CREATE TABLE EmailBlasts (
+    email_blast_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT,
+    blast_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id)
+);
+
+CREATE TABLE EmailBlastFees (
+    fee_id INT AUTO_INCREMENT PRIMARY KEY,
+    auction_id INT,
+    fee_amount DECIMAL(10,2),
+    status ENUM('Pending', 'Paid'),
+    transaction_id VARCHAR(255), -- Transaction ID from third-party service
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (auction_id) REFERENCES AuctionListings(listing_id)
+);
+
+
+CREATE TABLE Bids (
+    bid_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    listing_id INT,
+    bid_amount DECIMAL(10,2),
+    bid_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    bid_status ENUM('Accepted', 'Rejected', 'Pending') DEFAULT 'Pending',
+    is_winning BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id)
+);
+
+CREATE TABLE BidderPayments (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    bidder_id INT,
+    auction_id INT,
+    amount DECIMAL(10,2),
+    payment_type ENUM('Usage Fee', 'Cash Bond'),
+    status ENUM('Pending', 'Completed', 'Failed'),
+    transaction_id VARCHAR(255), -- Transaction ID from third-party service
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id),
+    FOREIGN KEY (auction_id) REFERENCES AuctionListings(listing_id)
+);
+
+
+CREATE TABLE CashBond (
+    bond_id INT AUTO_INCREMENT PRIMARY KEY,
+    auction_id INT,
+    bidder_id INT,
+    amount DECIMAL(10,2) NOT NULL,
+    status ENUM('Pending', 'Confirmed', 'Withdrawn', 'Claimed') NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (auction_id) REFERENCES AuctionListings(listing_id),
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id)
+);
+
+CREATE TABLE BidderNotifications (
+    notification_id INT AUTO_INCREMENT PRIMARY KEY,
+    bidder_id INT,
+    auction_id INT,
+    notification_type ENUM('Auction Win', 'Payment Instructions'),
+    notification_datetime DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id),
+    FOREIGN KEY (auction_id) REFERENCES AuctionListings(listing_id)
+);
+
+CREATE TABLE PaymentServiceLog (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    payment_id INT,
+    request_data TEXT, -- JSON or serialized request data sent to payment service
+    response_data TEXT, -- JSON or serialized response data from payment service
+    status ENUM('Success', 'Failure'),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (payment_id) REFERENCES BidderPayments(payment_id)
+);
+
+
+CREATE TABLE Admins (
+    admin_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL, -- Hash and store passwords securely
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
