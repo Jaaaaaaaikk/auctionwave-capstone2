@@ -26,17 +26,22 @@
               class="absolute top-full mt-2 w-48 shadow-sm-light shadow-slate-950 bg-white divide-y divide-gray-100 rounded-lg dark:bg-gray-700">
               <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
                 <li>
-                  <NuxtLink to="/transactionhistory"
+                  <NuxtLink to="/inbox"
                     class="block px-4 py-2 w-full hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">
                     Transaction History</NuxtLink>
                 </li>
               </ul>
             </div>
           </div>
-          <NuxtLink to="/faq" class="text-gray-900 dark:text-white hover:text-blue-700 dark:hover:text-blue-500">
+          <NuxtLink :to="{ path: '/faq', query: { userType: userType } }" class="text-gray-900 dark:text-white hover:text-blue-700 dark:hover:text-blue-500">
             FAQ's</NuxtLink>
-          <NuxtLink to="/contactus" class="text-gray-900 dark:text-white hover:text-blue-700 dark:hover:text-blue-500">
+          <NuxtLink :to="{ path: '/contactus', query: { userType: userType } }" class="text-gray-900 dark:text-white hover:text-blue-700 dark:hover:text-blue-500">
             Contact Us
+          </NuxtLink>
+          <NuxtLink
+            :to="{ path: '/inbox', query: { userType: userType } }"
+            class="text-gray-900 dark:text-white text-xl hover:text-blue-700 dark:hover:text-blue-500"
+            >Inbox
           </NuxtLink>
         </div>
 
@@ -44,15 +49,15 @@
         <div class="flex space-x-4 items-center">
           <!-- Notification Icon -->
           <div class="relative">
-            <NuxtLink to="#" @click="toggleNotificationDropdown"
-              class="flex items-center py-2 px-3 text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:hover:bg-gray-700 md:dark:hover:bg-transparent"
+            <button @click="toggleNotificationDropdown"
+              class="flex items-center py-2 px-3 text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:hover:bg-gray-700 md:dark:hover:bg-transparent cursor-pointer"
               aria-expanded="false">
               <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                 fill="none" viewBox="0 0 24 24">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 22c1.104 0 2-.896 2-2H10c0 1.104.896 2 2 2zM5 11V8a7 7 0 0 1 14 0v3l1 1v1H4v-1l1-1z" />
               </svg>
-            </NuxtLink>
+            </button>
             <div v-if="notificationDropdownOpen"
               class="absolute right-0 mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg dark:bg-gray-700 shadow-sm-light shadow-black">
               <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
@@ -77,11 +82,11 @@
 
           <!-- Profile Icon -->
           <div class="relative">
-            <NuxtLink to="#" @click="toggleProfileDropdown"
-              class="flex items-center py-2 px-3 text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:hover:bg-gray-700 md:dark:hover:bg-transparent"
+            <button @click="toggleProfileDropdown"
+              class="flex items-center py-2 px-3 text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:hover:bg-gray-700 md:dark:hover:bg-transparent cursor-pointer"
               aria-expanded="false">
               <img :src="userProfileImage" class="w-10 h-10 rounded-full object-cover" alt="Profile Icon" />
-            </NuxtLink>
+            </button>
             <div v-if="profileDropdownOpen"
               class="absolute right-0 mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg dark:bg-gray-700 shadow-sm-light shadow-black">
               <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
@@ -130,6 +135,7 @@
   const auctionsDropdownOpen = ref(false); // Added state for auctions dropdown
   const router = useRouter();
   const userProfileImage = ref("/images/default-profile-image.png");
+  const userType = ref("");
 
   const toggleNotificationDropdown = () => {
     notificationDropdownOpen.value = !notificationDropdownOpen.value;
@@ -159,9 +165,7 @@
       await axios.post("/api/logout");
 
       // Clear localStorage on logout
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("userType");
-      localStorage.removeItem("userLocation");
+      //localStorage.removeItem("userType");
 
       // Redirect to login page or homepage
       router.replace("/homepage");
@@ -170,6 +174,20 @@
       toast.error("Logout failed. Please try again.");
     }
   };
+
+  const getUserType = async () => {
+    try {
+      const { data } = await axios.post("/api/get-usertype");
+      userType.value = data.userType;
+    } catch (error) {
+      console.error("Failed to get:", error);
+      toast.error("Failed to get. Please try again.");
+    }
+  };
+
+  onMounted(() => {
+    getUserType();
+});
   </script>
 
   <style></style>

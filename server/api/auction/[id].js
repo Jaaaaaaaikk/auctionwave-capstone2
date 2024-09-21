@@ -1,4 +1,4 @@
-import { defineEventHandler, createError } from "h3";
+import { defineEventHandler, getCookie, createError } from "h3";
 import { getPool } from "../../db";
 import jwt from "jsonwebtoken";
 
@@ -6,11 +6,17 @@ export default defineEventHandler(async (event) => {
   // Extract listing_id from query parameters
   const id = event.context.params.id;
 
-  // Verify JWT token if provided
-  const token = event.req.headers["authorization"]?.split(" ")[1];
+  // Retrieve the access token from cookies
+  const token = getCookie(event, "accessToken");
+
+  if (!token) {
+    // No token found, return an unauthorized error
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+  }
+  
   if (token) {
     try {
-      jwt.verify(token, "hello123z");
+      jwt.verify(token, process.env.JWT_SECRET);
     } catch (err) {
       throw createError({
         statusCode: 401,
@@ -33,15 +39,17 @@ export default defineEventHandler(async (event) => {
   try {
     const [results] = await pool.query(
       `SELECT 
-                listing_id AS id, 
-                name, 
-                description, 
-                location, 
-                starting_bid, 
-                bidding_type, 
-                rarity 
-            FROM AuctionListings 
-            WHERE uuid = ?`,
+    al.listing_id AS id, 
+    al.name, 
+    al.description, 
+    l.location_name AS location, 
+    al.starting_bid, 
+    al.bidding_type, 
+    al.rarity 
+FROM AuctionListings al
+INNER JOIN Locations l ON al.location_id = l.location_id
+WHERE al.uuid = ?
+`,
       [id],
     );
 

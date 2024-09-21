@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
   const token = authorizationHeader.split(" ")[1];
   let decodedToken;
   try {
-    decodedToken = jwt.verify(token, "hello123z");
+    decodedToken = jwt.verify(token, process.env.JWT_SECRET);
   } catch (error) {
     throw createError({
       statusCode: 401,

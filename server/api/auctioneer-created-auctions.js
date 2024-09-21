@@ -1,21 +1,25 @@
-import { defineEventHandler, createError } from "h3";
+import { defineEventHandler, createError, getCookie } from "h3";
 import { getPool } from "../db";
 import jwt from "jsonwebtoken";
 
 export default defineEventHandler(async (event) => {
   try {
-    const token = event.req.headers.authorization?.split(" ")[1];
+    // Retrieve the access token from cookies
+    const token = getCookie(event, "accessToken");
+
     if (!token) {
+      // No token found, return an unauthorized error
       throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
     }
 
-    const decoded = jwt.verify(token, "hello123z");
+     // Verify the token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("Decoded Token:", decoded);
     const auctioneerId = decoded.userId; // Ensure this matches the token field
 
     const pool = getPool();
     const [rows] = await pool.query(
-      "SELECT listing_id, name, location, description, bidding_type FROM AuctionListings WHERE auctioneer_id = ?",
+      'SELECT al.listing_id, al.name, l.location_name, al.description, al.bidding_type, al.uuid, al.status FROM AuctionListings al JOIN Locations l ON al.location_id = l.location_id WHERE al.auctioneer_id = ?',
       [auctioneerId],
     );
     //console.log('Fetched Auctions:', rows);

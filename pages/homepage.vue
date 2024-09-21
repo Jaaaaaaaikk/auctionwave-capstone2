@@ -10,7 +10,7 @@
       <!-- Sign In Button -->
       <div class="flex items-center">
         <button @click="showSigninModal = true"
-          class="px-4 py-2 text-gray-900 font-semibold bg-teal-500 border border-teal-500 rounded-full hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-600 shadow-sm-light shadow-black">
+          class="flex px-4 py-2 text-gray-900 font-semibold bg-teal-500 border border-teal-500 rounded-full hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-600 shadow-sm-light shadow-black">
           Sign In
         </button>
       </div>
@@ -82,15 +82,14 @@
       </div>
     </section>
   </div>
-  <SigninModal v-if="showSigninModal" @close="showSigninModal = false" @show-signup="showSignupModal = true" />
-  <SignupModal v-if="showSignupModal" @show-login="ShowSigninModal = true" @show-login2="showSignupModal = false" />
+  <SigninModal v-if="showSigninModal" @close="showSigninModal = false" @close-signup="showSignupModal = false" />
   <NuxtLayout name="footer"></NuxtLayout>
 </template>
 
 <script setup>
 import { ref } from "vue";
 import SigninModal from "~/components/signinmodal.vue";
-import SignupModal from "~/components/signupmodal.vue";
+
 
 
 const showSigninModal = ref(false);

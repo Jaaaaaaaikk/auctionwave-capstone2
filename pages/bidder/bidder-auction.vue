@@ -113,12 +113,7 @@ const confirmBid = () => {
 const placeBid = async (amount) => {
   try {
     const auctionId = route.query.id;
-    const token = localStorage.getItem("accessToken");
-
-    await axios.post('/api/place-bid', { auctionId, bidAmount: amount }, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
+    await axios.post('/api/place-bid', { auctionId, bidAmount: amount });
     alert("Bid placed successfully!");
   } catch (err) {
     console.error("Failed to place bid:", err);

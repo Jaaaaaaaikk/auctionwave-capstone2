@@ -2,10 +2,10 @@ import mysql from "mysql2/promise";
 
 // MySQL database configuration
 const dbConfig = {
-  host: "localhost",
-  user: "root",
+  host: process.env.HOST,
+  user: process.env.USER,
   password: "",
-  database: "auctionwave",
+  database: process.env.DATABASE,
 };
 
 // MySQL connection pool

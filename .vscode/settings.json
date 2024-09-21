@@ -15,5 +15,11 @@
       "addWords": true,
       "scope": "workspace"
     }
-  }
+  },
+  "cSpell.ignoreWords": [
+    "gnaj",
+    "notif",
+    "usertype",
+    "xmkv"
+  ]
 }

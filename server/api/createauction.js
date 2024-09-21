@@ -1,4 +1,4 @@
-import { defineEventHandler, readBody, getHeader } from "h3";
+import { defineEventHandler, readBody, getCookie } from "h3";
 import { getPool } from "../db"; // Adjust path to your database setup
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
@@ -7,17 +7,17 @@ export default defineEventHandler(async (event) => {
   let connection;
 
   try {
-    // Extract token from Authorization header
-    const token = getHeader(event, "Authorization")?.replace("Bearer ", "");
+    // Retrieve the access token from cookies
+    const token = getCookie(event, "accessToken");
 
     if (!token) {
-      return { status: 401, json: { message: "Token is required" } };
+      // No token found, return an unauthorized error
+      throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
     }
 
-    // Validate token
     let decodedToken;
     try {
-      decodedToken = jwt.verify(token, "hello123z");
+      decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
       return { status: 401, json: { message: "Invalid token" } };
     }
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
     const body = await readBody(event);
     const {
       name,
-      location,
+      location_id, // Use location_id instead of location
       description,
       starting_bid,
       bidding_type,
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
     // Validate required fields
     if (
       !name ||
-      !location ||
+      !location_id || // Validate location_id
       !description ||
       !starting_bid ||
       !bidding_type ||
@@ -58,29 +58,29 @@ export default defineEventHandler(async (event) => {
     // Check if the auctioneer exists
     const [existingAuctioneer] = await connection.execute(
       'SELECT user_id FROM Users WHERE user_id = ? AND user_type = "Auctioneer"',
-      [auctioneer_id],
+      [auctioneer_id]
     );
 
     if (existingAuctioneer.length === 0) {
       return { status: 404, json: { message: "Auctioneer not found" } };
     }
 
-        // Generate a UUID
-        const auctionUuid = uuidv4();
+    // Generate a UUID
+    const auctionUuid = uuidv4();
 
     // Insert the new auction listing
     const [result] = await connection.execute(
-      'INSERT INTO AuctionListings (auctioneer_id, name, location, description, starting_bid, bidding_type, rarity, status, uuid) VALUES (?, ?, ?, ?, ?, ?, ?, "Auction Pending", ?)',
+      'INSERT INTO AuctionListings (auctioneer_id, name, location_id, description, starting_bid, bidding_type, rarity, status, uuid) VALUES (?, ?, ?, ?, ?, ?, ?, "Auction Pending", ?)', // Use location_id in the query
       [
         auctioneer_id,
         name,
-        location,
+        location_id, // Insert location_id
         description,
         starting_bid,
         bidding_type,
         rarity,
         auctionUuid, // Insert the generated UUID
-      ],
+      ]
     );
 
     const auctionId = result.insertId;
@@ -95,7 +95,7 @@ export default defineEventHandler(async (event) => {
       // Use the correct SQL syntax for inserting multiple rows
       await connection.query(
         "INSERT INTO AuctionListingCategories (listing_id, category_id) VALUES ?",
-        [categoryValues],
+        [categoryValues]
       );
     }
     return { status: 201, json: { message: "Auction created successfully" } };

@@ -10,11 +10,16 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 400, message: 'Listing ID is required' });
     }
 
-    // Authenticate JWT token (if required)
-    const token = event.req.headers.authorization?.split(' ')[1];
+    const token = getCookie(event, "accessToken");
+
+    if (!token) {
+        // No token found, return an unauthorized error
+        throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+    }
+
     if (token) {
         try {
-            jwt.verify(token, 'hello123z');
+            jwt.verify(token, process.env.JWT_SECRET);
         } catch (error) {
             throw createError({ statusCode: 401, message: 'Unauthorized' });
         }

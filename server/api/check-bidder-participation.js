@@ -1,8 +1,6 @@
-import { defineEventHandler, getHeader, createError } from 'h3';
+import { defineEventHandler, getCookie, createError } from 'h3';
 import { getPool } from '../db';
 import jwt from 'jsonwebtoken';
-
-const secretKey = 'hello123z'; // JWT secret key
 
 export default defineEventHandler(async (event) => {
   const pool = getPool();
@@ -14,21 +12,23 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Auction ID is required' });
   }
 
-  // Verify JWT token
-  const authHeader = getHeader(event, 'Authorization');
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw createError({ statusCode: 401, message: 'Authorization token is missing or invalid' });
-  }
-
-  const token = authHeader.split(' ')[1];
   let decodedToken;
   try {
-    decodedToken = jwt.verify(token, secretKey);
+    // Retrieve the access token from cookies
+    const token = getCookie(event, "accessToken");
+
+    if (!token) {
+      // No token found, return an unauthorized error
+      throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+    }
+
+    decodedToken = jwt.verify(token, process.env.JWT_SECRET);
   } catch (error) {
     throw createError({ statusCode: 401, message: 'Invalid token' });
   }
 
   const bidderId = decodedToken.userId;
+  const userType = decodedToken.userType;
 
   try {
 
@@ -47,7 +47,7 @@ LIMIT 1;
 
     const isParticipant = rows.length > 0;
 
-    return { isParticipant };
+    return { isParticipant, userType };
   } catch (error) {
     throw createError({ statusCode: 500, message: 'Database query failed' });
   }

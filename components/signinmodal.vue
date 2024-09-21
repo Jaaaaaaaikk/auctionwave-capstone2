@@ -1,17 +1,9 @@
 <template>
   <transition name="modal-fade">
-    <div
-      class="font-mono fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center"
-    >
-      <div
-        class="bg-gray-300 shadow-lg rounded-3xl overflow-hidden w-11/12 max-w-lg mx-auto p-5"
-      >
+    <div class="font-mono fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+      <div class="bg-gray-300 shadow-lg rounded-3xl overflow-hidden w-11/12 max-w-lg mx-auto p-5">
         <header class="p-4 border-b">
-          <button
-            type="button"
-            @click="$emit('close')"
-            class="text-gray-600 hover:text-gray-800"
-          >
+          <button type="button" @click="$emit('close')" class="text-gray-600 hover:text-gray-800">
             <svg
               class="w-full h-8"
               xmlns="http://www.w3.org/2000/svg"
@@ -35,34 +27,40 @@
                 v-model="email"
                 id="email"
                 type="email"
-                class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 border-black-500 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                 placeholder=" "
                 required
               />
               <label
                 for="email"
                 class="peer-focus:font-medium pl-2 left-1 bg-gray-300 absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-                >Email address</label
               >
+                Email address
+              </label>
             </div>
             <div class="relative z-0 w-full mb-5 group">
               <input
                 v-model="password"
                 id="password"
                 type="password"
-                class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 border-black-500 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                 placeholder=" "
                 required
               />
               <label
                 for="password"
                 class="peer-focus:font-medium pl-2 left-1 bg-gray-300 absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-                >Password</label
               >
+                Password
+              </label>
             </div>
             <div class="mb-4">
               <input type="checkbox" id="rememberMe" class="mr-2" />
               <label for="rememberMe">Remember me</label>
+            </div>
+            <!-- Display error message if any -->
+            <div v-if="errorMessage" class="text-red-500 text-center mb-4">
+              {{ errorMessage }}
             </div>
             <div class="flex justify-center mt-4">
               <button
@@ -76,12 +74,13 @@
         </section>
         <footer class="p-4 border-t text-center">
           <button
-            @click="$emit('show-signup')"
+            @click="toggleSignupModal"
             class="text-blue-500 hover:underline"
           >
             Don't have an account? Sign up
           </button>
         </footer>
+        <SignupModal v-if="showSignupModal" @close-signup="handleSignupClose" />
       </div>
     </div>
   </transition>
@@ -92,7 +91,9 @@ import { ref } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { toast } from "vue3-toastify";
+import SignupModal from "~/components/signupmodal.vue";
 
+const showSignupModal = ref(false);
 const email = ref("");
 const password = ref("");
 const router = useRouter();
@@ -105,18 +106,13 @@ const login = async () => {
       password: password.value,
     });
 
-    const { accessToken, user } = response.data;
-
-    // Store access token in localStorage or Vuex
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("userType", user.userType);
-    localStorage.setItem("userLocation", user.userLocation);
+    const { user } = response.data;
 
     // Redirect based on userType
     if (user.userType === "Bidder") {
-      router.replace("/bidder/bidderdashboard");
+      router.push("/bidder/bidderdashboard");
     } else if (user.userType === "Auctioneer") {
-      router.replace("/auctioneer/auctioneerdashboard");
+      router.push("/auctioneer/auctioneerdashboard");
     } else {
       toast.error("Invalid user type");
     }
@@ -130,6 +126,14 @@ const login = async () => {
   }
 };
 
+const toggleSignupModal = () => {
+  showSignupModal.value = true;
+};
+
+const handleSignupClose = () => {
+  showSignupModal.value = false;
+};
+
 </script>
 
 <style scoped>
@@ -140,7 +144,6 @@ const login = async () => {
 
 .modal-fade-enter,
 .modal-fade-leave-to
-
 /* .modal-fade-leave-active in <2.1.8 */ {
   opacity: 0;
 }

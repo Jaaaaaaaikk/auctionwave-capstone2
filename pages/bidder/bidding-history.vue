@@ -41,16 +41,7 @@
   
   const fetchBids = async () => {
     try {
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        console.error('No access token found in localStorage');
-        return;
-      }
-      const response = await axios.get('/api/bidder-bidding-history', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await axios.get('/api/bidder-bidding-history');
       console.log('Response Data:', response.data); // Debug: Check response data
       bids.value = response.data;
     } catch (error) {

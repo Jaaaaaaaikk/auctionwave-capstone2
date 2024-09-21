@@ -14,7 +14,7 @@
             </button>
           </div>
         </div>
-        <div class="w-px h-52 bg-gray-300 ml-48"></div>
+        <div class="w-px h-52 bg-gray-300 mx-10"></div>
         <div class="flex">
           <div class="mx-10 my-2">
             <div class="font-medium my-2">Full name:</div>
@@ -22,7 +22,7 @@
             <div class="font-medium my-2">Location:</div>
             <div class="font-medium my-2">Categories:</div>
           </div>
-          <div class="my-2 w-full">
+          <div class="my-2">
             <div class="font-normal my-2">{{ profile.fullname }}</div>
             <div class="font-normal my-2">{{ profile.email }}</div>
             <div class="font-normal my-2">{{ profile.location }}</div>
@@ -87,16 +87,7 @@ const editAbout = ref("");
 
 const fetchProfile = async () => {
   try {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      console.error("No token found in local storage");
-      return;
-    }
-    const response = await axios.get("/api/bidderprofile", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get("/api/bidderprofile");
     profile.value = response.data.profile;
     editAbout.value = profile.value.about;
   } catch (error) {
@@ -106,20 +97,7 @@ const fetchProfile = async () => {
 
 const saveAbout = async () => {
   try {
-    const token = localStorage.getItem("accessToken");
-    if (!token) {
-      console.error("No token found in local storage");
-      return;
-    }
-    await axios.put(
-      "/api/update_about_in_profile",
-      { about: editAbout.value },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
+    await axios.put("/api/update_about_in_profile",{ about: editAbout.value });
     profile.value.about = editAbout.value;
     isEditing.value = false;
   } catch (error) {

@@ -1,6 +1,6 @@
-import { defineEventHandler, readBody } from "h3";
-import bcrypt from "bcryptjs";
-import { getPool } from "../db";
+import { defineEventHandler, readBody, sendError, createError } from 'h3';
+import bcrypt from 'bcryptjs';
+import { getPool } from '../db';
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event);
@@ -9,56 +9,39 @@ export default defineEventHandler(async (event) => {
     middlename,
     lastname,
     email,
-    location,
+    location_id,
     password,
     userType,
-    categories,
+    categories
   } = body;
 
-  if (!firstname || !lastname || !email || !password || !userType) {
-    return { status: 400, json: { message: "All fields are required" } };
+  // Validate required fields
+  if (!firstname || !lastname || !email || !password || !userType || !location_id) {
+    return sendError(event, createError({ statusCode: 400, statusMessage: "All fields are required" }));
   }
 
-  if (userType === "Bidder" && (!categories || categories.length === 0)) {
-    return {
-      status: 400,
-      json: { message: "At least one category is required for Bidder" },
-    };
+  // Validate that at least one category is provided for Bidder
+  if (userType === 'Bidder' && (!categories || categories.length === 0)) {
+    return sendError(event, createError({ statusCode: 400, statusMessage: 'At least one category is required for Bidder' }));
   }
 
+  let connection;
   try {
     const pool = getPool();
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
 
-    // Check if the user already exists based on email
-    const [existingEmailUsers] = await connection.execute(
-      "SELECT * FROM Users WHERE email = ?",
-      [email],
-    );
+    // Check if location exists
+    const [locationExists] = await connection.execute('SELECT 1 FROM Locations WHERE location_id = ?', [location_id]);
 
-    if (existingEmailUsers.length > 0) {
-      connection.release();
-      return {
-        status: 409,
-        json: { message: "User already exists with the provided email" },
-      };
+    if (locationExists.length === 0) {
+      return sendError(event, createError({ statusCode: 400, statusMessage: `Location with ID '${location_id}' does not exist` }));
     }
 
-    // Check if the user already exists based on firstname and lastname
-    const [existingNameUsers] = await connection.execute(
-      "SELECT * FROM Users WHERE firstname = ? AND lastname = ?",
-      [firstname, lastname],
-    );
+    // Check if the email is already registered
+    const [existingEmailUsers] = await connection.execute('SELECT * FROM Users WHERE email = ?', [email]);
 
-    if (existingNameUsers.length > 0) {
-      connection.release();
-      return {
-        status: 409,
-        json: {
-          message:
-            "User already exists with the provided firstname and lastname",
-        },
-      };
+    if (existingEmailUsers.length > 0) {
+      return sendError(event, createError({ statusCode: 409, statusMessage: 'User already exists with the provided email' }));
     }
 
     // Hash the password
@@ -66,73 +49,59 @@ export default defineEventHandler(async (event) => {
 
     // Insert the new user
     const query = `
-            INSERT INTO Users (firstname, middlename, lastname, email, location, password, user_type)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `;
+      INSERT INTO Users (firstname, middlename, lastname, email, location_id, password, user_type)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `;
     const [result] = await connection.execute(query, [
       firstname,
       middlename,
       lastname,
       email,
-      location,
+      location_id,
       hashedPassword,
-      userType,
+      userType
     ]);
 
     const userId = result.insertId;
 
     // Insert into Bidders table if user is a Bidder
-    if (userType === "Bidder") {
+    if (userType === 'Bidder') {
       for (const categoryName of categories) {
-        // Check if the category name exists in the Categories table
         const [categoryExists] = await connection.execute(
-          "SELECT 1 FROM Categories WHERE category_name = ?",
-          [categoryName],
+          'SELECT 1 FROM Categories WHERE category_name = ?',
+          [categoryName]
         );
 
         if (categoryExists.length === 0) {
-          connection.release();
-          return {
-            status: 400,
-            json: { message: `Category '${categoryName}' does not exist` },
-          };
+          return sendError(event, createError({ statusCode: 400, statusMessage: `Category '${categoryName}' does not exist` }));
         }
 
-        // Get the category ID for the name
         const [categoryIdResult] = await connection.execute(
-          "SELECT category_id FROM Categories WHERE category_name = ?",
-          [categoryName],
+          'SELECT category_id FROM Categories WHERE category_name = ?',
+          [categoryName]
         );
         const categoryId = categoryIdResult[0]?.category_id;
 
-        if (!categoryId) {
-          connection.release();
-          return {
-            status: 400,
-            json: {
-              message: `Could not find ID for category '${categoryName}'`,
-            },
-          };
-        }
-
-        // Insert each selected category into Bidders table
-        const categoryQuery = `
-                    INSERT INTO Bidders (bidder_id, category_id)
-                    VALUES (?, ?)
-                `;
-        await connection.execute(categoryQuery, [userId, categoryId]);
+        await connection.execute(
+          'INSERT INTO Bidders (bidder_id, category_id) VALUES (?, ?)',
+          [userId, categoryId]
+        );
       }
     }
 
-    connection.release();
-
-    return { status: 201, json: { message: "User created successfully" } };
+    // Delete OTP
+    await connection.execute(
+      "DELETE FROM OTPs WHERE email = ?",
+      [email]
+    );
+    
+    return { status: 201, json: { message: "User Created successfully" } };
   } catch (error) {
-    console.error("Error inserting user:", error); // Log the error for debugging
-    if (error.code === "ER_DUP_ENTRY") {
-      return { status: 409, json: { message: "Email already exists" } };
-    }
-
+    console.error('Error:', error);
     return { status: 500, json: { message: "Internal server error" } };
+  } finally {
+    if (connection) {
+      connection.release();
+    }
   }
 });

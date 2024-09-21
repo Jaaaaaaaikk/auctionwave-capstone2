@@ -8,7 +8,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineEmits } from 'vue';
+import { ref, onMounted } from 'vue';
 
 // Emit event when a city is selected
 const emit = defineEmits(['citySelected']);
@@ -47,35 +47,35 @@ onMounted(async () => {
 
         // Array of cities with coordinates
         const cities = [
-            { name: "Davao City", lat: 7.1907, lng: 125.4553 },
-            { name: "Zamboanga City", lat: 6.9214, lng: 122.0790 },
-            { name: "Cagayan de Oro", lat: 8.4542, lng: 124.6319 },
-            { name: "General Santos City", lat: 6.1164, lng: 125.1716 },
-            { name: "Butuan", lat: 8.9494, lng: 125.5433 },
-            { name: "Iligan", lat: 8.2280, lng: 124.2452 },
-            { name: "Cotabato City", lat: 7.2044, lng: 124.2439 },
-            { name: "Tagum", lat: 7.4477, lng: 125.8047 },
-            { name: "Valencia", lat: 7.9062, lng: 125.0927 },
-            { name: "Pagadian", lat: 7.8256, lng: 123.4372 },
-            { name: "Panabo", lat: 7.3081, lng: 125.6846 },
-            { name: "Marawi", lat: 8.0057, lng: 124.2928 },
-            { name: "Koronadal", lat: 6.5032, lng: 124.8463 },
-            { name: "Malaybalay", lat: 8.1571, lng: 125.1277 },
-            { name: "Digos", lat: 6.7499, lng: 125.3572 },
-            { name: "Polomolok", lat: 6.2164, lng: 125.0636 },
-            { name: "Surigao City", lat: 9.7577, lng: 125.5135 },
-            { name: "Kidapawan", lat: 7.0084, lng: 125.0894 },
-            { name: "Mati", lat: 6.9495, lng: 126.2166 },
-            { name: "Ozamiz", lat: 8.1462, lng: 123.8504 },
-            { name: "Dipolog", lat: 8.5886, lng: 123.3405 },
-            { name: "Tacurong", lat: 6.6922, lng: 124.6738 },
-            { name: "Bislig", lat: 8.2109, lng: 126.3161 },
-            { name: "Bayugan", lat: 8.7566, lng: 125.7516 },
-            { name: "El Salvador", lat: 8.5553, lng: 124.5598 },
-            { name: "Lamitan", lat: 6.6500, lng: 122.1333 },
-            { name: "Tandag", lat: 9.0783, lng: 126.1988 },
-            { name: "Sultan Kudarat", lat: 6.6314, lng: 124.5385 },
-            { name: "Isabela City", lat: 6.7042, lng: 121.9719 }
+            { name: "Davao City", lat: 7.1907, lng: 125.4553, location_id: 1},
+            { name: "Zamboanga City", lat: 6.9214, lng: 122.0790, location_id: 2},
+            { name: "Cagayan de Oro", lat: 8.4542, lng: 124.6319, location_id:  3},
+            { name: "General Santos City", lat: 6.1164, lng: 125.1716, location_id: 4},
+            { name: "Butuan", lat: 8.9494, lng: 125.5433, location_id: 5},
+            { name: "Iligan", lat: 8.2280, lng: 124.2452, location_id: 6},
+            { name: "Cotabato City", lat: 7.2044, lng: 124.2439, location_id: 7},
+            { name: "Tagum", lat: 7.4477, lng: 125.8047, location_id: 8},
+            { name: "Valencia", lat: 7.9062, lng: 125.0927, location_id: 9},
+            { name: "Pagadian", lat: 7.8256, lng: 123.4372, location_id: 10},
+            { name: "Panabo", lat: 7.3081, lng: 125.6846, location_id: 11},
+            { name: "Marawi", lat: 8.0057, lng: 124.2928, location_id: 12},
+            { name: "Koronadal", lat: 6.5032, lng: 124.8463, location_id: 13},
+            { name: "Malaybalay", lat: 8.1571, lng: 125.1277, location_id: 14},
+            { name: "Digos", lat: 6.7499, lng: 125.3572, location_id: 15},
+            { name: "Polomolok", lat: 6.2164, lng: 125.0636, location_id: 16},
+            { name: "Surigao City", lat: 9.7577, lng: 125.5135, location_id: 17},
+            { name: "Kidapawan", lat: 7.0084, lng: 125.0894, location_id: 18},
+            { name: "Mati", lat: 6.9495, lng: 126.2166, location_id: 19},
+            { name: "Ozamiz", lat: 8.1462, lng: 123.8504, location_id: 20},
+            { name: "Dipolog", lat: 8.5886, lng: 123.3405, location_id: 21},
+            { name: "Tacurong", lat: 6.6922, lng: 124.6738, location_id: 22},
+            { name: "Bislig", lat: 8.2109, lng: 126.3161, location_id: 23},
+            { name: "Bayugan", lat: 8.7566, lng: 125.7516, location_id: 24},
+            { name: "El Salvador", lat: 8.5553, lng: 124.5598, location_id: 25},
+            { name: "Lamitan", lat: 6.6500, lng: 122.1333, location_id: 26},
+            { name: "Tandag", lat: 9.0783, lng: 126.1988, location_id: 27},
+            { name: "Sultan Kudarat", lat: 6.6314, lng: 124.5385, location_id: 28},
+            { name: "Isabela City", lat: 6.7042, lng: 121.9719, location_id: 29}
         ];
 
         // Add city markers to the map
@@ -84,7 +84,7 @@ onMounted(async () => {
                 .addTo(map)
                 .bindTooltip(city.name)
                 .on('click', () => {
-                    emit('citySelected', city.name);
+                    emit('citySelected', { name: city.name, id: city.location_id }); // Emit both name and ID
                 });
         });
     }

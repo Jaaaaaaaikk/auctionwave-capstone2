@@ -63,6 +63,20 @@
                     <p class="text-gray-500 mb-4 truncate">
                         Bidding Type: {{ listing.bidding_type }}
                     </p>
+
+                    <!-- Categories Section -->
+                    <div class="flex flex-wrap mt-2">
+                        <strong>Categories:</strong>
+                        <span v-if="listing.categories.length === 0" class="text-gray-500">No categories</span>
+
+                        <!-- Display each category as a styled tag -->
+                        <span v-for="(category, index) in listing.categories" :key="index"
+                            class="bg-gray-200 text-gray-700 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded">
+                            {{ category }}
+                        </span>
+                    </div>
+
+
                     <div class="flex items-center space-x-2 mb-2 self-end">
                         <!-- Image Icon with Viewers Count -->
                         <img src="/public/images/viewers-count-image.png" alt="Viewers Count"
@@ -88,7 +102,7 @@
             <div class="flex justify-center items-center mt-4">
                 <button @click="prevPage" :disabled="currentPage === 1" class="p-2">
                     <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        <path stroke="currentColor" stroke-line cap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
@@ -128,25 +142,13 @@ const searchTerm = ref("");
 const dropdownOpen = ref(false);
 const showModal = ref(false);
 const selectedAuction = ref(null);
-const userLocation = ref("");
 const viewersCount = ref({});
-
-// Fetch user location from local storage
-const getUserLocation = () => {
-    const userLocationStored = localStorage.getItem("userLocation");
-    if (userLocationStored) {
-        userLocation.value = userLocationStored;
-    } else {
-        console.warn("No location data found in local storage");
-    }
-};
 
 const fetchListings = async () => {
     try {
         const params = {
             category: selectedCategory.value,
-            search: searchTerm.value,
-            location: userLocation.value, // Include location in request
+            search: searchTerm.value
         };
         const response = await axios.get("/api/displayauctionlisting", { params });
         listings.value = response.data;
@@ -198,7 +200,7 @@ const currentListings = computed(() => {
     const start = (currentPage.value - 1) * pageSize;
     return listings.value.slice(start, start + pageSize);
 });
-
+ 
 const totalListings = computed(() => listings.value.length);
 const totalPages = computed(() => Math.ceil(totalListings.value / pageSize));
 
@@ -236,7 +238,6 @@ const closeModal = () => {
 };
 
 onMounted(() => {
-    getUserLocation(); // Fetch user location when component is mounted
     fetchListings();
 });
 </script>

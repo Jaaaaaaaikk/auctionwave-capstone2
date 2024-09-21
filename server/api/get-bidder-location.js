@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    const decoded = jwt.verify(token, 'hello123z');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // Return the location from the decoded token
     return { location: decoded.location };
   } catch (err) {

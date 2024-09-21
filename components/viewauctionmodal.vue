@@ -30,14 +30,16 @@
           <p class="text-gray-600 mb-2 truncate">
             <strong>Rarity:</strong> {{ auction.rarity }}
           </p>
-          <p class="text-gray-600 mb-2">
+          <div class="mb-2">
             <strong>Categories:</strong>
-            {{
-              auction.categories
-                ? auction.categories.join(", ")
-                : "No categories"
-            }}
-          </p>
+            <div class="flex flex-wrap mt-2">
+              <span v-if="auction.categories.length === 0" class="text-gray-500">No categories</span>
+              <span v-for="(category, index) in auction.categories" :key="index"
+                class="bg-gray-200 text-gray-700 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded">
+                {{ category }}
+              </span>
+            </div>
+          </div>
         </div>
 
         <!-- Bidders Section -->
@@ -53,7 +55,8 @@
       </div>
 
       <div class="modal-footer mt-4 font-semibold">
-        <button class="bg-teal-500 border border-teal-500 rounded-full hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 text-gray-900 px-4 py-2 shadow-sm-light shadow-black"
+        <button
+          class="bg-teal-500 border border-teal-500 rounded-full hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 text-gray-900 px-4 py-2 shadow-sm-light shadow-black"
           @click="joinAuction">
           {{ buttonLabel }}
         </button>
@@ -76,6 +79,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'joinAuction', 'manageAuction']);
 const router = useRouter();
+const userRole = ref('');
 
 const currentUserId = ref(null);
 const bidders = ref([]);
@@ -88,13 +92,8 @@ const joinAuction = async () => {
   const auctionId = props.auction.uuid;
 
   try {
-    const { data } = await axios.get('/api/check-bidder-participation', {
-      params: { auctionId },
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-      }
-    });
-
+    const { data } = await axios.get('/api/check-bidder-participation', { params: { auctionId } });
+    userRole.value = data.userType;
     // If the user is a participant (has placed a bid), navigate to the bidding page
     if (data.isParticipant) {
       router.push({
@@ -103,12 +102,7 @@ const joinAuction = async () => {
       });
     } else {
       // Otherwise, join the auction and navigate
-      await axios.post('/api/bidder-join-auction', { auctionId }, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      });
-
+      await axios.post('/api/bidder-join-auction', { auctionId });
       router.push({
         path: '/bidder/bidder-auction',
         query: { id: auctionId, userType: userRole.value },
@@ -119,10 +113,6 @@ const joinAuction = async () => {
   }
 };
 
-const userRole = computed(() => {
-  return localStorage.getItem('userType') || null;
-});
-
 const isCurrentUser = (bidderId) => {
   return bidderId === currentUserId.value;
 };
@@ -131,41 +121,14 @@ const buttonLabel = computed(() => {
   return bidders.value.some(bidder => isCurrentUser(bidder.user_id)) ? 'Continue Bidding' : 'Join Auction';
 });
 
-const base64UrlDecode = (base64Url) => {
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  const binaryString = atob(base64);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return new TextDecoder().decode(bytes);
-};
-
-const getUserIdFromToken = (token) => {
-  const parts = token.split('.');
-  if (parts.length !== 3) {
-    throw new Error('Invalid token');
-  }
-  const payload = base64UrlDecode(parts[1]);
-  const decodedPayload = JSON.parse(payload);
-  return decodedPayload.userId;
-};
-
 const fetchBidders = async () => {
   const listingId = props.auction.listing_id;
   if (listingId) {
     try {
-      const { data } = await axios.get(`/api/fill-in-bidder-participants?id=${listingId}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-        }
-      });
+      const { data } = await axios.get(`/api/fill-in-bidder-participants?id=${listingId}`);
       bidders.value = data.bidders;
 
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        currentUserId.value = getUserIdFromToken(token);
-      }
+      currentUserId.value = data.currentUserId;
     } catch (error) {
       console.error('Failed to fetch data:', error);
     }
@@ -184,5 +147,20 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Category tag styling */
+.bg-tag {
+  background-color: #e2e8f0;
+  /* Tailwind gray-200 */
+  color: #4a5568;
+  /* Tailwind gray-700 */
+  border-radius: 9999px;
+  /* Full rounding */
+  padding: 0.5rem 1rem;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 </style>

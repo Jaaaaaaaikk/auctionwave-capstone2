@@ -30,7 +30,7 @@
           <div v-for="auction in paginatedAuctions" :key="auction.listing_id"
             class="p-6 bg-white rounded shadow-sm-light shadow-black flex flex-col">
             <h3 class="text-xl font-bold mb-2">{{ auction.name }}</h3>
-            <p class="text-gray-600">Location: {{ auction.location }}</p>
+            <p class="text-gray-600">Location: {{ auction.location_name }}</p>
             <p class="text-gray-700 mt-2">
               Description: {{ auction.description }}
             </p>
@@ -38,7 +38,7 @@
               Bidding Type: {{ auction.bidding_type }}
             </p>
             <!-- View Auction Button -->
-            <button @click="view_auction"
+            <button @click="view_auction(auction)"
               class="bg-teal-500 border border-teal-500 rounded-full shadow-sm-light shadow-black hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-600 text-gray-900 px-4 py-2 font-semibold mt-auto self-end">
               View Auction
             </button>
@@ -86,17 +86,14 @@ const currentPage = ref(1);
 const pageSize = 6;
 const router = useRouter();
 
-const view_auction = () => {
-  router.push('/auctioneer/auctioneer-manage-auction')
-
+const view_auction = (auction) => {
+  // Pass auction ID in query parameter
+  router.push({ path: '/auctioneer/auctioneer-manage-auction', query: { id: auction.uuid, status: auction.status} });
 };
 
 const fetchAuctions = async () => {
   try {
-    const token = localStorage.getItem("accessToken");
-    const { data } = await axios.get("/api/auctioneer-created-auctions", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const { data } = await axios.get("/api/auctioneer-created-auctions");
     auctions.value = data.auctions;
   } catch (error) {
     console.error("Failed to fetch auctions:", error);

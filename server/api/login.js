@@ -1,12 +1,7 @@
 import { defineEventHandler, readBody, createError, setHeader } from "h3";
 import { getPool } from "../db";
 import jwt from "jsonwebtoken";
-import { v4 as uuidv4 } from "uuid";
 import bcrypt from "bcrypt";
-
-const SECRET_KEY = "hello123z";
-const ACCESS_TOKEN_EXPIRY = "1h";
-const REFRESH_TOKEN_EXPIRY = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 export default defineEventHandler(async (event) => {
   try {
@@ -45,30 +40,29 @@ export default defineEventHandler(async (event) => {
     }
 
     // Generate the access token
-    const accessToken = jwt.sign({ userId: user.user_id }, SECRET_KEY, {
-      expiresIn: ACCESS_TOKEN_EXPIRY,
+    const accessToken = jwt.sign({ userId: user.user_id, user_Location: user.location_id, userType: user.user_type }, process.env.JWT_SECRET, {
+      expiresIn: '24h',
     });
 
     // Generate the refresh token and store it in the database
-    const refreshToken = uuidv4();
-    const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY);
-    await pool.query(
-      "INSERT INTO UserTokens (userId, token, expiresAt) VALUES (?, ?, ?)",
-      [user.user_id, refreshToken, expiresAt]
-    );
+    // const refreshToken = uuidv4();
+    // const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY);
+    // console.log(expiresAt);
+    // await pool.query(
+    //   "INSERT INTO UserTokens (userId, token, expiresAt) VALUES (?, ?, ?)",
+    //   [user.user_id, refreshToken, expiresAt]
+    // );
 
     // Set the refresh token as an HTTP-only cookie
-    setHeader(event, "Set-Cookie", `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=${REFRESH_TOKEN_EXPIRY / 1000}`);
+    setHeader(event, "Set-Cookie", `accessToken=${accessToken}; HttpOnly; Path=/; Max-Age=${24 * 60 * 60}`); // 24 hours
 
     // Return the access token and user data to the client
     return {
       message: "Login successful",
-      accessToken,
       user: {
         id: user.user_id,
         email: user.email,
         userType: user.user_type,
-        userLocation: user.location,  
       },
     };
   } catch (error) {

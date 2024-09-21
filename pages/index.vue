@@ -1,10 +1,14 @@
-<template></template>
+<template>
+  <div>
+    <NuxtRedirect to="/homepage" />
+  </div>
+</template>
 
 <script setup>
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-router.replace("/homepage");
+router.push("/homepage");
 </script>
 
-<style></style>
+<style scoped></style>

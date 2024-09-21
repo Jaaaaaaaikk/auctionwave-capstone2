@@ -1,17 +1,19 @@
-import { defineEventHandler, getHeader, createError } from "h3";
+import { defineEventHandler, getCookie, createError } from "h3";
 import { getPool } from "../db";
 import jwt from "jsonwebtoken";
 
 export default defineEventHandler(async (event) => {
-  const token = getHeader(event, "Authorization")?.replace("Bearer ", "");
-
-  if (!token) {
-    throw createError({ statusCode: 401, message: "No token provided" });
-  }
-
   try {
+    // Retrieve the access token from cookies
+    const token = getCookie(event, "accessToken");
+
+    if (!token) {
+      // No token found, return an unauthorized error
+      throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+    }
+    
     // Verify and decode JWT token
-    const decoded = jwt.verify(token, "hello123z"); // Use your actual secret key
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Use your actual secret key
 
     // Extract userId from decoded token
     const userId = decoded.userId;

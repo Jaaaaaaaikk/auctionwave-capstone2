@@ -1,4 +1,4 @@
-import { defineEventHandler, readBody, getHeader, createError } from 'h3';
+import { defineEventHandler, readBody, getCookie, createError } from 'h3';
 import { getPool } from '../db';
 import jwt from 'jsonwebtoken';
 
@@ -8,17 +8,17 @@ export default defineEventHandler(async (event) => {
     // Read request body
     const { auctionId, bidAmount } = await readBody(event);
 
-    // Extract token from Authorization header
-    const token = getHeader(event, 'Authorization')?.replace('Bearer ', '');
-
-    if (!token) {
-        throw createError({ statusCode: 401, message: 'Token is required' });
-    }
-
-    // Validate token
     let decodedToken;
     try {
-        decodedToken = jwt.verify(token, 'hello123z');
+        // Retrieve the access token from cookies
+        const token = getCookie(event, "accessToken");
+
+        if (!token) {
+            // No token found, return an unauthorized error
+            throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+        }
+
+        decodedToken = jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
         throw createError({ statusCode: 401, message: 'Invalid token' });
     }
