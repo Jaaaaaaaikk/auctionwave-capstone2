@@ -3,7 +3,7 @@
     <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-6">
       <!-- Modal Header -->
       <div class="flex justify-between items-center mb-4 border-b border-gray-400 pb-4">
-        <h2 class="text-2xl font-semibold truncate">{{ auction.name }}</h2>
+        <h2 class="text-2xl font-semibold truncate">{{ auction?.name || 'N/A' }}</h2>
         <button @click="closeModal" class="text-gray-500 hover:text-gray-700">
           <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -19,16 +19,16 @@
             <strong>Bidding Type:</strong> {{ auction.bidding_type }}
           </h3>
           <p class="text-gray-600 mb-2 truncate">
-            <strong>Location:</strong> {{ auction.location }}
+            <strong>Location:</strong> {{ auction?.location || 'Not specified Location' }}
           </p>
           <p class="text-gray-600 mb-2 truncate">
-            <strong>Starting Bid:</strong> {{ auction.starting_bid }}
+            <strong>Starting Bid:</strong> {{ auction.starting_bid || 'N/A' }}
           </p>
           <p class="text-gray-600 mb-2 truncate">
-            <strong>Description:</strong> {{ auction.description }}
+            <strong>Description:</strong> {{ auction?.description || 'No description' }}
           </p>
           <p class="text-gray-600 mb-2 truncate">
-            <strong>Rarity:</strong> {{ auction.rarity }}
+            <strong>Rarity:</strong> {{ auction.rarity || 'No Rarity' }}
           </p>
           <div class="mb-2">
             <strong>Categories:</strong>
@@ -60,6 +60,11 @@
           @click="joinAuction">
           {{ buttonLabel }}
         </button>
+        <div class="flex items-center space-x-2 mb-2 justify-end">
+          <!-- Image Icon with Viewers Count -->
+          <img src="/images/viewers-count-image.png" alt="Viewers Count" class="w-5 h-5 text-gray-600" />
+          <p class="text-gray-600">{{ viewersCount || 0 }}</p>
+        </div>
       </div>
     </div>
   </div>
@@ -80,9 +85,10 @@ const props = defineProps({
 const emit = defineEmits(['close', 'joinAuction', 'manageAuction']);
 const router = useRouter();
 const userRole = ref('');
-
 const currentUserId = ref(null);
 const bidders = ref([]);
+const viewersCount = ref({});
+
 
 const closeModal = () => {
   emit('close');
@@ -113,6 +119,18 @@ const joinAuction = async () => {
   }
 };
 
+const fetchViewersCount = async () => {
+  const listingId = props.auction.listing_id;
+  if (listingId) {
+    try {
+      const { data } = await axios.get(`/api/get-viewer-count`, { params: { listing_id: listingId } });
+      viewersCount.value = data.viewer_count;
+    } catch (error) {
+      console.error("Failed to fetch viewers count:", error);
+    }
+  }
+};
+
 const isCurrentUser = (bidderId) => {
   return bidderId === currentUserId.value;
 };
@@ -139,6 +157,7 @@ const fetchBidders = async () => {
 
 onMounted(() => {
   fetchBidders();
+  fetchViewersCount();
 });
 </script>
 

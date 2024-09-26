@@ -1,6 +1,147 @@
 <template>
   <transition name="modal-width">
-    <div class="font-mono fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow relative dark:bg-gray-700 justify-center">
+      <form class="space-y-6 px-6 lg:px-8 pb-4 sm:pb-6 xl:pb-8 pt-8">
+        <h3 class="text-xl font-medium text-gray-900 dark:text-white">Create your <p
+            class="text-custom-bluegreen2 font-bold">AuctionWave</p> account</h3>
+
+        <!-- Firstname, Middlename, Lastname -->
+        <div class="grid grid-cols-3 gap-4">
+          <div class="w-full px-2 mb-4 sm:mb-0">
+            <div class="relative z-0 w-full group">
+              <input v-model="form.firstname" id="firstname" type="text"
+                class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                placeholder=" " required />
+              <label for="firstname"
+                class="peer-focus:font-medium pl-2 left-1 bg-white absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                First Name</label>
+            </div>
+          </div>
+          <div class="w-full px-2 mb-4 sm:mb-0">
+            <div class="relative z-0 w-full group">
+              <input v-model="form.middlename" id="middlename" type="text"
+                class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                placeholder=" " />
+              <label for="middlename"
+                class="peer-focus:font-medium pl-2 left-1 bg-white absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                Middle Name</label>
+            </div>
+          </div>
+          <div class="w-full px-2">
+            <div class="relative z-0 w-full group">
+              <input v-model="form.lastname" id="lastname" type="text"
+                class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                placeholder=" " required />
+              <label for="lastname"
+                class="peer-focus:font-medium pl-2 left-1 bg-white absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                Last Name</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Email Address -->
+        <div class="w-full px-2 mb-4 sm:mb-0">
+          <div class="relative z-0 w-full mb-5 group">
+            <input v-model="form.email" id="email" type="email"
+              class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+              placeholder=" " required />
+            <label for="email"
+              class="peer-focus:font-medium pl-2 left-1 bg-white absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+              Email address</label>
+            <span v-if="emailError" class="text-red-500 text-sm">{{ emailError }}</span>
+          </div>
+        </div>
+
+        <!-- City Location with Map Icon -->
+        <div class="w-full px-2 mb-4 sm:mb-0 relative">
+          <input type="text" v-model="selectedCity.name" placeholder="City Location"
+            class="bg-gray-50 border-2 appearance-none text-gray-900 sm:text-sm rounded-md focus:ring-custom-bluegreen focus:border-custom-bluegreen block w-full p-2 pr-10 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+            readonly required>
+          <span class="absolute inset-y-0 right-3 flex items-center">
+            <svg class="w-8 h-10 text-custom-bluegreen cursor-pointer hover:text-green-500" fill="currentColor"
+              viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" @click="toggleMap">
+              <path fill-rule="evenodd"
+                d="M12 2a7 7 0 00-7 7c0 4.418 7 13 7 13s7-8.582 7-13a7 7 0 00-7-7zm0 9a2 2 0 110-4 2 2 0 010 4z"
+                clip-rule="evenodd"></path>
+            </svg>
+            <CityMap v-if="showMap" @citySelected="setCity" />
+          </span>
+        </div>
+
+        <!-- Password and Confirm Password -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="w-full px-2 mb-4 sm:mb-0">
+            <div class="relative z-0 w-full group">
+              <input v-model="form.password" id="password" type="password"
+                class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                placeholder=" " required autocomplete="off" />
+              <label for="password"
+                class="peer-focus:font-medium pl-2 left-1 bg-white absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                Password</label>
+            </div>
+          </div>
+          <div class="w-full px-2">
+            <div class="relative z-0 w-full group">
+              <input v-model="form.confirmPassword" id="confirmPassword" type="password"
+                class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                placeholder=" " required autocomplete="off" />
+              <label for="confirmPassword"
+                class="peer-focus:font-medium pl-2 left-1 bg-white absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                Confirm Password</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- User Type (Combobox) -->
+        <div class="w-full px-2 mb-4 sm:mb-0 relative">
+          <label for="usertype" class="text-sm font-medium text-gray-900 block mb-2 dark:text-gray-300">User
+            Type</label>
+          <select v-model="form.userType" id="userType" @change="handleUserTypeChange"
+            class="bg-gray-50 border-2 text-gray-900 sm:text-sm rounded-lg focus:ring-custom-bluegreen focus:border-custom-bluegreen block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+            required>
+            <option disabled>Select User Type</option>
+            <option value="Bidder">Bidder</option>
+            <option value="Auctioneer">Auctioneer</option>
+          </select>
+        </div>
+
+        <!-- Categories (Combobox) -->
+        <div v-if="form.userType === 'Bidder'" class="w-full px-2 relative">
+          <select v-model="selectedCategory" @change="addCategory"
+            class="bg-gray-50 border-2 text-gray-900 sm:text-sm rounded-lg focus:ring-custom-bluegreen focus:border-custom-bluegreen block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+            placeholder="Select Category" required>
+            <option value="" disabled>Select Category</option>
+            <option v-for="category in categories" :key="category" :value="category">
+              {{ category }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Selected Categories Display -->
+        <div v-if="form.userType === 'Bidder'" class="mb-5">
+          <span v-for="category in form.categories" :key="category"
+            class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+            {{ category }}
+            <button type="button" @click="removeCategory(category)" class="text-red-500 ml-1">
+              x
+            </button>
+          </span>
+        </div>
+
+        <button type="button" @click="toggleOtpModal"
+          class="w-full text-white bg-custom-bluegreen hover:bg-green-500 focus:ring-4 focus:ring-custom-bluegreen font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Next</button>
+
+        <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
+          Already have an account? <button class="text-blue-700 hover:underline dark:text-blue-500" @click="$emit('close-signup')">Sign in</button>
+        </div>
+      </form>
+      <OtpModal v-if="showOtpModal" @close_otp_modal="showOtpModal = false" @show-signin="showSigninModalHandler"
+        :form="form" />
+    </div>
+
+
+
+    <!-- <div class="font-mono fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
       <div class="bg-gray-300 shadow-lg rounded-3xl overflow-hidden w-11/12 max-w-lg mx-auto p-5">
         <header class="p-4 border-b">
           <button type="button" @click="$emit('close-signup')" class="text-gray-600 hover:text-gray-800">
@@ -14,7 +155,7 @@
         </header>
         <section class="p-4">
           <form @submit.prevent="submitForm">
-            <!-- Group First Name, Middle Name, Last Name -->
+            Group First Name, Middle Name, Last Name
             <div class="flex flex-wrap -mx-2 mb-5">
               <div class="w-full sm:w-1/3 px-2 mb-4 sm:mb-0">
                 <div class="relative z-0 w-full group">
@@ -48,7 +189,7 @@
               </div>
             </div>
 
-            <!-- Email, and Location Field Group -->
+            Email, and Location Field Group 
             <div class="flex flex-wrap -mx-2 mb-5">
               <div class="w-full sm:w-1/2 px-2 mb-4 sm:mb-0">
                 <div class="relative z-0 w-full mb-5 group">
@@ -73,13 +214,13 @@
               </div>
             </div>
 
-            <!-- Group Password and Confirm Password -->
+            <!-- Group Password and Confirm Password 
             <div class="flex flex-wrap -mx-2 mb-5">
               <div class="w-full sm:w-1/2 px-2 mb-4 sm:mb-0">
                 <div class="relative z-0 w-full group">
                   <input v-model="form.password" id="password" type="password"
                     class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                    placeholder=" " required />
+                    placeholder=" " required autocomplete="off"/>
                   <label for="password"
                     class="peer-focus:font-medium pl-2 left-1 bg-gray-300 absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                     Password</label>
@@ -89,7 +230,7 @@
                 <div class="relative z-0 w-full group">
                   <input v-model="form.confirmPassword" id="confirmPassword" type="password"
                     class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                    placeholder=" " required />
+                    placeholder=" " required autocomplete="off"/>
                   <label for="confirmPassword"
                     class="peer-focus:font-medium pl-2 left-1 bg-gray-300 absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                     Confirm Password</label>
@@ -98,7 +239,7 @@
             </div>
 
             <div class="flex flex-wrap -mx-2 mb-5">
-              <!-- User Type Field -->
+              <!-- User Type Field
               <div class="w-full sm:w-1/2 px-2">
                 <div class="relative z-0 w-full mb-5 group">
                   <select v-model="form.userType" id="userType" @change="handleUserTypeChange"
@@ -115,7 +256,7 @@
               </div>
 
               <div class="w-full sm:w-1/2 px-2">
-                <!-- Bidder Category Selection -->
+                <!-- Bidder Category Selection
                 <div v-if="form.userType === 'Bidder'" class="relative z-0 w-full mb-5 group">
                   <select v-model="selectedCategory" @change="addCategory"
                     class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer">
@@ -131,7 +272,7 @@
               </div>
             </div>
 
-            <!-- Selected Categories Display -->
+            <!-- Selected Categories Display
             <div v-if="form.userType === 'Bidder'" class="mb-5">
               <span v-for="category in form.categories" :key="category"
                 class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
@@ -142,12 +283,12 @@
               </span>
             </div>
 
-            <!-- Submit and Back to Login Buttons -->
+            <!-- Submit and Back to Login Buttons
             <div class="flex justify-end mt-4">
               <!-- <button type="submit"
                 class="bg-teal-500 border border-teal-500 rounded-full hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-600 text-gray-900 py-2 px-4 shadow-sm-light shadow-black font-semibold">
                 Sign Up
-              </button> -->
+              </button>
               <button type="button" @click="toggleOtpModal"
                 class="bg-teal-500 border border-teal-500 rounded-full hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-600 text-gray-900 py-2 px-4 shadow-sm-light shadow-black font-semibold">
                 Next
@@ -158,7 +299,7 @@
           </form>
         </section>
       </div>
-    </div>
+    </div> -->
   </transition>
 </template>
 

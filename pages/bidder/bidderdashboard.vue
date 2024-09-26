@@ -1,7 +1,7 @@
 <template>
     <NuxtLayout name="biddernavbar">
         <!-- Content Section -->
-        <section class="bg-gray-400 p-6 rounded-lg shadow-xl">
+        <div class="bg-gray-400 p-6 rounded-lg shadow-xl" @focus = "autoCloseDropDown">
             <h2 class="text-2xl font-semibold mb-4 text-center">
                 Available Auctions
             </h2>
@@ -39,70 +39,59 @@
 
                     <!-- Search Input -->
                     <div class="relative flex-grow ml-2">
-                        <input type="text" id="search-dropdown" v-model="searchTerm" @input="handleSearch"
-                            class="block w-full p-3 text-sm text-gray-900 shadow-inner shadow-black bg-gray-50 rounded-xl border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500"
+                        <input type="search" id="search-dropdown" v-model="searchTerm" @focus = "autoCloseDropDown"
+                            class="block w-full p-3 text-sm text-gray-900 shadow-inner shadow-black bg-gray-50 rounded-xl border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500 cursor-pointer"
                             placeholder="Search for auction's name..." />
                     </div>
                 </form>
             </div>
 
-            <!-- Auction Listings -->
-            <div v-if="currentListings.length > 0"
-                class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
-                <div v-for="listing in currentListings" :key="listing.listing_id"
-                    class="bg-white p-4 rounded-lg shadow-sm-light shadow-black">
-                    <h3 class="text-2xl font-semibold mb-2 truncate">
-                        {{ listing.name }}
-                    </h3>
-                    <p class="text-gray-700 mb-2 truncate">
-                        Description: {{ listing.description }}
-                    </p>
-                    <p class="text-gray-500 mb-2 truncate">
-                        Location: {{ listing.location }}
-                    </p>
-                    <p class="text-gray-500 mb-4 truncate">
-                        Bidding Type: {{ listing.bidding_type }}
-                    </p>
-
-                    <!-- Categories Section -->
-                    <div class="flex flex-wrap mt-2">
-                        <strong>Categories:</strong>
-                        <span v-if="listing.categories.length === 0" class="text-gray-500">No categories</span>
-
-                        <!-- Display each category as a styled tag -->
-                        <span v-for="(category, index) in listing.categories" :key="index"
-                            class="bg-gray-200 text-gray-700 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded">
-                            {{ category }}
-                        </span>
-                    </div>
-
-
-                    <div class="flex items-center space-x-2 mb-2 self-end">
-                        <!-- Image Icon with Viewers Count -->
-                        <img src="/public/images/viewers-count-image.png" alt="Viewers Count"
-                            class="w-5 h-5 text-gray-600" />
-                        <p class="text-gray-600">{{ viewersCount[listing.listing_id] || 0 }}</p>
-                    </div>
-                    <div class="flex justify-center">
-
-                        <button @click="openModal(listing)"
-                            class="bg-teal-500 border border-teal-500 rounded-full shadow-sm-light shadow-black hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-600 text-gray-900 px-4 py-2 font-semibold">
-                            View Auction
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- No Auctions Available Message -->
-            <div v-else class="text-xl text-center text-red-500">
-                <p>No auction's available.</p>
-            </div>
+            <!-- Auction Listings Table -->
+            <table class="min-w-full border border-gray-300">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-600">
+                        <th class="py-2 px-4 border border-gray-300 text-center">Auction Name</th>
+                        <th class="py-2 px-4 border border-gray-300 text-center">Description</th>
+                        <th class="py-2 px-4 border border-gray-300 text-center">Location</th>
+                        <th class="py-2 px-4 border border-gray-300 text-center">Bidding Type</th>
+                        <th class="py-2 px-4 border border-gray-300 text-center">Categories</th>
+                        <th class="py-2 px-4 border border-gray-300 text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-if="currentListings.length === 0">
+                        <td colspan="6" class="text-center py-4 text-red-500 border border-gray-300">No auctions
+                            available.</td>
+                    </tr>
+                    <tr v-for="listing in currentListings" :key="listing.listing_id" class="text-center">
+                        <td class="py-2 px-4 border border-gray-300">{{ listing.name }}</td>
+                        <td class="py-2 px-4 border border-gray-300">
+                            {{ truncateDescription(listing.description, 100) }} <!-- Adjust character limit here -->
+                        </td>
+                        <td class="py-2 px-4 border border-gray-300">{{ listing.location }}</td>
+                        <td class="py-2 px-4 border border-gray-300">{{ listing.bidding_type }}</td>
+                        <td class="py-2 px-4 border border-gray-300">
+                            <span v-if="listing.categories.length === 0">No categories</span>
+                            <span v-for="(category, index) in listing.categories" :key="index"
+                                class="bg-gray-200 text-gray-700 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded">
+                                {{ category }}
+                            </span>
+                        </td>
+                        <td class="py-2 px-4 border border-gray-300">
+                            <button @click="openModal(listing)"
+                                class="bg-teal-500 border border-teal-500 rounded-full text-white px-2 py-1">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
             <!-- Pagination Controls -->
             <div class="flex justify-center items-center mt-4">
                 <button @click="prevPage" :disabled="currentPage === 1" class="p-2">
                     <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-line cap="round" stroke-linejoin="round" stroke-width="2"
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M15 19l-7-7 7-7" />
                     </svg>
                 </button>
@@ -115,17 +104,16 @@
                 </button>
             </div>
             <ViewAuctionModal v-if="showModal" :auction="selectedAuction" @close="closeModal" />
-        </section>
+        </div>
     </NuxtLayout>
     <NuxtLayout name="footer"></NuxtLayout>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import axios from "axios";
 import ViewAuctionModal from "~/components/viewauctionmodal.vue";
 
-// Hardcoded categories for demonstration
 const categories = ref([
     { id: 1, name: "Art" },
     { id: 2, name: "Electronics" },
@@ -134,7 +122,6 @@ const categories = ref([
     { id: 5, name: "Real Estate" },
 ]);
 
-const listings = ref([]);
 const pageSize = 5;
 const currentPage = ref(1);
 const selectedCategory = ref(null);
@@ -142,7 +129,7 @@ const searchTerm = ref("");
 const dropdownOpen = ref(false);
 const showModal = ref(false);
 const selectedAuction = ref(null);
-const viewersCount = ref({});
+const listings = ref([]);
 
 const fetchListings = async () => {
     try {
@@ -153,54 +140,24 @@ const fetchListings = async () => {
         const response = await axios.get("/api/displayauctionlisting", { params });
         listings.value = response.data;
 
-        fetchViewersCount();
     } catch (error) {
         console.error("Failed to fetch auction listings:", error);
     }
 };
 
-// Fetch viewers count for each listing
-const fetchViewersCount = async () => {
-    try {
-        const promises = listings.value.map(async (listing) => {
-            const response = await axios.get(`/api/get-viewer-count`, {
-                params: { listing_id: listing.listing_id },
-            });
-            viewersCount.value[listing.listing_id] = response.data.viewer_count;
-        });
-        await Promise.all(promises);
-    } catch (error) {
-        console.error("Failed to fetch viewers count:", error);
+watch(searchTerm, (newValue) => {
+    if (newValue === "") {
+        selectedCategory.value = null; // Reset category selection
     }
-};
-
-// Function to handle search input changes
-const handleSearch = () => {
-    selectedCategory.value = null; // Reset category selection
-    dropdownOpen.value = false;
-    currentPage.value = 1; // Reset to first page
-    debouncedSearch(); // Call debounced search
-};
-
-function debounce(fn, delay) {
-    let timeout;
-    return function (...args) {
-        if (timeout) clearTimeout(timeout);
-        timeout = setTimeout(() => fn.apply(this, args), delay);
-    };
-}
-
-// Debounced search handler
-const debouncedSearch = debounce(() => {
     currentPage.value = 1; // Reset to first page
     fetchListings(); // Fetch listings with the search term
-}, 300); // Delay set to 300ms for debouncing
+});
 
 const currentListings = computed(() => {
     const start = (currentPage.value - 1) * pageSize;
     return listings.value.slice(start, start + pageSize);
 });
- 
+
 const totalListings = computed(() => listings.value.length);
 const totalPages = computed(() => Math.ceil(totalListings.value / pageSize));
 
@@ -220,6 +177,12 @@ const toggleDropdown = () => {
     dropdownOpen.value = !dropdownOpen.value;
 };
 
+const autoCloseDropDown = () => {
+    dropdownOpen.value = false;
+    selectedCategory.value = null;
+    fetchListings();
+};
+
 const selectCategory = (category) => {
     selectedCategory.value = category;
     currentPage.value = 1; // Reset to first page
@@ -228,8 +191,12 @@ const selectCategory = (category) => {
 };
 
 const openModal = (auction) => {
-    selectedAuction.value = auction;
-    showModal.value = true;
+    if (auction) {
+        selectedAuction.value = auction;
+        showModal.value = true;
+    } else {
+        console.warn("No auction data provided");
+    }
 };
 
 const closeModal = () => {
@@ -237,17 +204,18 @@ const closeModal = () => {
     selectedAuction.value = null;
 };
 
+const truncateDescription = (description, maxLength) => {
+    if (description.length > maxLength) {
+        return description.slice(0, 30) + '...';
+    }
+    return description;
+};
+
 onMounted(() => {
     fetchListings();
 });
 </script>
 
-
 <style scoped>
-/* Text overflow ellipsis */
-.truncate {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+/* Add your custom styles here */
 </style>

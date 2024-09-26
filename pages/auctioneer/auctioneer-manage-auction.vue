@@ -42,9 +42,9 @@
       </div>
       <div class="space-y-4">
         <div class="p-4 bg-gray-100 rounded-lg shadow-md">
-          <button @click="confirmEmailBlast"
-            class="text-lg border bg-green-500 rounded-full px-4 py-2 shadow-md shadow-black hover:bg-teal-600 font-semibold">
-            Email Blast
+          <button @click="confirmEmailBlast" :disabled="isEmailBlastSent" class="text-lg border bg-green-500 rounded-full px-4 py-2 shadow-md shadow-black hover:bg-teal-600
+            font-semibold" :class="{ 'opacity-50 cursor-not-allowed': isEmailBlastSent }">
+            {{ isEmailBlastSent ? "Email Blast Sent Already" : "Email Blast" }}
           </button>
         </div>
       </div>
@@ -61,13 +61,16 @@ import { toast } from "vue3-toastify";
 
 const route = useRoute();
 const auction = ref({});
+const isEmailBlastSent = ref(false);
 
 const fetchAuctionDetails = async () => {
   try {
     const { data } = await axios.get(`/api/auction/${route.query.id}`);
     console.log(data);
     auction.value = data;
-    auction.value.status = route.query.status;
+    if (data.email_blast_sent === 1) {
+      isEmailBlastSent.value = true;
+    }
   } catch (error) {
     console.error("Failed to fetch auction details:", error);
   }
@@ -81,9 +84,10 @@ const confirmEmailBlast = () => {
 
 const sendEmailBlast = async () => {
   try {
-    const emailBlastResponse = await axios.post('/api/email-blast', {auctionUuid: route.query.id});
+    const emailBlastResponse = await axios.post('/api/email-blast', { auctionUuid: route.query.id });
     console.log(emailBlastResponse);
     toast.success("Email blast sent successfully!");
+    isEmailBlastSent.value = true;
   } catch (error) {
     console.error("Failed to send email blast:", error);
     toast.error("Failed to send email blast.");
@@ -95,4 +99,10 @@ onMounted(() => {
 });
 </script>
 
-<style scoped></style>
+<style scoped>
+/* Optional: add some styling for the disabled button */
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+</style>

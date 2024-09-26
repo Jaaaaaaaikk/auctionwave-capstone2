@@ -45,7 +45,9 @@ export default defineEventHandler(async (event) => {
     l.location_name AS location, 
     al.starting_bid, 
     al.bidding_type, 
-    al.rarity 
+    al.rarity,
+    al.status,
+    al.email_blast_sent
 FROM AuctionListings al
 INNER JOIN Locations l ON al.location_id = l.location_id
 WHERE al.uuid = ?

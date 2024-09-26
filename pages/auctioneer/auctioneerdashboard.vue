@@ -1,6 +1,6 @@
 <template>
   <NuxtLayout name="auctioneernavbar">
-    <section class="bg-gray-400 rounded-lg p-6 flex flex-col items-center justify-center">
+    <section class="bg-gray-400 rounded-lg p-6 flex flex-col items-center justify-center w-full">
       <!-- Default Message if No Auctions Exist -->
       <div v-if="auctions.length === 0" class="flex flex-row items-center space-x-6">
         <div class="flex-shrink-0">
@@ -20,36 +20,48 @@
         </div>
       </div>
 
-      <!-- Auctions List if Auctions Exist -->
+      <!-- Auctions Table if Auctions Exist -->
       <div v-else class="w-full">
         <h2 class="text-2xl font-semibold mb-4 text-center">
           Your Created Auctions
         </h2>
-        <!-- Grid Layout -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div v-for="auction in paginatedAuctions" :key="auction.listing_id"
-            class="p-6 bg-white rounded shadow-sm-light shadow-black flex flex-col">
-            <h3 class="text-xl font-bold mb-2">{{ auction.name }}</h3>
-            <p class="text-gray-600">Location: {{ auction.location_name }}</p>
-            <p class="text-gray-700 mt-2">
-              Description: {{ auction.description }}
-            </p>
-            <p class="text-sm text-gray-500 mt-4">
-              Bidding Type: {{ auction.bidding_type }}
-            </p>
-            <!-- View Auction Button -->
-            <button @click="view_auction(auction)"
-              class="bg-teal-500 border border-teal-500 rounded-full shadow-sm-light shadow-black hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-600 text-gray-900 px-4 py-2 font-semibold mt-auto self-end">
-              View Auction
-            </button>
-          </div>
-          <div class="flex mt-48">
-            <button @click="create_AuctionModal = true"
-              class="bg-teal-500 text-black text-3xl py-2 px-4 hover:bg-teal-600 rounded-xl shadow-md shadow-black">
-              +
-            </button>
-          </div>
-        </div>
+        <button @click="create_AuctionModal = true" class="flex bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"><svg class="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd"></path>
+            </svg>Create Auction
+        </button>
+        <!-- Table Layout -->
+        <table class="min-w-full border border-gray-300">
+          <thead>
+            <tr class="bg-gray-200 text-gray-600">
+              <th class="py-2 px-4 border border-gray-300 text-center">Auction Name</th>
+              <th class="py-2 px-4 border border-gray-300 text-center">Description</th>
+              <th class="py-2 px-4 border border-gray-300 text-center">Location</th>
+              <th class="py-2 px-4 border border-gray-300 text-center">Bidding Type</th>
+              <th class="py-2 px-4 border border-gray-300 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Empty State if No Auctions -->
+            <tr v-if="paginatedAuctions.length === 0">
+              <td colspan="6" class="text-center py-4 text-red-500 border border-gray-300">No auctions available.</td>
+            </tr>
+            <!-- Render Each Auction Row -->
+            <tr v-for="auction in paginatedAuctions" :key="auction.listing_id" class="text-center">
+              <td class="py-2 px-4 border border-gray-300">{{ auction.name }}</td>
+              <td class="py-2 px-4 border border-gray-300">
+                {{ truncateDescription(auction.description, 100) }}
+              </td>
+              <td class="py-2 px-4 border border-gray-300">{{ auction.location_name }}</td>
+              <td class="py-2 px-4 border border-gray-300">{{ auction.bidding_type }}</td>
+              <td class="py-2 px-4 border border-gray-300">
+                <button @click="view_auction(auction)"
+                  class="bg-teal-500 border border-teal-500 rounded-full text-white px-2 py-1">
+                  View
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
         <!-- Pagination Controls -->
         <div class="flex justify-center items-center mt-4">
@@ -68,11 +80,13 @@
           </button>
         </div>
       </div>
+
       <CreateAuction_Modal v-if="create_AuctionModal" @close="create_AuctionModal = false" />
     </section>
   </NuxtLayout>
   <NuxtLayout name="footer"></NuxtLayout>
 </template>
+
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
@@ -88,7 +102,7 @@ const router = useRouter();
 
 const view_auction = (auction) => {
   // Pass auction ID in query parameter
-  router.push({ path: '/auctioneer/auctioneer-manage-auction', query: { id: auction.uuid, status: auction.status} });
+  router.push({ path: '/auctioneer/auctioneer-manage-auction', query: { id: auction.uuid } });
 };
 
 const fetchAuctions = async () => {
@@ -115,10 +129,18 @@ const changePage = (newPage) => {
   }
 };
 
+const truncateDescription = (description, maxLength) => {
+  if (description.length > maxLength) {
+    return description.substring(0, 30) + '...';
+  }
+  return description;
+};
+
 onMounted(() => {
   fetchAuctions();
 });
 </script>
+
 
 <style scoped>
 /* Your styles here */

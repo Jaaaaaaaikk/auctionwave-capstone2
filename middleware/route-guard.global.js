@@ -16,9 +16,9 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     } else {
       // Redirect logged-in users based on their userType
       if (to.path === '/homepage' || to.path === '/bidder' ) {
-        if (userType === 'Bidder') {
+        if (userType === 'Bidder' || to.path === '/bidder/bidderdashboard') {
           return navigateTo('/bidder/bidderdashboard', { replace: true });
-        } else if (userType === 'Auctioneer') {
+        } else if (userType === 'Auctioneer' || to.path === '/auctioneer/auctioneerdashboard') {
           return navigateTo('/auctioneer/auctioneerdashboard', { replace: true });
         }
       }

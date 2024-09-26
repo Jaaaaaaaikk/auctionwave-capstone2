@@ -1,11 +1,11 @@
 <template>
-  <div class="font-mono p-6 bg-white dark:bg-gray-900 min-h-screen">
+  <div class="font-mono p-6 bg-white dark:bg-gray-900 min-h-screen ml-10 mr-10">
     <!-- Header Section -->
     <div class="fixed top-0 left-0 right-0 px-4 py-4 flex items-center justify-between bg-white shadow-xl mb-6">
       <!-- Logo and Company Name -->
       <NuxtLink to="/bidder/bidderdashboard" class="flex justify-start space-x-3 rtl:space-x-reverse mr-8">
         <!-- Added margin-right -->
-        <img src="/public/images/auctionwave-logo-final.png" class="h-16" alt="Logo" />
+        <img src="/images/auctionwave-logo-final.png" class="h-16" alt="Logo" />
       </NuxtLink>
 
       <!-- Navigation Bar and Search Bar Container -->

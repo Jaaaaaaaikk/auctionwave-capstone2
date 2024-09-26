@@ -1,6 +1,14 @@
 import { defineEventHandler, readBody, getCookie } from 'h3';
 import { getPool } from '../db';
-import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
+
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL,
+        pass: process.env.APP_PASS,
+    },
+});
 
 export default defineEventHandler(async (event) => {
     const pool = await getPool();
@@ -19,7 +27,7 @@ export default defineEventHandler(async (event) => {
 
         // Fetch auction details by UUID
         const [[auction]] = await pool.query(
-            `SELECT listing_id, location_id FROM AuctionListings WHERE uuid = ?`,
+            `SELECT listing_id, name, location_id, email_blast_sent FROM AuctionListings WHERE uuid = ?`,
             [auctionUuid]
         );
 
@@ -27,8 +35,16 @@ export default defineEventHandler(async (event) => {
             throw createError({ statusCode: 404, message: 'Auction not found' });
         }
 
+        // Check if the email blast has already been sent
+        if (auction.email_blast_sent) {
+            throw createError({ statusCode: 400, message: 'Email blast has already been sent for this auction.' });
+        }
+
         const listingId = auction.listing_id;
         const location_id = auction.location_id;
+        const auction_name = auction.name;
+
+        console.log("yeah", auction_name);
 
         // Fetch categories associated with the auction
         const [categories] = await pool.query(
@@ -55,7 +71,7 @@ export default defineEventHandler(async (event) => {
         const notifications = bidders.map(bidder => ({
             user_id: bidder.bidder_id,
             auction_id: listingId,
-            message: `New auction in your interested categories: ${auctionUuid}`,
+            message: `Don’t miss out! A new auction, "${auction_name}", has been created just for you. Explore it now!`,
             is_read: false
         }));
 
@@ -64,6 +80,29 @@ export default defineEventHandler(async (event) => {
        VALUES ?`,
             [notifications.map(notif => [notif.user_id, notif.auction_id, notif.message, notif.is_read])]
         );
+
+        const baseUrl = process.env.BASE_URL;
+        const auctionLink = `${baseUrl}/bidder/bidder-auction?id=${auctionUuid}`;
+
+        await Promise.all(bidders.map(async (bidder) => {
+            try {
+                await transporter.sendMail({
+                    from: process.env.EMAIL,
+                    to: bidder.email,
+                    subject: `New Auction Alert: ${auction_name}`,
+                    text: `Hello! A new auction, "${auction_name}", has been created just for you. Explore it now! To join, click this link: ${auctionLink}`,
+                });
+            } catch (emailError) {
+                console.error(`Failed to send email to ${bidder.email}:`, emailError);
+            }
+        }));
+
+        // Mark the email blast as sent in the database
+        await pool.query(
+            `UPDATE AuctionListings SET email_blast_sent = TRUE WHERE listing_id = ?`,
+            [listingId]
+        );
+
 
         return { success: true, message: 'Notifications sent successfully' };
     } catch (error) {

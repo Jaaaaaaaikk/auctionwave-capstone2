@@ -1,5 +1,4 @@
 <template>
-  <!-- Footer Section -->
   <footer class="bg-gray-800 text-white py-6 mt-8">
     <div class="container mx-auto flex justify-between items-center">
       <p class="text-sm">© 2024 AuctionWave. All rights reserved.</p>
@@ -56,7 +55,3 @@
     </div>
   </footer>
 </template>
-
-<script></script>
-
-<style scoped></style>
