@@ -1,0 +1,339 @@
+CREATE TABLE Users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    firstname VARCHAR(100) NOT NULL,
+    middlename VARCHAR(100),
+    lastname VARCHAR(100) NOT NULL,
+    location_id INT NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    about TEXT,
+    user_type ENUM('Bidder', 'Auctioneer') NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (location_id) REFERENCES Locations(location_id) ON DELETE CASCADE
+);
+
+CREATE TABLE UserProfileImages (
+    profile_image_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    image_url VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Locations (
+    location_id INT AUTO_INCREMENT PRIMARY KEY,
+    location_name VARCHAR(100) NOT NULL,
+    latitude DECIMAL(10, 7),
+    longitude DECIMAL(10, 7)
+);
+
+CREATE TABLE OTPs (
+  otp_id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  otp VARCHAR(6) NOT NULL, --adjust COLLATE utf8mb4_bin to case-sensitive
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create Bidders table
+CREATE TABLE Bidders (
+    bidder_category_id INT AUTO_INCREMENT PRIMARY KEY,
+    bidder_id INT NOT NULL,
+    category_id INT NOT NULL,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES Categories(category_id) ON DELETE CASCADE
+);
+
+-- Create Categories table
+CREATE TABLE Categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_name VARCHAR(250) NOT NULL
+);
+
+CREATE TABLE AuctionListings (
+    listing_id INT AUTO_INCREMENT PRIMARY KEY,
+    auctioneer_id INT NOT NULL,
+    name VARCHAR(250) NOT NULL,
+    location_id INT NOT NULL, -- Use location_id as foreign key
+    description TEXT,
+    starting_bid DECIMAL(10,2) NOT NULL,
+    bidding_type ENUM('Lowest-type', 'Offer-type') NOT NULL,
+    rarity ENUM('Common', 'Uncommon', 'Rare'),
+    status ENUM('Auction Pending', 'Auction Done') NOT NULL,
+    email_blast_sent BOOLEAN DEFAULT FALSE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    uuid char(36) NOT NULL,
+    FOREIGN KEY (auctioneer_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (location_id) REFERENCES Locations(location_id) ON DELETE CASCADE
+);
+
+CREATE TABLE AuctionImages (
+    image_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,
+    image_url VARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE
+);
+
+
+-- Create AuctionListingCategories table
+CREATE TABLE AuctionListingCategories (
+    listing_id INT NOT NULL,
+    category_id INT NOT NULL,
+    PRIMARY KEY (listing_id, category_id),
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES Categories(category_id) ON DELETE CASCADE
+);
+
+-- Create AuctionParticipants table
+CREATE TABLE AuctionParticipants (
+    participant_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,
+    bidder_id INT NOT NULL,
+    initial_joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_interaction_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_listing_bidder (listing_id, bidder_id)
+);
+
+
+CREATE TABLE Bids (
+    bid_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,
+    participant_id INT NOT NULL,
+    bid_amount DECIMAL(10,2) NOT NULL,
+    bid_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (participant_id) REFERENCES AuctionParticipants(participant_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE Offers (
+    offer_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,
+    bidder_id INT NOT NULL,
+    offer_amount DECIMAL(10,2),
+    comment TEXT,
+    offer_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    review_comment TEXT,
+    review_status ENUM('Pending', 'Reviewed') DEFAULT 'Pending',
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Notifications (
+    notification_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL, 
+    auction_id INT, 
+    message TEXT NOT NULL, 
+    is_read BOOLEAN DEFAULT FALSE, 
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (auction_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE
+);
+
+
+
+INSERT INTO Categories (category_name) VALUES
+('Art'),
+('Electronics'),
+('Collectibles'),
+('Furniture'),
+('Real Estate');
+
+INSERT INTO Locations (location_name, latitude, longitude) VALUES
+('Davao City', 7.1907, 125.4553),
+('Zamboanga City', 6.9214, 122.0790),
+('Cagayan de Oro', 8.4542, 124.6319),
+('General Santos City', 6.1164, 125.1716),
+('Butuan', 8.9494, 125.5433),
+('Iligan', 8.2280, 124.2452),
+('Cotabato City', 7.2044, 124.2439),
+('Tagum', 7.4477, 125.8047),
+('Valencia', 7.9062, 125.0927),
+('Pagadian', 7.8256, 123.4372),
+('Panabo', 7.3081, 125.6846),
+('Marawi', 8.0057, 124.2928),
+('Koronadal', 6.5032, 124.8463),
+('Malaybalay', 8.1571, 125.1277),
+('Digos', 6.7499, 125.3572),
+('Polomolok', 6.2164, 125.0636),
+('Surigao City', 9.7577, 125.5135),
+('Kidapawan', 7.0084, 125.0894),
+('Mati', 6.9495, 126.2166),
+('Ozamiz', 8.1462, 123.8504),
+('Dipolog', 8.5886, 123.3405),
+('Tacurong', 6.6922, 124.6738),
+('Bislig', 8.2109, 126.3161),
+('Bayugan', 8.7566, 125.7516),
+('El Salvador', 8.5553, 124.5598),
+('Lamitan', 6.6500, 122.1333),
+('Tandag', 9.0783, 126.1988),
+('Sultan Kudarat', 6.6314, 124.5385),
+('Isabela City', 6.7042, 121.9719);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SELECT * FROM users;
+SELECT * FROM bidders;
+SELECT * FROM usertokens;
+SELECT * FROM auctionlistings;
+SELECT * FROM auctionlistingcategories;
+SELECT * FROM auctionparticipants;
+SELECT * FROM bids;
+SELECT * FROM offers;
+
+-- Create UserTokens table
+CREATE TABLE UserTokens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    userId INT NOT NULL,
+    token VARCHAR(512) NOT NULL,
+    expiresAt DATETIME NOT NULL,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    revokedAt DATETIME NULL,
+    FOREIGN KEY (userId) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE EmailBlasts (
+    email_blast_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT,
+    blast_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id)
+);
+
+CREATE TABLE EmailBlastFees (
+    fee_id INT AUTO_INCREMENT PRIMARY KEY,
+    auction_id INT,
+    fee_amount DECIMAL(10,2),
+    status ENUM('Pending', 'Paid'),
+    transaction_id VARCHAR(255), -- Transaction ID from third-party service
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (auction_id) REFERENCES AuctionListings(listing_id)
+);
+
+
+CREATE TABLE Bids (
+    bid_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    listing_id INT,
+    bid_amount DECIMAL(10,2),
+    bid_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    bid_status ENUM('Accepted', 'Rejected', 'Pending') DEFAULT 'Pending',
+    is_winning BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id),
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id)
+);
+
+CREATE TABLE BidderPayments (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    bidder_id INT,
+    auction_id INT,
+    amount DECIMAL(10,2),
+    payment_type ENUM('Usage Fee', 'Cash Bond'),
+    status ENUM('Pending', 'Completed', 'Failed'),
+    transaction_id VARCHAR(255), -- Transaction ID from third-party service
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id),
+    FOREIGN KEY (auction_id) REFERENCES AuctionListings(listing_id)
+);
+
+
+CREATE TABLE CashBond (
+    bond_id INT AUTO_INCREMENT PRIMARY KEY,
+    auction_id INT,
+    bidder_id INT,
+    amount DECIMAL(10,2) NOT NULL,
+    status ENUM('Pending', 'Confirmed', 'Withdrawn', 'Claimed') NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (auction_id) REFERENCES AuctionListings(listing_id),
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id)
+);
+
+CREATE TABLE BidderNotifications (
+    notification_id INT AUTO_INCREMENT PRIMARY KEY,
+    bidder_id INT,
+    auction_id INT,
+    notification_type ENUM('Auction Win', 'Payment Instructions'),
+    notification_datetime DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id),
+    FOREIGN KEY (auction_id) REFERENCES AuctionListings(listing_id)
+);
+
+CREATE TABLE PaymentServiceLog (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    payment_id INT,
+    request_data TEXT, -- JSON or serialized request data sent to payment service
+    response_data TEXT, -- JSON or serialized response data from payment service
+    status ENUM('Success', 'Failure'),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (payment_id) REFERENCES BidderPayments(payment_id)
+);
+
+
+CREATE TABLE Admins (
+    admin_id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL, -- Hash and store passwords securely
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
+CREATE TABLE Users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  is_verified BOOLEAN DEFAULT FALSE
+);
+
+Project ID: curious-clone-435417-t0. It cannot be changed later.
+
