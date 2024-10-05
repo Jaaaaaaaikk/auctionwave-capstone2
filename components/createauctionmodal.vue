@@ -1,121 +1,149 @@
 <template>
   <div class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-    <div class="bg-white shadow-lg rounded-3xl overflow-hidden w-11/12 max-w-4xl mx-auto">
-      <header class="flex justify-between p-4 border-b">
-        <h1 class="text-2xl font-bold">Auction Form</h1>
-        <button type="button" @click="$emit('close')" class="text-gray-600 hover:text-gray-800">
-          <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-          </svg>
-        </button>
-      </header>
+    <div class="relative p-4 w-full max-w-4xl max-h-full">
+      <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+        <!-- Modal header -->
+        <header class="flex items-center justify-between p-4 border-b rounded-t dark:border-gray-600">
+          <h1 class="text-lg font-semibold text-gray-900 dark:text-white">Create Auction</h1>
+          <button type="button" @click="$emit('close')"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+            <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+            </svg>
+            <span class="sr-only">Close modal</span>
+          </button>
+        </header>
 
-      <section class="p-4">
-        <form @submit.prevent="createAuction" class="flex gap-4">
-          <!-- Left Section - Auction Details -->
-          <div class="w-1/2 flex flex-col gap-5">
-            <!-- Name and Location -->
-            <div class="flex gap-4">
-              <div class="flex-1 flex flex-col">
-                <label for="name" class="text-sm font-medium mb-2">Name</label>
-                <input v-model="auctionData.name" id="name" type="text" class="form-input" placeholder="Auction name"
-                  required />
-              </div>
-              <div class="flex-1 flex flex-col">
-                <label for="location" class="text-sm font-medium mb-2">Location</label>
-                <input v-model="auctionData.location_name" id="location" type="text" class="form-input"
-                  placeholder="Location" disabled />
-              </div>
+        <!-- Modal body -->
+        <section class="p-4 md:p-5">
+          <form @submit.prevent="createAuction" class=" gap-4 mb-4 ">
+            <!-- Left Section - Auction Details -->
+            <div class="col-span-2 mb-5">
+              <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Name</label>
+              <input v-model="auctionData.name" id="name" type="text"
+                class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 focus:ring-custom-bluegreen focus:border-custom-bluegreen dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                placeholder="Auction name" required />
             </div>
 
-            <!-- Description -->
-            <div>
-              <label for="description" class="text-sm font-medium mb-2">Description</label>
-              <textarea v-model="auctionData.description" id="description" rows="3" class="form-input"
+
+
+            <div class="col-span-2 mb-4">
+              <label for="description"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
+              <textarea v-model="auctionData.description" id="description" rows="3"
+                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-custom-bluegreen focus:border-custom-bluegreen dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="Description"></textarea>
             </div>
 
-            <!-- Starting Bid and Bidding Type -->
-            <div class="flex gap-4">
-              <div class="flex-1 flex flex-col">
-                <label for="startingBid" class="text-sm font-medium mb-2">Starting Bid</label>
-                <input v-model.number="auctionData.startingBid" id="startingBid" type="number" step="1" min="0"
-                  class="form-input" placeholder="Starting bid" required />
-              </div>
-              <div class="flex-1 flex flex-col">
-                <label for="biddingType" class="text-sm font-medium mb-2">Bidding Type</label>
-                <select v-model="auctionData.biddingType" id="biddingType" class="form-select" required>
+            <div class="flex gap-4 mb-5">
+              <div class="w-66 flex flex-col">
+                <label for="biddingType" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Bidding
+                  Type</label>
+                <select v-model="auctionData.biddingType" id="biddingType"
+                  class="focus:ring-custom-bluegreen focus:border-custom-bluegreen bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                  required>
                   <option value="" disabled>Bidding Type</option>
                   <option value="Lowest-type">Lowest-type</option>
                   <option value="Offer-type">Offer-type</option>
                 </select>
               </div>
-            </div>
 
-            <!-- Category and Rarity -->
-            <div class="flex gap-4">
-              <div class="flex-1 flex flex-col">
-                <label for="categoryId" class="text-sm font-medium mb-2">Category</label>
-                <select v-model="selectedCategory" id="categoryId" class="form-select" @change="addCategory">
-                  <option value="" disabled>Select Category</option>
-                  <option v-for="(name, id) in categoryMap" :key="id" :value="id">
-                    {{ name }}
-                  </option>
-                </select>
-                <div class="mt-2">
-                  <span v-for="categoryId in auctionData.categories" :key="categoryId"
-                    class="inline-block px-3 py-1 mr-2 mb-2 bg-blue-100 text-blue-800 rounded-full text-sm">
-                    {{ categoryMap[categoryId] }}
-                    <button type="button" @click="removeCategory(categoryId)" class="text-red-500 ml-1">x</button>
-                  </span>
-                </div>
-              </div>
-              <div class="flex-1 flex flex-col">
-                <label for="rarity" class="text-sm font-medium mb-2">Rarity</label>
-                <select v-model="auctionData.rarity" id="rarity" class="form-select">
+
+
+              <div class=" w-66 flex flex-col">
+                <label for="rarity" class=" block mb-2 text-sm font-medium text-gray-900 dark:text-white">Rarity</label>
+                <select v-model="auctionData.rarity" id="rarity"
+                  class=" focus:ring-custom-bluegreen focus:border-custom-bluegreen bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                   <option value="" disabled>Select Rarity</option>
                   <option value="Common">Common (5%)</option>
                   <option value="Uncommon">Uncommon (10%)</option>
                   <option value="Rare">Rare (20%)</option>
                 </select>
               </div>
+
+              <div v-if="auctionData.biddingType !== 'Offer-type'" class="w-66 flex flex-col">
+                <label for="startingBid" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Starting
+                  Bid</label>
+                <div class="relative">
+                  <span
+                    class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-900 dark:text-white">₱</span>
+                  <input v-model.number="auctionData.startingBid" id="startingBid" type="number" step="1" min="0"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 pl-8 focus:ring-custom-bluegreen focus:border-custom-bluegreen dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                    placeholder="0" required />
+                </div>
+              </div>
             </div>
-          </div>
 
-          <!-- Vertical Divider -->
-          <div class="border-r h-full mx-4"></div>
 
-          <!-- Right Section - Image Upload -->
-          <div class="w-1/2 flex flex-col items-center justify-center">
-            <!-- Image Preview -->
-            <div class="mb-4">
-              <img :src="auctionData.image || '/images/no-image.jpg'" alt="Auction Image Preview"
-                class="w-48 h-48 object-cover rounded-lg shadow-xl" />
+            <div class="gap-4 mb-5">
+              <div class="flex-1 flex flex-col">
+                <label for="category"
+                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category</label>
+                <div class="flex flex-wrap gap-2"> <!-- Added this div for controlling width -->
+                  <ul
+                    class="flex flex-row text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <li v-for="(name, id) in categoryMap" :key="id"
+                      class="flex items-center border-r last:border-0 dark:border-gray-600">
+                      <div class="flex items-center p-3">
+                        <input type="checkbox" :id="'category-' + id" :checked="auctionData.categories.includes(id)"
+                          @change="handleCategoryChange(id, $event.target.checked)"
+                          class="w-4 h-4 text-custom-bluegreen bg-gray-100 border-gray-300 rounded focus:ring-custom-bluegreen dark:focus:ring-custom-bluegreen dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
+                        <label :for="'category-' + id"
+                          class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">
+                          {{ name }}
+                        </label>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
-            <!-- File Input -->
-            <div class="mb-4">
-              <label class="text-sm font-medium mb-2">Upload Image</label>
-              <input type="file" @change="onImageChange" class="form-input" accept="image/*" />
+            <!-- Centered Image Upload Section with Preview -->
+            <div class="flex justify-center col-span-2 mb-4">
+              <label for="dropzone-file"
+                class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                <div v-if="auctionData.image" class="flex flex-col items-center justify-center pt-5 pb-6">
+                  <!-- Image Preview Section -->
+                  <img :src="auctionData.image" alt="Image Preview" class="max-h-44 object-contain mb-2" />
+                  <p class="text-xs text-gray-500 dark:text-gray-400">Click to upload a new image</p>
+                </div>
+
+                <!-- Default Upload Icon and Text when no image is selected -->
+                <div v-else class="flex flex-col items-center justify-center pt-5 pb-6">
+                  <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                  </svg>
+                  <p class="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                    <span class="font-semibold">Click to upload</span> or drag and drop
+                  </p>
+                  <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG</p>
+                </div>
+
+                <input id="dropzone-file" type="file" class="hidden" @change="onImageChange" />
+              </label>
             </div>
-          </div>
-                </form>
 
-        <div class="flex justify-end mt-5">
-          <button type="submit"
-            class="text-white inline-flex items-center bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5">
-            <svg class="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path fill-rule="evenodd"
-                d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                clip-rule="evenodd"></path>
-            </svg>
-            Submit Auction
-          </button>
-        </div>
 
-        <p v-if="errorMessage" class="text-red-500">{{ errorMessage }}</p>
-      </section>
+
+            <div class="flex justify-end col-span-2">
+              <button type="submit"
+                class="text-white inline-flex items-center bg-custom-bluegreen hover:bg-green-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5">
+                <svg class="me-1 -ms-1 w-5 h-5" fill="currentColor" viewBox="0 0 20 20"
+                  xmlns="http://www.w3.org/2000/svg">
+                  <path fill-rule="evenodd"
+                    d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                    clip-rule="evenodd"></path>
+                </svg>
+                Add Auction
+              </button>
+            </div>
+          </form>
+        </section>
+      </div>
     </div>
   </div>
 </template>
@@ -141,6 +169,8 @@ const auctionData = ref({
   image: null,
 });
 
+const isLoading = ref(false);
+const emit = defineEmits();
 const selectedCategory = ref("");
 const categoryMap = ref({
   1: "Art",
@@ -152,13 +182,31 @@ const categoryMap = ref({
 const errorMessage = ref("");
 const router = useRouter();
 
-// Handle image upload and display a preview
-const onImageChange = (event) => {
+
+const onImageChange = async (event) => {
   const file = event.target.files[0];
+
   if (file) {
-    auctionData.value.image = URL.createObjectURL(file); // Create an image preview URL
-  } else {
-    auctionData.value.image = null; // Reset if no file is selected
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      toast.error("Invalid file type. Please upload an image (JPG, PNG, GIF).");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // Limit to 5MB
+      toast.error("File size exceeds 5MB limit.");
+      return;
+    }
+
+    // Read the file as base64
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      auctionData.value.image = reader.result; // Set base64 string to auctionData
+    };
+    reader.onerror = (error) => {
+      console.error("Error reading file:", error);
+    };
   }
 };
 
@@ -186,9 +234,10 @@ const fetchLocation = async () => {
 
 
 const createAuction = async () => {
+  isLoading.value = true; // Start loading
   try {
-    // Log the data being sent to the API for debugging
-    console.log("Sending auction data:", {
+    // Log the auction data for debugging
+    console.log("Auction data being sent:", {
       name: auctionData.value.name,
       location_id: auctionData.value.location_id,
       description: auctionData.value.description,
@@ -196,6 +245,7 @@ const createAuction = async () => {
       bidding_type: auctionData.value.biddingType,
       rarity: auctionData.value.rarity,
       categories: auctionData.value.categories, // Ensure this is an array of IDs
+      image: auctionData.value.image // Ensure the image URL is included
     });
 
     const response = await axios.post(
@@ -208,6 +258,7 @@ const createAuction = async () => {
         bidding_type: auctionData.value.biddingType,
         rarity: auctionData.value.rarity,
         categories: auctionData.value.categories, // Send category IDs to the backend
+        image: auctionData.value.image // Include the image URL
       }
     );
 
@@ -227,21 +278,21 @@ const createAuction = async () => {
       toast.error("An error occurred. Please try again.");
     }
   }
-};
-const addCategory = () => {
-  if (
-    selectedCategory.value &&
-    !auctionData.value.categories.includes(selectedCategory.value)
-  ) {
-    auctionData.value.categories.push(selectedCategory.value); // Add category ID
-    selectedCategory.value = ""; // Reset selection
+  finally {
+    isLoading.value = false; // Stop loading
   }
 };
 
-const removeCategory = (categoryId) => {
-  auctionData.value.categories = auctionData.value.categories.filter(
-    (id) => id !== categoryId,
-  );
+const handleCategoryChange = (categoryId, isChecked) => {
+  if (isChecked) {
+    // Add the category ID if it is checked
+    if (!auctionData.value.categories.includes(categoryId)) {
+      auctionData.value.categories.push(categoryId);
+    }
+  } else {
+    // Remove the category ID if it is unchecked
+    auctionData.value.categories = auctionData.value.categories.filter(id => id !== categoryId);
+  }
 };
 
 onMounted(() => {

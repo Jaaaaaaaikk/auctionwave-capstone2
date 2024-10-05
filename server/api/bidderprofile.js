@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
       // No token found, return an unauthorized error
       throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
     }
-    
+
     // Verify and decode JWT token
     const decoded = jwt.verify(token, process.env.JWT_SECRET); // Use your actual secret key
 
@@ -46,7 +46,7 @@ export default defineEventHandler(async (event) => {
         fullname: `${user[0].firstname} ${user[0].middlename ? user[0].middlename + " " : ""}${user[0].lastname}`,
         email: user[0].email,
         location: location.length ? location[0].location_name : "Unknown", // Handle case if location is not found
-        about: user[0].about,
+        about: user[0].about
       },
     };
   } catch (error) {

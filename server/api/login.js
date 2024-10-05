@@ -16,6 +16,8 @@ export default defineEventHandler(async (event) => {
     }
 
     const pool = await getPool();
+    
+    // Fetch user by email
     const [results] = await pool.execute(
       "SELECT * FROM Users WHERE email = ?",
       [email]
@@ -39,26 +41,33 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    // Generate the access token
-    const accessToken = jwt.sign({ userId: user.user_id, user_Location: user.location_id, userType: user.user_type }, process.env.JWT_SECRET, {
-      expiresIn: '24h',
-    });
+    const [profileImage] = await pool.query(
+      `SELECT profile_image_url 
+       FROM UserProfileImages 
+       WHERE user_id = ? AND is_current_profile_image = TRUE`,
+      [user.user_id]
+    );
 
-    // Generate the refresh token and store it in the database
-    // const refreshToken = uuidv4();
-    // const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY);
-    // console.log(expiresAt);
-    // await pool.query(
-    //   "INSERT INTO UserTokens (userId, token, expiresAt) VALUES (?, ?, ?)",
-    //   [user.user_id, refreshToken, expiresAt]
-    // );
+    const user_profile_picture = profileImage.length ? profileImage[0].profile_image_url.toString() : '/images/default-profile-image.png';
 
-    // Set the refresh token as an HTTP-only cookie
-    setHeader(event, "Set-Cookie", `accessToken=${accessToken}; HttpOnly; Path=/; Max-Age=${24 * 60 * 60}`); // 24 hours
+    // Generate the access token, including profile image URL in the payload
+    const accessToken = jwt.sign(
+      { 
+        userId: user.user_id, 
+        user_Location: user.location_id, 
+        userType: user.user_type, 
+      }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '24h' }
+    );
 
-    // Return the access token and user data to the client
+    // Set the access token as an HTTP-only, secure cookie
+    setHeader(event, "Set-Cookie", `accessToken=${accessToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${24 * 60 * 60}`); // 24 hours
+
+    // Return a success message and some user data (without the token)
     return {
       message: "Login successful",
+      user_profile_picture,
       user: {
         id: user.user_id,
         email: user.email,

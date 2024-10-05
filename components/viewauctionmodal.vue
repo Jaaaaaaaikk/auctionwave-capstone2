@@ -46,7 +46,7 @@
         <div class="w-full sm:w-1/2 pl-6 mt-4">
           <h3 class="flex text-xl text-center font-semibold mb-4">Participated Bidders</h3>
           <div v-for="bidder in bidders" :key="bidder.user_id" class="mb-2">
-            <span>{{ bidder.firstname }} {{ bidder.lastname }}
+            <span>{{ bidder.firstname }} {{ bidder.lastname }} - {{ bidder.bid_amount }}
               <span v-if="isCurrentUser(bidder.user_id)" class="text-teal-500 pr-10">(YOU)</span>
             </span>
           </div>

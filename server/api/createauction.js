@@ -2,6 +2,8 @@ import { defineEventHandler, readBody, getCookie } from "h3";
 import { getPool } from "../db"; // Adjust path to your database setup
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
+import fs from "fs";
+import path from "path";
 
 export default defineEventHandler(async (event) => {
   let connection;
@@ -34,6 +36,7 @@ export default defineEventHandler(async (event) => {
       bidding_type,
       categories,
       rarity,
+      image,
     } = body;
 
     // Validate required fields
@@ -44,7 +47,7 @@ export default defineEventHandler(async (event) => {
       !starting_bid ||
       !bidding_type ||
       !categories ||
-      !rarity
+      !rarity || !image
     ) {
       return {
         status: 400,
@@ -65,6 +68,21 @@ export default defineEventHandler(async (event) => {
       return { status: 404, json: { message: "Auctioneer not found" } };
     }
 
+    // Save the image file
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'auctions');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true }); // Create directory if it doesn't exist
+    }
+
+    const imageBuffer = Buffer.from(image.split(',')[1], 'base64'); // Convert base64 string to buffer
+    const imageName = `${uuidv4()}.jpg`; // Generate a unique file name
+    const imagePath = path.join(uploadDir, imageName); // Path to save the image
+
+    fs.writeFileSync(imagePath, imageBuffer); // Write image to file system
+
+    // Construct the image URL
+    const imageUrl = `/uploads/auctions/${imageName}`;
+
     // Generate a UUID
     const auctionUuid = uuidv4();
 
@@ -84,6 +102,12 @@ export default defineEventHandler(async (event) => {
     );
 
     const auctionId = result.insertId;
+
+    // Insert image into AuctionImages table
+    await connection.execute(
+      "INSERT INTO AuctionImages (listing_id, image_url) VALUES (?, ?)",
+      [auctionId, imageUrl]
+    );
 
     // Insert categories into the AuctionCategories table
     const categoryValues = categories.map((category_id) => [

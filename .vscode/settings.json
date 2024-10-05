@@ -17,11 +17,16 @@
     }
   },
   "cSpell.ignoreWords": [
+    "creation",
     "darkbrown",
     "fuschia",
     "gnaj",
     "notif",
+    "pinia",
+    "profilepicture",
+    "profilepictures",
     "usertype",
+    "variable",
     "xmkv"
   ]
 }

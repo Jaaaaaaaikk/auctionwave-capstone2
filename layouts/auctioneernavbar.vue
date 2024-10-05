@@ -1,5 +1,5 @@
   <template>
-    <div class="font-mono p-6 bg-white dark:bg-gray-900 min-h-screen">
+    <div class="p-6 bg-white dark:bg-gray-900 min-h-screen">
       <!-- Header Section -->
       <nav class="fixed top-0 left-0 right-0 px-4 py-4 flex justify-between items-center bg-white shadow-xl">
         <!-- Logo and Company Name -->
@@ -33,15 +33,15 @@
               </ul>
             </div>
           </div>
-          <NuxtLink :to="{ path: '/faq', query: { userType: userType } }" class="text-gray-900 dark:text-white hover:text-blue-700 dark:hover:text-blue-500">
+          <NuxtLink :to="{ path: '/faq', query: { userType: userType } }"
+            class="text-gray-900 dark:text-white hover:text-blue-700 dark:hover:text-blue-500">
             FAQ's</NuxtLink>
-          <NuxtLink :to="{ path: '/contactus', query: { userType: userType } }" class="text-gray-900 dark:text-white hover:text-blue-700 dark:hover:text-blue-500">
+          <NuxtLink :to="{ path: '/contactus', query: { userType: userType } }"
+            class="text-gray-900 dark:text-white hover:text-blue-700 dark:hover:text-blue-500">
             Contact Us
           </NuxtLink>
-          <NuxtLink
-            :to="{ path: '/inbox', query: { userType: userType } }"
-            class="text-gray-900 dark:text-white text-xl hover:text-blue-700 dark:hover:text-blue-500"
-            >Inbox
+          <NuxtLink :to="{ path: '/inbox', query: { userType: userType } }"
+            class="text-gray-900 dark:text-white text-xl hover:text-blue-700 dark:hover:text-blue-500">Inbox
           </NuxtLink>
         </div>
 
@@ -85,7 +85,7 @@
             <button @click="toggleProfileDropdown"
               class="flex items-center py-2 px-3 text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:hover:bg-gray-700 md:dark:hover:bg-transparent cursor-pointer"
               aria-expanded="false">
-              <img :src="userProfileImage" class="w-10 h-10 rounded-full object-cover" alt="Profile Icon" />
+              <img :src="userStore.userProfileImage" class="w-10 h-10 rounded-full object-cover" alt="Profile Icon" />
             </button>
             <div v-if="profileDropdownOpen"
               class="absolute right-0 mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg dark:bg-gray-700 shadow-sm-light shadow-black">
@@ -125,69 +125,71 @@
     </div>
   </template>
 
-  <script setup>
-  import { ref } from "vue";
-  import { useRouter } from "vue-router";
-  import axios from "axios";
+<script setup>
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
+import { useUserStore } from '@/stores/user-profile-image'; // Import the user store
 
-  const notificationDropdownOpen = ref(false);
-  const profileDropdownOpen = ref(false);
-  const auctionsDropdownOpen = ref(false); // Added state for auctions dropdown
-  const router = useRouter();
-  const userProfileImage = ref("/images/default-profile-image.png");
-  const userType = ref("");
 
-  const toggleNotificationDropdown = () => {
-    notificationDropdownOpen.value = !notificationDropdownOpen.value;
-    profileDropdownOpen.value = false;
-    auctionsDropdownOpen.value = false;
-  };
+const notificationDropdownOpen = ref(false);
+const profileDropdownOpen = ref(false);
+const auctionsDropdownOpen = ref(false); // Added state for auctions dropdown
+const router = useRouter();
+const userType = ref("");
+const userStore = useUserStore(); // Use the store
 
-  const toggleProfileDropdown = () => {
-    profileDropdownOpen.value = !profileDropdownOpen.value;
-    notificationDropdownOpen.value = false;
-    auctionsDropdownOpen.value = false;
-  };
+const toggleNotificationDropdown = () => {
+  notificationDropdownOpen.value = !notificationDropdownOpen.value;
+  profileDropdownOpen.value = false;
+  auctionsDropdownOpen.value = false;
+};
 
-  const toggleAuctionsDropdown = () => {
-    auctionsDropdownOpen.value = !auctionsDropdownOpen.value; // Toggle auctions dropdown
-    notificationDropdownOpen.value = false;
-    profileDropdownOpen.value = false;
-  };
+const toggleProfileDropdown = () => {
+  profileDropdownOpen.value = !profileDropdownOpen.value;
+  notificationDropdownOpen.value = false;
+  auctionsDropdownOpen.value = false;
+};
 
-  function viewProfile() {
-    profileDropdownOpen.value = false;
-    router.replace("/auctioneer/auctioneerprofile");
+const toggleAuctionsDropdown = () => {
+  auctionsDropdownOpen.value = !auctionsDropdownOpen.value; // Toggle auctions dropdown
+  notificationDropdownOpen.value = false;
+  profileDropdownOpen.value = false;
+};
+
+function viewProfile() {
+  profileDropdownOpen.value = false;
+  router.replace("/auctioneer/auctioneerprofile");
+}
+
+const logout = async () => {
+  try {
+    await axios.post("/api/logout");
+
+    localStorage.removeItem("user_profile_picture");
+
+    // Redirect to login page or homepage
+    router.replace("/homepage");
+  } catch (error) {
+    console.error("Logout failed:", error);
+    toast.error("Logout failed. Please try again.");
   }
+};
 
-  const logout = async () => {
-    try {
-      await axios.post("/api/logout");
+const getUserType = async () => {
+  try {
+    const { data } = await axios.post("/api/get-usertype");
+    userType.value = data.userType;
+  } catch (error) {
+    console.error("Failed to get:", error);
+    toast.error("Failed to get. Please try again.");
+  }
+};
 
-      // Clear localStorage on logout
-      //localStorage.removeItem("userType");
-
-      // Redirect to login page or homepage
-      router.replace("/homepage");
-    } catch (error) {
-      console.error("Logout failed:", error);
-      toast.error("Logout failed. Please try again.");
-    }
-  };
-
-  const getUserType = async () => {
-    try {
-      const { data } = await axios.post("/api/get-usertype");
-      userType.value = data.userType;
-    } catch (error) {
-      console.error("Failed to get:", error);
-      toast.error("Failed to get. Please try again.");
-    }
-  };
-
-  onMounted(() => {
-    getUserType();
+onMounted(async() => {
+  userStore.initializeProfileImage(); // Initialize from localStorage
+  await Promise.all([getUserType()]);
 });
-  </script>
+</script>
 
-  <style></style>
+<style></style>

@@ -2,8 +2,23 @@
   <NuxtLayout name="auctioneernavbar">
     <div class="min-h-screen bg-custom-white w-full mt-16">
       <div class="bg-white w-3/5 mx-auto px-12 py-12 rounded-lg flex items-start">
-        <div class="mr-6">
-          <img class="w-48 rounded-full" src="../../public/images/default-profile-image.png" alt="Profile Picture" />
+        <div class="mr-6 relative">
+          <input type="file" accept="image/png, image/jpeg" @change="handleImageUpload" ref="fileInput"
+            class="hidden" />
+
+          <!-- with ring border -->
+          <img class="w-48 rounded-full ring-4 ring-blue-500" :src="userStore.userProfileImage || '/images/default-profile-image.png'"
+            alt="Profile Picture" />
+
+          <!-- Pencil Icon -->
+          <div class="absolute top-0 right-0 bg-white rounded-full p-1 cursor-pointer hover:bg-gray-200 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" @click="profile_modal = true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 8h4l1-2h8l1 2h4a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V10a2 2 0 012-2zm7 3a3 3 0 106 0 3 3 0 00-6 0z" />
+            </svg>
+            <profileModal v-if="profile_modal" @close="handleModalClose" @image-uploaded="fetchProfile"/>
+          </div>
         </div>
         <div class="my-2 mx-8">
           <h1 class="text-3xl font-medium mb-3">Auctioneer</h1>
@@ -69,6 +84,8 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import axios from "axios";
+import profileModal from "~/components/change-profile-picture-modal.vue";
+import { useUserStore } from '@/stores/user-profile-image'; // Import the user store
 
 const profile = ref({
   fullname: "",
@@ -77,8 +94,10 @@ const profile = ref({
   about: "",
 });
 
+const profile_modal = ref(false);
 const isEditing = ref(false);
 const editAbout = ref("");
+const userStore = useUserStore(); // Use the store
 
 const fetchProfile = async () => {
   try {
@@ -113,7 +132,15 @@ const toggleEdit = () => {
   }
 };
 
-onMounted(fetchProfile);
+const handleModalClose = () => {
+  profile_modal.value = false;
+  fetchProfile();
+};
+
+onMounted(async () => {
+  userStore.initializeProfileImage(); // Initialize from localStorage
+  await Promise.all([fetchProfile()]);
+});
 </script>
 
 <style scoped>

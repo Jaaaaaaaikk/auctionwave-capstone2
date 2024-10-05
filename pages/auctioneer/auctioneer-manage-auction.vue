@@ -4,6 +4,22 @@
       <!-- Auction Details -->
       <div class="mb-6">
         <h1 class="text-3xl font-semibold mb-2">Auction Name: {{ auction.name }}</h1>
+        <div class="w-full flex flex-col items-center justify-center mb-4">
+          <!-- Display auction image or fallback to a default image -->
+          <img 
+            v-if="auction.image_url" 
+            :src="auction.image_url" 
+            alt="Auction Image Preview" 
+            class="w-48 h-48 object-cover rounded-lg shadow-xl" 
+            @error="auction.image_url = 'public/images/no-image.jpg'" 
+          />
+          <img 
+            v-else 
+            src="public/images/no-image.jpg" 
+            alt="No Image Available" 
+            class="w-48 h-48 object-cover rounded-lg shadow-xl" 
+          />
+        </div>
         <div class="flex items-center space-x-4 mb-4">
           <span class="text-xl font-medium">Bidding Type:</span>
           <span class="text-lg text-blue-500">{{ auction.bidding_type }}</span>
@@ -68,6 +84,7 @@ const fetchAuctionDetails = async () => {
     const { data } = await axios.get(`/api/auction/${route.query.id}`);
     console.log(data);
     auction.value = data;
+
     if (data.email_blast_sent === 1) {
       isEmailBlastSent.value = true;
     }

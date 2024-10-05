@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     // No token found, return an unauthorized error
     throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
   }
-  
+
   if (token) {
     try {
       jwt.verify(token, process.env.JWT_SECRET);
@@ -38,6 +38,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     const [results] = await pool.query(
+
       `SELECT 
     al.listing_id AS id, 
     al.name, 
@@ -47,11 +48,25 @@ export default defineEventHandler(async (event) => {
     al.bidding_type, 
     al.rarity,
     al.status,
-    al.email_blast_sent
-FROM AuctionListings al
-INNER JOIN Locations l ON al.location_id = l.location_id
-WHERE al.uuid = ?
-`,
+    al.email_blast_sent,
+    GROUP_CONCAT(c.category_name ORDER BY c.category_name SEPARATOR ', ') AS categories,
+    ai.image_url AS image_url
+FROM 
+    AuctionListings al
+INNER JOIN 
+    Locations l ON al.location_id = l.location_id
+LEFT JOIN 
+    AuctionListingCategories alc ON al.listing_id = alc.listing_id
+LEFT JOIN 
+    Categories c ON alc.category_id = c.category_id
+LEFT JOIN 
+    AuctionImages ai ON al.listing_id = ai.listing_id
+WHERE 
+    al.uuid = ?
+GROUP BY 
+    al.listing_id;
+`
+      ,
       [id],
     );
 
@@ -64,7 +79,16 @@ WHERE al.uuid = ?
       });
     }
 
-    return results[0]; // Ensure a single object is returned
+    const auctionData = results[0];
+
+    if (auctionData.image_url) {
+      auctionData.image_url = `http://localhost:3000${auctionData.image_url}`; // Path of image, refer from createauction.js for image url
+    } else {
+      auctionData.image_url = '/images/no-image.jpg'; // or set to a default image URL
+    }
+
+    return auctionData; // Ensure a single object is returned
+
   } catch (error) {
     console.error("Database query error:", error);
     throw createError({ statusCode: 500, message: "Internal Server Error" });

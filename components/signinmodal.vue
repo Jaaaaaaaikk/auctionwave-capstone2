@@ -92,7 +92,9 @@ const login = async () => {
       password: password.value,
     });
 
-    const { user } = response.data;
+    const { user_profile_picture, user } = response.data;
+
+    localStorage.setItem('user_profile_picture', user_profile_picture);
 
     // Redirect based on userType
     if (user.userType === "Bidder") {

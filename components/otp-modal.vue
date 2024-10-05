@@ -1,9 +1,9 @@
 <template>
   <transition name="modal-fade">
-    <div class="font-mono fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-      <div class="bg-gray-300 shadow-lg rounded-3xl overflow-hidden w-11/12 max-w-lg mx-auto p-5">
+    <div class=" fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden w-11/12 max-w-lg mx-auto p-5">
         <!-- Modal Header -->
-        <header class="p-4 border-b">
+        <header class="p-4 ">
           <h1 class="text-2xl font-bold text-center">Verify OTP</h1>
         </header>
 
@@ -11,33 +11,45 @@
         <section class="p-4">
           <form @submit.prevent="submitOtp">
             <!-- OTP Input Field -->
-            <div class="relative z-0 w-full mb-5 group">
-              <span class="text-gray-600">An OTP has been sent to your email address: {{ props.form.email }}.</span>
+            <div class="relative z-0 w-full mb-2 group">
+              <span class="text-gray-500">
+                  An OTP has been sent to your email address: <span class="font-bold">{{ props.form.email }}</span>.
+              </span>
               <div class="relative z-0 w-full group mt-4">
                 <!-- Updated Input for Floating Label -->
                 <input v-model="otp" id="otp" type="text"
                   class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent border-gray-500 border-2 rounded-md focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                   placeholder=" " required />
                 <label for="otp"
-                  class="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 origin-[0] left-2.5 bg-gray-300 px-1 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 peer-focus:text-blue-600">
+                  class="absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 origin-[0] left-2.5 bg-white px-1 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 peer-focus:text-blue-600">
                   OTP
                 </label>
               </div>
             </div>
 
             <!-- Resend OTP Button and Timer -->
-            <div class="flex justify-between items-center mb-4">
-              <button type="button" :disabled="timer > 0" @click="resendOtp"
-                class="font-semibold px-4 py-2 bg-teal-500 border border-teal-500 rounded-full shadow-sm-light shadow-black hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 text-gray-900 disabled:bg-gray-400">
-                Resend OTP
-              </button>
-              <span class="text-gray-700">{{ timer > 0 ? `Resend available in ${timer}s` : '' }}</span>
+            <div class="flex justify-between items-center mb-6">
+              <span class="text-gray-500 ml-2">
+                Didn't receive code? 
+                <a @click="timer === 0 ? resendOtp() : null"  
+                  class="cursor-pointer text-custom-bluegreen font-bold hover:underline"
+                  :class="{ 'opacity-50 text-gray-500 cursor-not-allowed': timer > 0 }"
+                  tabindex="0"
+                  >
+                  Resend
+                </a>
+                <span class="text-gray-500 text-sm opacity-50">{{ timer > 0 ? `(${timer}s)` : '' }}</span>
+              </span>
             </div>
 
-            <!-- Submit Button -->
-            <div class="flex justify-center mt-4">
+             <!-- Submit and Cancel Buttons -->
+             <div class="flex justify-center mt-4">
+              <button @click="$emit('close_otp_modal')" 
+                class="w-52 mx-2 font-medium px-4 py-2 bg-white border rounded-md shadow-sm-light hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800 text-custom-bluegreen">
+                Cancel
+              </button>
               <button type="submit"
-                class="w-52 font-semibold px-4 py-2 bg-teal-500 border border-teal-500 rounded-full shadow-sm-light shadow-black hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 text-gray-900">
+                class="w-52 mx-2 font-medium px-4 py-2 bg-custom-bluegreen border rounded-md shadow-sm-light hover:bg-green-500 focus:ring-4 focus:outline-none focus:ring-teal-500 text-white">
                 Submit
               </button>
             </div>
@@ -45,8 +57,8 @@
         </section>
 
         <!-- Modal Footer -->
-        <footer class="p-4 border-t text-center">
-          <button @click="$emit('close_otp_modal')" class="text-red-500 hover:underline">Cancel</button>
+        <footer class="p-4  text-center">
+          
         </footer>
       </div>
     </div>

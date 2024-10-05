@@ -1,5 +1,5 @@
 <template>
-    <NuxtRedirect to="/homepage" />
+    <!-- <NuxtRedirect to="/homepage" /> -->
 </template>
 
 <script setup>

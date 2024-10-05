@@ -81,7 +81,8 @@
         </div>
       </div>
 
-      <CreateAuction_Modal v-if="create_AuctionModal" @close="create_AuctionModal = false" />
+      <CreateAuction_Modal v-if="create_AuctionModal" @close="handleModalClose" />
+
     </section>
   </NuxtLayout>
   <NuxtLayout name="footer"></NuxtLayout>
@@ -95,6 +96,7 @@ import axios from "axios";
 import { useRouter } from "vue-router";
 
 const create_AuctionModal = ref(false);
+
 const auctions = ref([]);
 const currentPage = ref(1);
 const pageSize = 6;
@@ -134,6 +136,11 @@ const truncateDescription = (description, maxLength) => {
     return description.substring(0, 30) + '...';
   }
   return description;
+};
+
+const handleModalClose = () => {
+  create_AuctionModal.value = false;
+  fetchAuctions(); // Re-fetch auctions after closing the modal
 };
 
 onMounted(() => {
