@@ -1,5 +1,5 @@
 import { defineEventHandler, readBody, getCookie, createError } from "h3";
-import { getPool } from "../db";
+import { getPool } from "../../db";
 import jwt from "jsonwebtoken";
 
 export default defineEventHandler(async (event) => {

@@ -1,5 +1,5 @@
 import { defineEventHandler, createError, getQuery } from 'h3';
-import { getPool } from '../db';
+import { getPool } from '../../db';
 import jwt from 'jsonwebtoken';
 
 export default defineEventHandler(async (event) => {
@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
     // Query to get the count of viewers for the auction
     const query = `
         SELECT COUNT(*) AS viewer_count
-        FROM AuctionParticipants
+        FROM AuctionVisits
         WHERE listing_id = ?
     `;
 

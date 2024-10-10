@@ -69,7 +69,7 @@ const notifications = ref([]);
 // Fetch notifications from the API
 const fetchNotifications = async () => {
   try {
-    const { data } = await axios.get('/api/notifications');
+    const { data } = await axios.get('/api/notifications/fetch-bidder-inbox-notification');
     console.log('Fetched notifications:', data.notifications);
     notifications.value = data.notifications;
   } catch (error) {
@@ -80,7 +80,7 @@ const fetchNotifications = async () => {
 // Mark a notification as read
 const markAsRead = async (notificationId, index) => {
   try {
-    await axios.post('/api/mark-as-read', { id: notificationId });
+    await axios.post('/api/notifications/mark-as-read', { id: notificationId });
     notifications.value[index].is_read = 1; // Mark notification as read
   } catch (error) {
     console.error("Failed to mark notification as read:", error);
@@ -90,7 +90,7 @@ const markAsRead = async (notificationId, index) => {
 // Delete a notification
 const deleteNotification = async (notificationId, index) => {
   try {
-    const response = await axios.post('/api/delete-notification', { id: notificationId });
+    const response = await axios.post('/api/notifications/delete-notification-inbox', { id: notificationId });
     console.log('response on deletion', response);
     if (response.data.status === 200) {
       notifications.value.splice(index, 1); // Remove the notification from the list

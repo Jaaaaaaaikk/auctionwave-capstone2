@@ -34,6 +34,40 @@ export default {
         '162': '40rem',
         'screen-90': '90vh', // Example of height using viewport units
       },
+      margin: {
+        '17': '68px',   
+        '25': '100px',   // Custom mt-25 class
+        '26': '104px',   // Custom mt-26 class
+        '27': '108px',   // Custom mt-27 class
+        '70': '280px',
+        '71': '284px',
+        '72': '288px',
+        '73': '292px',
+        '74': '296px',
+        '74.5': '297px',
+        '75': '300px',
+        '76': '304px',
+        '77': '308px',
+        '78': '312px',
+        '79': '316px',
+        '80': '320px',
+        '81': '324px',
+        '82': '328px',
+        '83': '332px',
+        '84': '336px',
+        '85': '340px',
+        '86': '344px',
+        '87': '348px',
+        '88': '352px',
+        '89': '356px',
+        '90': '360px',
+        '91': '364px',
+        '92': '368px',
+        '93': '372px',
+        '94': '376px',
+        '95': '380px',
+      },
+      
       fontFamily: {
         sans: ['Exo', 'Helvetica', 'Arial', 'sans-serif'], // Add "Exo" to the sans font stack
       },
@@ -53,6 +87,15 @@ export default {
         '69': '17.25rem', // 276px
         '70': '17.5rem',  // 280px
       },
+      padding: {
+        '17': '68px',
+        '18': '72px',
+        '19': '76px',
+        '20': '80px',
+        '21': '84px',
+        '22': '88px',
+        '23': '92px',
+      }
 
 
     },

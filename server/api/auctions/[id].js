@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 export default defineEventHandler(async (event) => {
   // Extract listing_id from query parameters
-  const id = event.context.params.id;
+  const uuid = event.context.params.id;
 
   // Retrieve the access token from cookies
   const token = getCookie(event, "accessToken");
@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (!id || !uuidRegex.test(id)) {
+  if (!uuid || !uuidRegex.test(uuid)) {
     throw createError({
       statusCode: 400,
       message: "Invalid auction UUID",
@@ -67,7 +67,7 @@ GROUP BY
     al.listing_id;
 `
       ,
-      [id],
+      [uuid],
     );
 
     console.log("Database Query Results:", results); // Log the query results

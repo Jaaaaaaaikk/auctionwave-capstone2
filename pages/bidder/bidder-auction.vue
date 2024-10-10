@@ -21,7 +21,7 @@
         <p class="text-gray-500 mb-2">
           <strong>Location:</strong> {{ auction.location }}
         </p>
-        <p class="text-gray-500 mb-2">
+        <p class="text-gray-500 mb-2" v-if="auction.bidding_type === 'Lowest-type'">
           <strong>Starting Bid:</strong> {{ auction.starting_bid }}
         </p>
         <p class="text-gray-500 mb-2">
@@ -43,49 +43,89 @@
         </div>
 
         <div class="w-1/2 flex flex-col items-end justify-end mb-4">
-          <img 
-            v-if="auction.image_url" 
-            :src="auction.image_url" 
-            alt="Auction Image Preview" 
-            class="w-48 h-48 object-cover rounded-lg shadow-xl" 
-            @error="auction.image_url = 'public/images/no-image.jpg'" 
-          />
-          <img 
-            v-else 
-            src="public/images/no-image.jpg" 
-            alt="No Image Available" 
-            class="w-48 h-48 object-cover rounded-lg shadow-xl" 
-          />
+          <img v-if="auction.image_url" :src="auction.image_url" alt="Auction Image Preview"
+            class="w-48 h-48 object-cover rounded-lg shadow-xl"
+            @error="auction.image_url = 'public/images/no-image.jpg'" />
+          <img v-else src="public/images/no-image.jpg" alt="No Image Available"
+            class="w-48 h-48 object-cover rounded-lg shadow-xl" />
         </div>
 
 
         <div class="flex flex-col items-end mt-6">
-          <input v-model.number="bidAmount" class="rounded-xl" type="number" step="1" :min="minBid" :max="maxBid"
-            placeholder="Amount bid" required @input="validateBidAmount" />
+          <!-- Amount Bid Input for Lowest-type -->
+          <template v-if="auction.bidding_type === 'Lowest-type'">
+            <input v-model.number="bidAmount" class="rounded-xl" type="number" step="1" :min="minBid" :max="maxBid"
+              placeholder="Amount bid" required @input="validateBidAmount" />
+            <p v-if="bidders.length === 0 && bidAmount !== auction.starting_bid" class="text-red-500 p-12">
+              Bid amount must be the starting bid since there are no bidders yet.
+            </p>
+            <p v-if="bidders.length > 0 && (bidAmount < minBid || bidAmount >= maxBid)" class="text-red-500 p-12">
+              Bid amount must be between {{ minBid }} and {{ maxBid - 1 }}.
+            </p>
+          </template>
 
-          <!-- Validation Messages -->
-          <p v-if="bidders.length === 0 && bidAmount !== auction.starting_bid" class="text-red-500 p-12">
-            Bid amount must be the starting bid since there are no bidders yet.
-          </p>
-          <p v-if="bidders.length > 0 && (bidAmount < minBid || bidAmount >= maxBid)" class="text-red-500 p-12">
-            Bid amount must be between {{ minBid }} and {{ maxBid - 1}}.
-          </p>
+          <!-- Custom Comments Section -->
+          <section class="w-full rounded-lg border-2 border-purple-600 p-4 my-8 mx-auto max-w-xl"
+            v-else-if="auction.bidding_type === 'Offer-type'">
+            <h3 class="font-os text-lg font-bold">Comments</h3>
+
+            <div v-for="comment in comments" :key="comment.id" class="flex mt-4">
+              <div class="w-14 h-14 rounded-full bg-purple-400/50 flex-shrink-0 flex items-center justify-center">
+                <img class="h-12 w-12 rounded-full object-cover"
+                  :src="comment.userImageUrl || '/images/default-profile-image.png'" alt="User Image">
+              </div>
+
+              <div class="ml-3">
+                <div class="font-medium text-purple-800">{{ comment.firstname }} {{ comment.lastname }}</div>
+                <div class="text-gray-600 text-sm">Posted on {{ formatDate(comment.offer_time) }}</div>
+                <div class="mt-2 text-purple-800">{{ comment.comment }}</div>
+              </div>
+            </div>
+
+            <!-- Comment Form -->
+            <div class="my-4">
+              <textarea id="comment" v-model="offerComment" class="border-2 border-purple-600 p-2 w-full rounded"
+                placeholder="Enter your offer comment here" required></textarea>
+            </div>
+
+            <button @click="confirmBidOrOffer"
+              class="bg-purple-700 text-white font-medium py-2 px-4 rounded hover:bg-purple-600">Post
+              Offer</button>
+          </section>
+
+          <!--It should be comment section here-->
+          <template v-else-if="auction.bidding_type === 'Offer-type'">
+            <textarea v-model="offerComment" class="rounded-xl" placeholder="Enter your offer comment here"
+              required></textarea>
+          </template>
         </div>
 
+
+
         <div class="flex justify-end mt-6">
-          <button @click="confirmBid"
+          <button @click="confirmBidOrOffer" v-if="auction.bidding_type === 'Lowest-type'"
             class="bg-teal-500 border font-semibold border-teal-500 shadow-sm-light shadow-black hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-600 text-gray-900 px-4 py-2 rounded-full">
             Enter Bid
           </button>
         </div>
 
+        <!-- Bidder Participants (Lowest-type) or Top Comments (Offer-type) -->
         <div class="w-full pl-6 mt-4">
-          <h3 class="flex text-xl text-center font-semibold mb-4">Participated Bidders</h3>
-          <div v-for="bidder in bidders" :key="bidder.user_id" class="mb-2">
-            <span>{{ bidder.firstname }} {{ bidder.lastname }} - {{ bidder.bid_amount }}
-              <span v-if="isCurrentUser(bidder.user_id)" class="text-teal-500 pr-10">(YOU)</span>
-            </span>
-          </div>
+          <h3 class="flex text-xl text-center font-semibold mb-4"> {{ h3Label }} </h3>
+          <template v-if="auction.bidding_type === 'Lowest-type'">
+            <div v-for="bidder in bidders" :key="bidder.user_id" class="mb-2">
+              <span>{{ bidder.firstname }} {{ bidder.lastname }} - {{ bidder.bid_amount }}
+                <span v-if="isCurrentUser(bidder.user_id)" class="text-teal-500 pr-10">(YOU)</span>
+              </span>
+            </div>
+          </template>
+          <template v-else-if="auction.bidding_type === 'Offer-type'">
+            <div v-for="comment in topComments" :key="comment.user_id" class="mb-2">
+              <span>{{ comment.firstname }} {{ comment.lastname }} (number of offers: {{ comment.offer_count }})
+                <span v-if="isCurrentUser(comment.user_id)" class="text-teal-500 pr-10">(YOU)</span>
+              </span>
+            </div>
+          </template>
         </div>
       </div>
 
@@ -99,7 +139,7 @@
 
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
 
@@ -110,6 +150,19 @@ const bidders = ref([]);
 const currentUserId = ref(null);
 const minBid = ref(0);
 const maxBid = ref(0);
+const offerComment = ref('');
+const topComments = ref([]); // New state variable for top comments
+const comments = ref([]); // New state variable for comments
+
+const fetchComments = async (listingId) => {
+  try {
+    const { data } = await axios.post(`/api/auctions/comment-section?id=${listingId}`);
+    comments.value = data.comments;
+  } catch (error) {
+    console.error('Failed to fetch comments:', error);
+  }
+};
+
 
 const fetchAuction = async () => {
   try {
@@ -120,7 +173,7 @@ const fetchAuction = async () => {
       throw new Error("Auction ID is missing");
     }
 
-    const response = await axios.get(`/api/auction/${auctionId}`);
+    const response = await axios.get(`/api/auctions/${auctionId}`);
     console.log("Response Data:", response.data);
 
     if (response.data) {
@@ -132,6 +185,7 @@ const fetchAuction = async () => {
       }
 
       fetchBidders(auction.value.id);
+      fetchComments(auction.value.id);
     } else {
       throw new Error("No auction data returned");
     }
@@ -143,9 +197,9 @@ const fetchAuction = async () => {
 
 const fetchBidders = async (listingId) => {
   console.log('auction.listing_id', listingId);
-  if (listingId) {
+  if (listingId && auction.value.bidding_type === 'Lowest-type') { // Corrected access here
     try {
-      const { data } = await axios.get(`/api/fill-in-bidder-participants?id=${listingId}`);
+      const { data } = await axios.get(`/api/auctions/fill-in-bidder-participants?id=${listingId}`);
       bidders.value = data.bidders;
       console.log('fetch bidder in bidder-auction', data);
       currentUserId.value = data.currentUserId;
@@ -162,8 +216,26 @@ const fetchBidders = async (listingId) => {
     } catch (error) {
       console.error('Failed to fetch data:', error);
     }
+  } else if (listingId && auction.value.bidding_type === 'Offer-type') { // Corrected access here
+    try {
+      const { data } = await axios.get(`/api/auctions/fill-in-offer-participants?id=${listingId}`);
+      topComments.value = data.offers; // Store the fetched top comments
+      currentUserId.value = data.currentUserId;
+      console.log('fetch Top comments in bidder-auction', topComments.value);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    }
   } else {
     console.error('No listing ID available');
+  }
+};
+
+
+const confirmBidOrOffer = () => {
+  if (auction.value.bidding_type === 'Lowest-type') {
+    confirmBid();
+  } else if (auction.value.bidding_type === 'Offer-type') {
+    confirmOffer();
   }
 };
 
@@ -200,11 +272,29 @@ const confirmBid = () => {
   }
 };
 
+const confirmOffer = () => {
+  const comment = offerComment.value.trim();
+
+  if (!comment) {
+    alert("Please enter a valid offer comment.");
+    return;
+  }
+
+  const confirmed = confirm(`Are you sure you want to place the offer: "${comment}"?`);
+  if (confirmed) {
+    placeOffer(comment);
+  }
+};
 
 const placeBid = async (amount) => {
   try {
     const auctionId = route.query.id;
-    await axios.post('/api/place-bid', { auctionId, bidAmount: amount });
+
+    if (!auctionId) {
+      throw new Error("Auction ID is missing");
+    }
+
+    await axios.post('/api/auctions/place-bid', { auctionId, bidAmount: amount });
     alert("Bid placed successfully!");
 
     // After placing the bid, fetch the updated list of bidders and bids
@@ -215,12 +305,54 @@ const placeBid = async (amount) => {
   }
 };
 
+const placeOffer = async (comment) => {
+  try {
+    const auctionId = route.query.id;
+
+    if (!auctionId) {
+      throw new Error("Auction ID is missing");
+    }
+
+    await axios.post('/api/auctions/place-offer', { auctionId, offerComment: comment });
+    alert("Offer placed successfully!");
+
+    // Reset offer comment
+    offerComment.value = '';
+
+    // Optionally, you may want to fetch updated bids or offer participants
+    fetchComments(auction.value.id);
+  } catch (err) {
+    console.error("Failed to place offer:", err);
+    alert("Failed to place offer.");
+  }
+};
+
+
+const h3Label = computed(() => {
+  return auction.value.bidding_type === 'Lowest-type' ? 'Participated Bidders' : 'Top Comments';
+});
+
 const isCurrentUser = (bidderId) => {
   return bidderId === currentUserId.value;
 };
 
+const formatDate = (dateString) => {
+  const options = { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric', 
+    hour: 'numeric', 
+    minute: '2-digit', 
+    hour12: true // 12-hour format with AM/PM
+  };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
+
+
+
 onMounted(() => {
   fetchAuction();
+  fetchComments();
 });
 </script>
 

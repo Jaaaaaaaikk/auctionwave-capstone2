@@ -10,8 +10,7 @@
             v-if="auction.image_url" 
             :src="auction.image_url" 
             alt="Auction Image Preview" 
-            class="w-48 h-48 object-cover rounded-lg shadow-xl" 
-            @error="auction.image_url = 'public/images/no-image.jpg'" 
+            class="w-48 h-48 object-cover rounded-lg shadow-xl"
           />
           <img 
             v-else 
@@ -81,7 +80,7 @@ const isEmailBlastSent = ref(false);
 
 const fetchAuctionDetails = async () => {
   try {
-    const { data } = await axios.get(`/api/auction/${route.query.id}`);
+    const { data } = await axios.get(`/api/auctions/${route.query.id}`);
     console.log(data);
     auction.value = data;
 
@@ -101,7 +100,7 @@ const confirmEmailBlast = () => {
 
 const sendEmailBlast = async () => {
   try {
-    const emailBlastResponse = await axios.post('/api/email-blast', { auctionUuid: route.query.id });
+    const emailBlastResponse = await axios.post('/api/notifications/email-blast', { auctionUuid: route.query.id });
     console.log(emailBlastResponse);
     toast.success("Email blast sent successfully!");
     isEmailBlastSent.value = true;

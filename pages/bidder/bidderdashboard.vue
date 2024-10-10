@@ -1,109 +1,137 @@
 <template>
     <NuxtLayout name="biddernavbar">
-        <!-- Content Section -->
-        <div class="bg-gray-400 p-6 rounded-lg shadow-xl" @focus = "autoCloseDropDown">
-            <h2 class="text-2xl font-semibold mb-4 text-center">
-                Available Auctions
-            </h2>
+        <div class="flex w-full">
+            <NuxtLayout name="sidebar"></NuxtLayout>
+            <!-- Content Section -->
+            <div class="flex-grow bg-custom-blue2 mx-auto justify-center" @focus="autoCloseDropDown">
+                <h2 class="text-2xl font-semibold mb-4 justify-center ml-96">
+                </h2>
 
-            <!-- Search Bar Section -->
-            <div class="flex-grow flex justify-center mb-6">
-                <form class="relative flex items-center w-full max-w-lg">
-                    <!-- Dropdown Button -->
-                    <div class="relative flex items-center">
-                        <button id="dropdown-button" type="button"
-                            class="flex-shrink-0 inline-flex items-center py-2 px-4 text-sm shadow-black shadow-sm-light font-medium text-gray-900 bg-gray-100 border border-gray-300 rounded-2xl hover:bg-blue-100 ml-1"
-                            @click="toggleDropdown">
-                            {{ selectedCategory || "Select Category" }}
-                            <svg class="w-2.5 h-2.5 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 10 6">
-                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                    stroke-width="2" d="m1 1 4 4 4-4" />
-                            </svg>
-                        </button>
+                <div v-if="currentListings.length === 0" class="text-center py-4 text-red-500">No auctions available.
+                </div>
+                <div class="flex justify-center mx-95">
+                    <!-- Flex container to hold the cards -->
+
+                    <div class="flex flex-wrap mx-auto justify-center"> <!-- Added justify-center here -->
+                        <div v-for="listing in currentListings" :key="listing.listing_id" @click="openModal(listing)"
+                            class="cursor-pointer bg-white border relative border-gray-200 rounded-lg shadow-md m-2 transition-transform hover:scale-105 w-64">
+
+                            <!-- Auction Image -->
+                            <img v-if="listing.image_urls.length > 0" :src="listing.image_urls[0]" alt="Auction Image"
+                                class="object-cover w-full h-32 rounded-t-lg" loading="lazy" />
+                            <img v-else src="public/images/no-image.jpg" alt="No Image Available"
+                                class="object-cover w-full h-32 rounded-t-lg" loading="lazy" />
+
+                            <div class="p-2 pb-12">
+                                <!-- Auction Name -->
+                                <h5 class="mb-1 text-base font-bold tracking-tight text-gray-900 dark:text-white">
+                                    {{ listing.name }}
+                                </h5>
+
+
+
+                                <!-- Categories -->
+                                <div class="mt-1 flex flex-wrap">
+                                    <span v-if="listing.categories.length === 0" class="text-sm text-gray-500">No
+                                        categories</span>
+                                    <span v-for="(category, index) in listing.categories" :key="index"
+                                        class="bg-gray-200 text-gray-700 text-xs font-semibold mr-1 mb-1 px-1 py-0.5 rounded">
+                                        {{ category }}
+                                    </span>
+                                </div>
+
+                                <!-- Starting Bid -->
+                                <p class="text-gray-500 dark:text-white mt-1 text-xs"
+                                    v-if="listing.bidding_type === 'Lowest-type'">
+                                    Starting Bid: <span class="font-bold text-black">${{ listing.starting_bid }}</span>
+                                </p>
+                                <p class="text-gray-500 dark:text-white mt-1 text-xs">
+                                    Bidding Type: <span class="font-bold text-black">{{ listing.bidding_type }}</span>
+                                </p>
+                                <p class="text-gray-500 dark:text-white mt-1 text-xs">
+                                    Rarity: <span class="font-bold text-black">{{ listing.rarity }}</span>
+                                </p>
+
+                            </div>
+                        </div>
                     </div>
+                </div>
 
-                    <!-- Dropdown Menu -->
-                    <div v-if="dropdownOpen"
-                        class="absolute top-0 mt-12 w-44 bg-white divide-y divide-gray-100 rounded-2xl shadow-sm-light shadow-black dark:bg-gray-700">
-                        <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdown-button">
-                            <li v-for="category in categories" :key="category.id">
-                                <button type="button"
-                                    class="block w-full px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                                    @click="selectCategory(category.name)">
-                                    {{ category.name }}
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
 
-                    <!-- Search Input -->
-                    <div class="relative flex-grow ml-2">
-                        <input type="search" id="search-dropdown" v-model="searchTerm" @focus = "autoCloseDropDown"
-                            class="block w-full p-3 text-sm text-gray-900 shadow-inner shadow-black bg-gray-50 rounded-xl border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500 cursor-pointer"
-                            placeholder="Search for auction's name..." />
-                    </div>
-                </form>
-            </div>
-
-            <!-- Auction Listings Table -->
-            <table class="min-w-full border border-gray-300">
-                <thead>
-                    <tr class="bg-gray-200 text-gray-600">
-                        <th class="py-2 px-4 border border-gray-300 text-center">Auction Name</th>
-                        <th class="py-2 px-4 border border-gray-300 text-center">Description</th>
-                        <th class="py-2 px-4 border border-gray-300 text-center">Location</th>
-                        <th class="py-2 px-4 border border-gray-300 text-center">Bidding Type</th>
-                        <th class="py-2 px-4 border border-gray-300 text-center">Categories</th>
-                        <th class="py-2 px-4 border border-gray-300 text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-if="currentListings.length === 0">
-                        <td colspan="6" class="text-center py-4 text-red-500 border border-gray-300">No auctions
-                            available.</td>
-                    </tr>
-                    <tr v-for="listing in currentListings" :key="listing.listing_id" class="text-center">
-                        <td class="py-2 px-4 border border-gray-300">{{ listing.name }}</td>
-                        <td class="py-2 px-4 border border-gray-300">
-                            {{ truncateDescription(listing.description, 100) }} <!-- Adjust character limit here -->
-                        </td>
-                        <td class="py-2 px-4 border border-gray-300">{{ listing.location }}</td>
-                        <td class="py-2 px-4 border border-gray-300">{{ listing.bidding_type }}</td>
-                        <td class="py-2 px-4 border border-gray-300">
-                            <span v-if="listing.categories.length === 0">No categories</span>
-                            <span v-for="(category, index) in listing.categories" :key="index"
-                                class="bg-gray-200 text-gray-700 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded">
-                                {{ category }}
-                            </span>
-                        </td>
-                        <td class="py-2 px-4 border border-gray-300">
-                            <button @click="openModal(listing)"
-                                class="bg-teal-500 border border-teal-500 rounded-full text-white px-2 py-1">
-                                View
+                <!-- Pagination Controls -->
+                <div class="my-20 mx-auto flex justify-center">
+                    <div class="inline-flex -space-x-px text-sm">
+                        <div>
+                            <button @click="prevPage" :disabled="currentPage === 1"
+                                class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-custom-bluegreen hover:bg-opacity-25 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white cursor-pointer">
+                                Previous
                             </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                        </div>
 
-            <!-- Pagination Controls -->
-            <div class="flex justify-center items-center mt-4">
-                <button @click="prevPage" :disabled="currentPage === 1" class="p-2">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
-                <span class="mx-4 text-lg">{{ currentPage }} / {{ totalPages }}</span>
-                <button @click="nextPage" :disabled="currentPage === totalPages" class="p-2">
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5l7 7-7 7" />
-                    </svg>
-                </button>
+                        <!-- <span class="mx-4 text-lg">{{ currentPage }} / {{ totalPages }}</span> -->
+
+                        <div v-for="page in totalPages" :key="page">
+                            <span :class="{
+                                'flex items-center justify-center px-3 h-8 text-custom-bluegreen border border-gray-300 bg-green-50 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white': currentPage === page,
+                                'flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white': currentPage !== page
+                            }">
+                                {{ page }}
+                            </span>
+                        </div>
+
+                        <div>
+                            <button @click="nextPage" :disabled="currentPage === totalPages"
+                                class="flex items-center justify-center px-3 h-8 leading-tight text-gray-500 bg-white border border-gray-300 rounded-e-lg hover:bg-custom-bluegreen hover:bg-opacity-25 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white cursor-pointer">
+                                Next
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <!-- Trending Auctions Sidebar (Right) -->
+                <div class="w-1/6 p-4 rounded-lg fixed right-0 top-0 mt-17 min-h-screen overflow-y-auto">
+                    <h3 class="text-xl text-gray-500 font-semibold mb-4">Trending Auctions</h3>
+                    <ul>
+                        <li v-for="(trending, index) in trendingAuctions" :key="trending.listing_id" class="mb-4">
+                            <!-- Use listing_id for key -->
+                            <div class="bg-white p-3 rounded-lg shadow flex items-center space-x-4">
+                                <div
+                                    class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-solid border-custom-bluegreen bg-transparent text-purple-blue-500">
+                                    <span class="text-base font-bold leading-7 text-custom-bluegreen2">{{ index + 1
+                                        }}</span>
+                                </div>
+
+                                <div class="flex-1">
+                                    <h4 class="font-semibold text-base text-gray-900">{{ trending.name }}</h4>
+                                    <div class="mt-1 flex flex-wrap">
+                                        <span v-if="trending.categories.length === 0" class="text-sm text-gray-500">No
+                                            categories</span>
+                                        <span v-for="(category, index) in trending.categories" :key="index"
+                                            class="bg-gray-200 text-gray-700 text-xs font-semibold mr-1 mb-1 px-1 py-0.5 rounded">
+                                            {{ category }}
+                                        </span>
+                                    </div>
+
+                                    <p class="text-sm text-gray-600">
+                                        <span class="font-semibold">Bidding Type:</span> {{ trending.bidding_type }}
+                                    </p>
+                                    <p class="text-sm text-gray-600">
+                                        <span class="font-semibold">Location:</span> {{ trending.location }}
+                                        <!-- Ensure `location` is provided in the API response -->
+                                    </p>
+                                    <button @click="openModal(trending)"
+                                        class="bg-custom-bluegreen border-custom-bluegreen rounded-md hover:bg-green-500 text-white px-2 py-1 text-xs mt-2">
+                                        View Auction
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <ViewAuctionModal v-if="showModal" :auction="selectedAuction" @close="closeModal" />
             </div>
-            <ViewAuctionModal v-if="showModal" :auction="selectedAuction" @close="closeModal" />
         </div>
     </NuxtLayout>
     <NuxtLayout name="footer"></NuxtLayout>
@@ -113,45 +141,86 @@
 import { ref, onMounted, computed, watch } from "vue";
 import axios from "axios";
 import ViewAuctionModal from "~/components/viewauctionmodal.vue";
+import { useAuctionFilterStore } from '@/stores/fetch-auction-bidder-dashboard';
 
-const categories = ref([
-    { id: 1, name: "Art" },
-    { id: 2, name: "Electronics" },
-    { id: 3, name: "Collectibles" },
-    { id: 4, name: "Furniture" },
-    { id: 5, name: "Real Estate" },
-]);
+const filterStore = useAuctionFilterStore();
 
-const pageSize = 5;
+const pageSize = 12;
 const currentPage = ref(1);
-const selectedCategory = ref(null);
-const searchTerm = ref("");
+const selectedCategory = ref(filterStore.selectedCategories);
+const selectedBiddingType = ref(filterStore.selectedBiddingType);
+const selectedRarity = ref(filterStore.selectedRarity);
+const searchAuction = ref(filterStore.searchTerm);
 const dropdownOpen = ref(false);
 const showModal = ref(false);
 const selectedAuction = ref(null);
 const listings = ref([]);
+const trendingAuctions = ref([]);
 
-const fetchListings = async () => {
+// Function to fetch trending auctions
+const fetchTrendingAuctions = async () => {
+    try {
+        const response = await axios.get("/api/auctions/trending-auctions");
+        trendingAuctions.value = response.data.allData.slice(0, 3); // Limit to top 3 trend auctions
+    } catch (error) {
+        console.error("Failed to fetch trending auctions:", error);
+    }
+};
+
+
+// Function to fetch auction listings
+const fetchListings = async (params) => {
     try {
         const params = {
-            category: selectedCategory.value,
-            search: searchTerm.value
-        };
-        const response = await axios.get("/api/displayauctionlisting", { params });
+        category: selectedCategory.value,
+        biddingType: selectedBiddingType.value,
+        rarity: selectedRarity.value,
+        search: searchAuction.value,
+    };
+        const response = await axios.get(`/api/auctions/display-auction-bidder-dashboard`, { params });
         listings.value = response.data;
-
     } catch (error) {
         console.error("Failed to fetch auction listings:", error);
     }
 };
 
-watch(searchTerm, (newValue) => {
-    if (newValue === "") {
-        selectedCategory.value = null; // Reset category selection
+// Watch for changes in the filter store and fetch listings accordingly
+
+
+
+// Watchers for filter selections
+watch(
+    () => filterStore.selectedCategories,
+    (newValue) => {
+        selectedCategory.value = newValue;
+        fetchListings(); 
     }
-    currentPage.value = 1; // Reset to first page
-    fetchListings(); // Fetch listings with the search term
-});
+);
+
+watch(
+    () => filterStore.selectedBiddingType,
+    (newValue) => {
+        selectedBiddingType.value = newValue;
+        fetchListings(); 
+    }
+);
+
+watch(
+    () => filterStore.selectedRarity,
+    (newValue) => {
+        selectedRarity.value = newValue;
+        fetchListings(); 
+    }
+);
+
+watch(
+    () => filterStore.searchTerm,
+    (newValue) => {
+        searchAuction.value = newValue;
+        fetchListings(); 
+    }
+);
+
 
 const currentListings = computed(() => {
     const start = (currentPage.value - 1) * pageSize;
@@ -173,9 +242,6 @@ const prevPage = () => {
     }
 };
 
-const toggleDropdown = () => {
-    dropdownOpen.value = !dropdownOpen.value;
-};
 
 const autoCloseDropDown = () => {
     dropdownOpen.value = false;
@@ -183,20 +249,9 @@ const autoCloseDropDown = () => {
     fetchListings();
 };
 
-const selectCategory = (category) => {
-    selectedCategory.value = category;
-    currentPage.value = 1; // Reset to first page
-    fetchListings();
-    toggleDropdown(); // Close dropdown after selection
-};
-
 const openModal = (auction) => {
-    if (auction) {
-        selectedAuction.value = auction;
-        showModal.value = true;
-    } else {
-        console.warn("No auction data provided");
-    }
+    selectedAuction.value = auction;
+    showModal.value = true;
 };
 
 const closeModal = () => {
@@ -204,15 +259,8 @@ const closeModal = () => {
     selectedAuction.value = null;
 };
 
-const truncateDescription = (description, maxLength) => {
-    if (description.length > maxLength) {
-        return description.slice(0, 30) + '...';
-    }
-    return description;
-};
-
-onMounted(() => {
-    fetchListings();
+onMounted(async () => {
+    await Promise.all([fetchListings(), fetchTrendingAuctions()]);
 });
 </script>
 

@@ -21,7 +21,7 @@
           <p class="text-gray-600 mb-2 truncate">
             <strong>Location:</strong> {{ auction?.location || 'Not specified Location' }}
           </p>
-          <p class="text-gray-600 mb-2 truncate">
+          <p class="text-gray-600 mb-2 truncate" v-if="auction.bidding_type === 'Lowest-type'">
             <strong>Starting Bid:</strong> {{ auction.starting_bid || 'N/A' }}
           </p>
           <p class="text-gray-600 mb-2 truncate">
@@ -33,7 +33,7 @@
           <div class="mb-2">
             <strong>Categories:</strong>
             <div class="flex flex-wrap mt-2">
-              <span v-if="auction.categories.length === 0" class="text-gray-500">No categories</span>
+              <!-- <span v-if="auction.categories.length === 0" class="text-gray-500">No categories</span> -->
               <span v-for="(category, index) in auction.categories" :key="index"
                 class="bg-gray-200 text-gray-700 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded">
                 {{ category }}
@@ -42,12 +42,20 @@
           </div>
         </div>
 
-        <!-- Bidders Section -->
-        <div class="w-full sm:w-1/2 pl-6 mt-4">
+        <!-- Bidders Participated Section -->
+        <div class="w-full sm:w-1/2 pl-6 mt-4" v-if="auction.bidding_type === 'Lowest-type'">
           <h3 class="flex text-xl text-center font-semibold mb-4">Participated Bidders</h3>
           <div v-for="bidder in bidders" :key="bidder.user_id" class="mb-2">
             <span>{{ bidder.firstname }} {{ bidder.lastname }} - {{ bidder.bid_amount }}
               <span v-if="isCurrentUser(bidder.user_id)" class="text-teal-500 pr-10">(YOU)</span>
+            </span>
+          </div>
+        </div>
+        <div class="w-full sm:w-1/2 pl-6 mt-4" v-else-if="auction.bidding_type === 'Offer-type'">
+          <h3 class="flex text-xl text-center font-semibold mb-4">Top Participated Bidders</h3>
+          <div v-for="comment in topComments" :key="comment.user_id" class="mb-2">
+            <span>{{ comment.firstname }} {{ comment.lastname }} (number of offers: {{ comment.offer_count }})
+              <span v-if="isCurrentUser(comment.user_id)" class="text-teal-500 pr-10">(YOU)</span>
             </span>
           </div>
         </div>
@@ -79,7 +87,7 @@ const props = defineProps({
   auction: {
     type: Object,
     required: true,
-  },
+  }
 });
 
 const emit = defineEmits(['close', 'joinAuction', 'manageAuction']);
@@ -88,6 +96,8 @@ const userRole = ref('');
 const currentUserId = ref(null);
 const bidders = ref([]);
 const viewersCount = ref({});
+const topComments = ref([]); // New state variable for top comments
+
 
 
 const closeModal = () => {
@@ -98,7 +108,7 @@ const joinAuction = async () => {
   const auctionId = props.auction.uuid;
 
   try {
-    const { data } = await axios.get('/api/check-bidder-participation', { params: { auctionId } });
+    const { data } = await axios.get('/api/auctions/check-bidder-participation', { params: { auctionId } });
     userRole.value = data.userType;
     // If the user is a participant (has placed a bid), navigate to the bidding page
     if (data.isParticipant) {
@@ -108,7 +118,7 @@ const joinAuction = async () => {
       });
     } else {
       // Otherwise, join the auction and navigate
-      await axios.post('/api/bidder-join-auction', { auctionId });
+      await axios.post('/api/auctions/bidder-join-auction', { auctionId });
       router.push({
         path: '/bidder/bidder-auction',
         query: { id: auctionId, userType: userRole.value },
@@ -123,7 +133,7 @@ const fetchViewersCount = async () => {
   const listingId = props.auction.listing_id;
   if (listingId) {
     try {
-      const { data } = await axios.get(`/api/get-viewer-count`, { params: { listing_id: listingId } });
+      const { data } = await axios.get(`/api/auctions/get-viewers-count`, { params: { listing_id: listingId } });
       viewersCount.value = data.viewer_count;
     } catch (error) {
       console.error("Failed to fetch viewers count:", error);
@@ -141,19 +151,31 @@ const buttonLabel = computed(() => {
 
 const fetchBidders = async () => {
   const listingId = props.auction.listing_id;
-  if (listingId) {
-    try {
-      const { data } = await axios.get(`/api/fill-in-bidder-participants?id=${listingId}`);
-      bidders.value = data.bidders;
-
-      currentUserId.value = data.currentUserId;
-    } catch (error) {
-      console.error('Failed to fetch data:', error);
-    }
-  } else {
+  if (!listingId) {
     console.error('No listing ID available');
+    return;
+  }
+
+  try {
+    if (props.auction.bidding_type === 'Lowest-type') {
+      const { data } = await axios.get(`/api/auctions/fill-in-bidder-participants`, { params: { id: listingId } });
+      bidders.value = data.bidders;
+      currentUserId.value = data.currentUserId;
+      console.log('Fetched bidders for lowest-type:', bidders.value);
+    } else if (props.auction.bidding_type === 'Offer-type') {
+      const { data } = await axios.get(`/api/auctions/fill-in-offer-participants`, { params: { id: listingId } });
+      topComments.value = data.offers;
+      currentUserId.value = data.currentUserId;
+      console.log('Fetched top comments for offer-type:', topComments.value);
+    } else {
+      console.warn('Unhandled bidding type:', props.auction.bidding_type);
+    }
+  } catch (error) {
+    console.error('Failed to fetch data:', error);
   }
 };
+
+
 
 onMounted(() => {
   fetchBidders();

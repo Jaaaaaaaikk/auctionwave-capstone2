@@ -1,5 +1,5 @@
 import { defineEventHandler, getCookie, createError } from 'h3';
-import { getPool } from '../db';
+import { getPool } from '../../db';
 import jwt from 'jsonwebtoken';
 
 export default defineEventHandler(async (event) => {
@@ -35,9 +35,9 @@ export default defineEventHandler(async (event) => {
     const [rows] = await pool.query(
       `SELECT B.bid_id 
 FROM Bids B
-JOIN AuctionParticipants AP ON B.participant_id = AP.participant_id
+JOIN AuctionVisits AV ON B.participant_id = AV.participant_id
 JOIN AuctionListings AL ON B.listing_id = AL.listing_id
-JOIN Users U ON AP.bidder_id = U.user_id
+JOIN Users U ON AV.bidder_id = U.user_id
 WHERE U.user_id = ?
 AND AL.listing_id = ?
 LIMIT 1;

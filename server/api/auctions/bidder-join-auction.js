@@ -1,5 +1,5 @@
 import { defineEventHandler, readBody, getCookie } from "h3";
-import { getPool } from "../db";
+import { getPool } from "../../db";
 import jwt from "jsonwebtoken";
 
 export default defineEventHandler(async (event) => {
@@ -38,9 +38,9 @@ export default defineEventHandler(async (event) => {
 
         const listingId = result[0].listing_id;
 
-        // Insert or update AuctionParticipants table
+        // Insert or update AuctionVisits table
         await pool.query(
-            `INSERT INTO AuctionParticipants (listing_id, bidder_id, initial_joined_at, last_interaction_at) 
+            `INSERT INTO AuctionVisits (listing_id, bidder_id, initial_joined_at, last_interaction_at) 
              VALUES (?, ?, NOW(), NOW()) 
              ON DUPLICATE KEY UPDATE last_interaction_at = VALUES(last_interaction_at)`,
             [listingId, bidderId]

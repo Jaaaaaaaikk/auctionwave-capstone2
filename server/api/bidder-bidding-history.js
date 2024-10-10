@@ -33,8 +33,8 @@ export default defineEventHandler(async (event) => {
       al.status AS status
     FROM Bids b
     JOIN AuctionListings al ON b.listing_id = al.listing_id
-    JOIN AuctionParticipants ap ON b.participant_id = ap.participant_id
-    WHERE ap.bidder_id = ?
+    JOIN AuctionVisits av ON b.participant_id = av.participant_id
+    WHERE av.bidder_id = ?
     ORDER BY b.bid_time DESC
   `;
 

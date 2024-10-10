@@ -1,5 +1,5 @@
 import { defineEventHandler, readBody, getCookie } from 'h3';
-import { getPool } from '../db';
+import { getPool } from '../../db';
 import nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
@@ -76,9 +76,9 @@ export default defineEventHandler(async (event) => {
         }));
 
         await pool.query(
-            `INSERT INTO Notifications (user_id, auction_id, message, is_read)
+            `INSERT INTO Notifications (user_id, auction_id, notification_type, message, is_read)
        VALUES ?`,
-            [notifications.map(notif => [notif.user_id, notif.auction_id, notif.message, notif.is_read])]
+            [notifications.map(notif => [notif.user_id, notif.auction_id, 'EmailBlast', notif.message, notif.is_read])]
         );
 
         const baseUrl = process.env.BASE_URL;

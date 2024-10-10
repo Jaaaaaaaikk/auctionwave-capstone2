@@ -8,7 +8,7 @@
 
           <!-- with ring border -->
           <img class="w-48 rounded-full ring-4 ring-blue-500" :src="userStore.userProfileImage || '/images/default-profile-image.png'"
-            alt="Profile Picture" />
+            alt="Profile Picture"/>
 
           <!-- Pencil Icon -->
           <div class="absolute top-0 right-0 bg-white rounded-full p-1 cursor-pointer hover:bg-gray-200 transition">
@@ -91,7 +91,7 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import profileModal from "~/components/change-profile-picture-modal.vue";
-import { useUserStore } from '@/stores/user-profile-image'; // Import the user store
+import { useUserStore } from '@/stores/user-profile-image'; 
 
 
 const profile = ref({

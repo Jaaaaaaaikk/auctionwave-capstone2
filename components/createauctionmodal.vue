@@ -249,7 +249,7 @@ const createAuction = async () => {
     });
 
     const response = await axios.post(
-      "/api/createauction",
+      "/api/auctions/create-auction",
       {
         name: auctionData.value.name,
         location_id: auctionData.value.location_id,

@@ -1,5 +1,5 @@
 import { defineEventHandler, readBody, getCookie } from "h3";
-import { getPool } from "../db";
+import { getPool } from "../../db";
 
 export default defineEventHandler(async (event) => {
 

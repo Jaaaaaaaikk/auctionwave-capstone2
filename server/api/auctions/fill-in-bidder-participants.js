@@ -1,6 +1,6 @@
 // server/api/fill-in-bidder-participants.js
 import { defineEventHandler, getCookie, createError } from 'h3'; 
-import { getPool } from '../db';
+import { getPool } from '../../db';
 import jwt from 'jsonwebtoken';
 
 export default defineEventHandler(async (event) => {
@@ -37,11 +37,11 @@ export default defineEventHandler(async (event) => {
       FROM 
           Users u
       JOIN 
-          AuctionParticipants ap ON u.user_id = ap.bidder_id
+          AuctionVisits av ON u.user_id = av.bidder_id
       JOIN 
-          Bids b ON b.participant_id = ap.participant_id
+          Bids b ON b.participant_id = av.participant_id
       WHERE 
-          ap.listing_id = ?
+          av.listing_id = ?
       ORDER BY 
           b.bid_amount ASC;`, [listingId]);
 
@@ -55,9 +55,9 @@ export default defineEventHandler(async (event) => {
       FROM 
           Bids b
       JOIN 
-          AuctionParticipants ap ON b.participant_id = ap.participant_id
+          AuctionVisits av ON b.participant_id = av.participant_id
       WHERE 
-          ap.listing_id = ?;`, [listingId]);
+          av.listing_id = ?;`, [listingId]);
 
     const lowestBid = lowestBidRow.length > 0 ? lowestBidRow[0].lowest_bid : null;
 

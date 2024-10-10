@@ -1,10 +1,8 @@
-import { defineEventHandler, createError, getQuery } from 'h3';
-import { getPool } from '../db';
+import { defineEventHandler, createError, getQuery, getCookie } from 'h3';
+import { getPool } from '../../db';
 import jwt from 'jsonwebtoken';
 
 export default defineEventHandler(async (event) => {
-  // Extract parameters from the query
-  const { category = null, search = null } = getQuery(event);
 
   // Retrieve the access token from cookies
   const token = getCookie(event, "accessToken");
@@ -28,69 +26,55 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Create the base query
+  // Create the base query to fetch trending auctions based on visit counts
   let query = `
-    SELECT DISTINCT 
+    SELECT
       al.listing_id, 
       al.name, 
-      al.description, 
-      al.starting_bid, 
-      l.location_name AS location, 
-      al.bidding_type, 
-      al.rarity, 
+      al.description,
+      l.location_name AS location,
+      al.starting_bid,
+      al.bidding_type,
       al.uuid,
-      GROUP_CONCAT(c.category_name) AS categories
+      al.rarity,
+      GROUP_CONCAT(DISTINCT c.category_name) AS categories,
+      COUNT(av.participant_id) AS visit_count
     FROM 
-      AuctionListings al
+      AuctionListings al 
     INNER JOIN 
       AuctionListingCategories alc ON al.listing_id = alc.listing_id
-    INNER JOIN 
+    LEFT JOIN
       Categories c ON alc.category_id = c.category_id
-    INNER JOIN 
+    LEFT JOIN 
       Locations l ON al.location_id = l.location_id
+    LEFT JOIN 
+      AuctionVisits av ON al.listing_id = av.listing_id
     WHERE 
       al.status = 'Auction Pending'
   `;
 
-  // Create a list for the query parameters
-  const queryParams = [];
-
-  // Filter by location if provided
-  if (userLocation) {
-    query += ` AND l.location_id = ?`;
-    queryParams.push(userLocation);
-  }
-
-  // Filter by category if provided
-  if (category && category !== 'All') {
-    query += ` AND alc.category_id = (
-      SELECT category_id FROM Categories WHERE category_name = ?
-    )`;
-    queryParams.push(category);
-  }
-
-  // Filter by search term if provided
-  if (search) {
-    query += ` AND al.name LIKE ?`;
-    queryParams.push(`%${search}%`);
-  }
-
-  // Group by listing_id to aggregate categories
-  query += ` GROUP BY al.listing_id`;
+  // Group by listing_id to aggregate visit counts
+  query += `
+    GROUP BY al.listing_id 
+    ORDER BY visit_count DESC
+    LIMIT 10; 
+  `;
 
   // Open a connection to the database
   const pool = await getPool();
 
   try {
-    // Execute the query with the provided parameters
-    const [rows] = await pool.query(query, queryParams);
+    // Execute the query
+    const [rows] = await pool.query(query);
 
-    // Parse categories as an array
     rows.forEach(row => {
       row.categories = row.categories ? row.categories.split(',') : [];
     });
 
-    return rows;
+    return {
+      success: true,
+      allData: rows,
+    };
   } catch (error) {
     console.error('Database query failed:', error);
     throw createError({

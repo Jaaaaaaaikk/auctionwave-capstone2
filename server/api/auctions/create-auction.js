@@ -1,5 +1,5 @@
 import { defineEventHandler, readBody, getCookie } from "h3";
-import { getPool } from "../db"; // Adjust path to your database setup
+import { getPool } from "../../db"; // Adjust path to your database setup
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
@@ -44,14 +44,22 @@ export default defineEventHandler(async (event) => {
       !name ||
       !location_id || // Validate location_id
       !description ||
-      !starting_bid ||
       !bidding_type ||
       !categories ||
-      !rarity || !image
+      !rarity || 
+      !image
     ) {
       return {
         status: 400,
         json: { message: "All required fields must be provided" },
+      };
+    }
+
+    // Server-side validation for starting_bid based on bidding_type
+    if (bidding_type === 'Lowest-type' && !starting_bid) {
+      return {
+        status: 400,
+        json: { message: "Starting bid is required for lowest-type auctions." },
       };
     }
 

@@ -109,7 +109,7 @@ const view_auction = (auction) => {
 
 const fetchAuctions = async () => {
   try {
-    const { data } = await axios.get("/api/auctioneer-created-auctions");
+    const { data } = await axios.get("/api/auctions/auctioneer-created-auctions");
     auctions.value = data.auctions;
   } catch (error) {
     console.error("Failed to fetch auctions:", error);

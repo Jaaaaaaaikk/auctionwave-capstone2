@@ -47,34 +47,20 @@
 
         <!-- Notification and Profile Icons -->
         <div class="flex space-x-4 items-center">
-          <!-- Notification Icon -->
           <div class="relative">
-            <button @click="toggleNotificationDropdown"
-              class="flex items-center py-2 px-3 text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:hover:bg-gray-700 md:dark:hover:bg-transparent cursor-pointer"
-              aria-expanded="false">
-              <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M12 22c1.104 0 2-.896 2-2H10c0 1.104.896 2 2 2zM5 11V8a7 7 0 0 1 14 0v3l1 1v1H4v-1l1-1z" />
+            <button @click="toggleNotificationDropdown" class="flex items-center py-2 px-3 text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:hover:bg-gray-700 md:dark:hover:bg-transparent cursor-pointer" aria-expanded="false">
+              <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22c1.104 0 2-.896 2-2H10c0 1.104.896 2 2 2zM5 11V8a7 7 0 0 1 14 0v3l1 1v1H4v-1l1-1z" />
               </svg>
+              <span v-if="notificationsStore.unreadCount > 0" class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-600 rounded-full"></span>
             </button>
-            <div v-if="notificationDropdownOpen"
-              class="absolute right-0 mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg dark:bg-gray-700 shadow-sm-light shadow-black">
+            <div v-if="notificationDropdownOpen" class="absolute right-0 mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow-sm-light shadow-black dark:bg-gray-700">
               <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
-                <li>
-                  <button class="block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                    Notification 1
-                  </button>
+                <li v-for="notification in notificationsStore.notifications" :key="notification.notification_id" :class="{ 'bg-yellow-100': !notification.is_read, 'bg-gray-100': notification.is_read }">
+                  <button class="block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">{{ notification.message }}</button>
                 </li>
-                <li>
-                  <button class="block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                    Notification 2
-                  </button>
-                </li>
-                <li>
-                  <button class="block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                    Notification 3
-                  </button>
+                <li v-if="notificationsStore.notifications.length === 0">
+                  <p class="block px-4 py-2 text-gray-500">No notifications</p>
                 </li>
               </ul>
             </div>
@@ -126,10 +112,12 @@
   </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { useUserStore } from '@/stores/user-profile-image'; // Import the user store
+import { useUserStore } from '@/stores/user-profile-image';
+import { useNotificationStore } from '@/stores/notification-store';
+
 
 
 const notificationDropdownOpen = ref(false);
@@ -137,13 +125,27 @@ const profileDropdownOpen = ref(false);
 const auctionsDropdownOpen = ref(false); // Added state for auctions dropdown
 const router = useRouter();
 const userType = ref("");
-const userStore = useUserStore(); // Use the store
+const userStore = useUserStore();
+const notificationsStore = useNotificationStore();
 
-const toggleNotificationDropdown = () => {
+
+const toggleNotificationDropdown =  async () => {
   notificationDropdownOpen.value = !notificationDropdownOpen.value;
   profileDropdownOpen.value = false;
-  auctionsDropdownOpen.value = false;
+  if (notificationDropdownOpen.value) {
+    await notificationsStore.fetchNotifications();
+  }
 };
+
+// const fetchNotifications = async () => {
+//   try {
+//     const { data } = await axios.get('/api/notifications/fetch-bidder-inbox-notification');
+//     notifications.value = data.notifications;
+//     unreadCount.value = data.notifications.filter(notification => !notification.read).length;
+//   } catch (error) {
+//     console.error("Failed to fetch notifications:", error);
+//   }
+// };
 
 const toggleProfileDropdown = () => {
   profileDropdownOpen.value = !profileDropdownOpen.value;
@@ -188,7 +190,7 @@ const getUserType = async () => {
 
 onMounted(async() => {
   userStore.initializeProfileImage(); // Initialize from localStorage
-  await Promise.all([getUserType()]);
+  await Promise.all([notificationsStore.fetchNotifications(), getUserType()]);
 });
 </script>
 

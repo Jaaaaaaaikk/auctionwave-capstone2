@@ -1,5 +1,5 @@
 import { defineEventHandler, readBody, getCookie, createError } from 'h3';
-import { getPool } from '../db';
+import { getPool } from '../../db';
 import jwt from 'jsonwebtoken';
 
 export default defineEventHandler(async (event) => {
@@ -26,9 +26,9 @@ export default defineEventHandler(async (event) => {
     const bidderId = decodedToken.userId;
 
     try {
-        // Retrieve listing_id from UUID
+        // Retrieve listing_id and auctioneer_id from UUID
         const [result] = await pool.query(
-            `SELECT listing_id FROM AuctionListings WHERE uuid = ?`,
+            `SELECT listing_id, auctioneer_id, name FROM AuctionListings WHERE uuid = ?`,
             [auctionId]
         );
 
@@ -37,10 +37,12 @@ export default defineEventHandler(async (event) => {
         }
 
         const listingId = result[0].listing_id;
+        const auctioneerId = result[0].auctioneer_id; // Get the auctioneer ID
+        const auction_name = result[0].name;
 
         // Retrieve participant_id
         const [participantResult] = await pool.query(
-            `SELECT participant_id FROM AuctionParticipants WHERE listing_id = ? AND bidder_id = ?`,
+            `SELECT participant_id FROM AuctionVisits WHERE listing_id = ? AND bidder_id = ?`,
             [listingId, bidderId]
         );
 
@@ -50,11 +52,33 @@ export default defineEventHandler(async (event) => {
 
         const participantId = participantResult[0].participant_id;
 
+        // Check if this is the first bid by this bidder for this auction
+        const [existingBidResult] = await pool.query(
+            `SELECT bid_id FROM Bids WHERE listing_id = ? AND participant_id = ?`,
+            [listingId, participantId]
+        );
+
         // Insert bid into Bids table
         await pool.query(
             `INSERT INTO Bids (listing_id, participant_id, bid_amount) 
              VALUES (?, ?, ?)`,
             [listingId, participantId, bidAmount]
+        );
+
+        let message;
+        if (existingBidResult.length === 0) {
+            // First bid from this bidder
+            message = `${auction_name}: A new bidder has placed their first bid on your auction.`;
+        } else {
+            // Subsequent bid
+            message = `${auction_name}: A bidder has placed a new bid on your auction.`;
+        }
+
+        // Insert notification for the auctioneer about the bid
+        await pool.query(
+            `INSERT INTO Notifications (user_id, auction_id, notification_type, message) 
+             VALUES (?, ?, 'BidPlaced', ?)`,
+            [auctioneerId, listingId, message]
         );
 
         return { status: 'success' };
