@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
         let notifications;
         if (userType === 'Auctioneer') {
             [notifications] = await pool.query(
-                `SELECT n.* 
+                `SELECT n.*, a.uuid AS auction_uuid, a.bidding_type
                  FROM Notifications n
                  JOIN AuctionListings a ON n.auction_id = a.listing_id
                  WHERE a.auctioneer_id = ? AND n.user_id = ?
@@ -26,12 +26,15 @@ export default defineEventHandler(async (event) => {
             );
         } else if (userType === 'Bidder') {
             [notifications] = await pool.query(
-                `SELECT * FROM Notifications 
-                 WHERE user_id = ? 
-                 ORDER BY created_at DESC`,
+                `SELECT n.*, a.uuid AS auction_uuid, a.bidding_type
+                 FROM Notifications n
+                 JOIN AuctionListings a ON n.auction_id = a.listing_id
+                 WHERE n.user_id = ?
+                 ORDER BY n.created_at DESC`,
                 [userId]
             );
-        } else {
+        }
+        else {
             throw createError({ statusCode: 403, statusMessage: "Forbidden" });
         }
 

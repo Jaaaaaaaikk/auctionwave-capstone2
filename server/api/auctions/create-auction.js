@@ -31,9 +31,11 @@ export default defineEventHandler(async (event) => {
     const {
       name,
       location_id, // Use location_id instead of location
+      item_details,
       description,
       starting_bid,
       bidding_type,
+      duration_hours,
       categories,
       rarity,
       image,
@@ -43,10 +45,11 @@ export default defineEventHandler(async (event) => {
     if (
       !name ||
       !location_id || // Validate location_id
+      !item_details ||
       !description ||
       !bidding_type ||
       !categories ||
-      !rarity || 
+      !rarity ||
       !image
     ) {
       return {
@@ -60,6 +63,13 @@ export default defineEventHandler(async (event) => {
       return {
         status: 400,
         json: { message: "Starting bid is required for lowest-type auctions." },
+      };
+    }
+
+    if (bidding_type === 'Lowest-type' && !duration_hours) {
+      return {
+        status: 400,
+        json: { message: "Duration of auction is required for lowest-type auctions." },
       };
     }
 
@@ -96,16 +106,18 @@ export default defineEventHandler(async (event) => {
 
     // Insert the new auction listing
     const [result] = await connection.execute(
-      'INSERT INTO AuctionListings (auctioneer_id, name, location_id, description, starting_bid, bidding_type, rarity, status, uuid) VALUES (?, ?, ?, ?, ?, ?, ?, "Auction Pending", ?)', // Use location_id in the query
+      'INSERT INTO AuctionListings (auctioneer_id, name, location_id, item_details, description, starting_bid, bidding_type, duration_hours, rarity, status, uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, "Auction Pending", ?)', // Use location_id in the query
       [
         auctioneer_id,
         name,
-        location_id, // Insert location_id
+        location_id,
+        item_details,
         description,
         starting_bid,
         bidding_type,
+        duration_hours,
         rarity,
-        auctionUuid, // Insert the generated UUID
+        auctionUuid,
       ]
     );
 

@@ -38,10 +38,10 @@ export default defineEventHandler(async (event) => {
 
   try {
     const [results] = await pool.query(
-
       `SELECT 
     al.listing_id AS id, 
     al.name, 
+    al.item_details,
     al.description, 
     l.location_name AS location, 
     al.starting_bid, 
@@ -49,8 +49,10 @@ export default defineEventHandler(async (event) => {
     al.rarity,
     al.status,
     al.email_blast_sent,
-    GROUP_CONCAT(c.category_name ORDER BY c.category_name SEPARATOR ', ') AS categories,
-    ai.image_url AS image_url
+    al.duration_hours,
+    ai.image_url AS image_url,
+    al.end_time,  -- Add end_time to the query result
+    GROUP_CONCAT(c.category_name ORDER BY c.category_name SEPARATOR ', ') AS categories
 FROM 
     AuctionListings al
 INNER JOIN 
@@ -64,10 +66,8 @@ LEFT JOIN
 WHERE 
     al.uuid = ?
 GROUP BY 
-    al.listing_id;
-`
-      ,
-      [uuid],
+    al.listing_id;`,
+      [uuid]
     );
 
     console.log("Database Query Results:", results); // Log the query results
@@ -80,12 +80,6 @@ GROUP BY
     }
 
     const auctionData = results[0];
-
-    if (auctionData.image_url) {
-      auctionData.image_url = `http://localhost:3000${auctionData.image_url}`; // Path of image, refer from createauction.js for image url
-    } else {
-      auctionData.image_url = '/images/no-image.jpg'; // or set to a default image URL
-    }
 
     return auctionData; // Ensure a single object is returned
 

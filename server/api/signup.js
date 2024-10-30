@@ -49,8 +49,8 @@ export default defineEventHandler(async (event) => {
 
     // Insert the new user
     const query = `
-      INSERT INTO Users (firstname, middlename, lastname, email, location_id, password, user_type)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO Users (firstname, middlename, lastname, email, location_id, password, about, user_type)
+      VALUES (?, ?, ?, ?, ?, ?, 'No information yet.',?)
     `;
     const [result] = await connection.execute(query, [
       firstname,
@@ -94,7 +94,7 @@ export default defineEventHandler(async (event) => {
       "DELETE FROM OTPs WHERE email = ?",
       [email]
     );
-    
+
     return { status: 201, json: { message: "User Created successfully" } };
   } catch (error) {
     console.error('Error:', error);

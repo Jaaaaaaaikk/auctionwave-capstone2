@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
     }
 
-     // Verify the token
+    // Verify the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("Decoded Token:", decoded);
     const auctioneerId = decoded.userId; // Ensure this matches the token field

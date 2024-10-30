@@ -24,21 +24,38 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // Create the base query
+  // Create the base query to fetch unique auctions based on user participation
   let query = `
     SELECT 
       al.name AS auctionName,
-      b.bid_amount AS amount,
-      b.bid_time AS date,
-      al.status AS status
-    FROM Bids b
-    JOIN AuctionListings al ON b.listing_id = al.listing_id
-    JOIN AuctionVisits av ON b.participant_id = av.participant_id
-    WHERE av.bidder_id = ?
-    ORDER BY b.bid_time DESC
+      MAX(b.bid_time) AS date,
+      al.status AS status,
+      al.bidding_type AS biddingType,
+      al.uuid AS auction_uuid
+    FROM AuctionListings al
+    LEFT JOIN Bids b ON al.listing_id = b.listing_id 
+    LEFT JOIN AuctionVisits av ON b.participant_id = av.participant_id
+    WHERE av.bidder_id = 12
+    
+    GROUP BY al.listing_id
+    
+        UNION ALL
+    
+    SELECT 
+      al.name AS auctionName,
+      MAX(o.offer_time) AS date,
+      al.status AS status,
+      al.bidding_type AS biddingType,
+      al.uuid AS auction_uuid
+    FROM AuctionListings al
+    LEFT JOIN Offers o ON al.listing_id = o.listing_id 
+    LEFT JOIN AuctionVisits av ON o.bidder_id = av.bidder_id
+    WHERE av.bidder_id = 12
+    
+    GROUP BY al.listing_id
   `;
 
-  const queryParams = [userId];
+  const queryParams = [userId, userId]; // Using the same userId for both parts
 
   // Open a connection to the database
   const pool = await getPool();
@@ -47,7 +64,6 @@ export default defineEventHandler(async (event) => {
     // Execute the query with the provided parameters
     const [rows] = await pool.query(query, queryParams);
 
-    console.log('Fetched Bids:', rows); // Debug: Check fetched bids
 
     return rows;
   } catch (error) {

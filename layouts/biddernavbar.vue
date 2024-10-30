@@ -1,14 +1,13 @@
 <template>
   <div class="bg-custom-blue2 dark:bg-gray-900 min-h-screen">
     <!-- Header Section -->
-    <div class="fixed top-0 left-0 right-0  flex items-center justify-between bg-white shadow-md mb-6 z-20">
+    <div class="fixed top-0 left-0 right-0 flex items-center justify-between bg-white shadow-md mb-6 z-20">
       <NuxtLink to="/bidder/bidderdashboard" class="flex justify-start space-x-3 rtl:space-x-reverse mr-8">
-        <img src="/images/logo-no-text.jpg" class="h-16" alt="Logo" />
+        <img src="/public/images/logo-no-text.jpg" class="h-16" alt="Logo" />
       </NuxtLink>
 
       <div class="flex items-center w-full">
-
-        <form class="ml-74.5 w-3/5 mx-4">
+        <form v-if="isBidderDashboard" class="ml-74.5 w-3/5 mx-4">
           <label for="default-search"
             class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
           <div class="relative">
@@ -19,15 +18,18 @@
                   d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z" />
               </svg>
             </div>
-            <input type="search" id="default-search" v-model="auctionStore.searchTerm" 
+            <input type="search" id="default-search" v-model="auctionStore.searchTerm"
               class="block w-full p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-custom-bluegreen focus:border-custom-bluegreen dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               placeholder="Search auction name..." required />
           </div>
         </form>
 
-        <div class="flex space-x-4 items-center flex-grow  justify-end">
-          <div class="relative mx-1 hover:text-green-500">
-            <NuxtLink :to="{ path: '/inbox', query: { userType: userType } }">
+        <div class="flex space-x-4 items-center flex-grow justify-end">
+          <!--View Inbox in Navbar-->
+          <div class="relative">
+            <button @click="toggleInboxDropdown" title="Inbox"
+              class="flex items-center py-2 px-3 text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:hover:bg-gray-700 md:dark:hover:bg-transparent cursor-pointer"
+              aria-label="View Inbox" aria-expanded="false">
               <svg height="28px" width="28px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve"
                 class="fill-current text-[#005262] hover:text-green-500">
@@ -46,10 +48,58 @@
                   </g>
                 </g>
               </svg>
-            </NuxtLink>
+            </button>
+            <div v-if="inboxDropdownOpen"
+              class="absolute right-0 mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow-sm-light shadow-black dark:bg-gray-700">
+              <!-- Message List -->
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 max-h-48 overflow-y-auto no-scrollbar">
+                <li v-for="message in inboxStore.messages" :key="message.message_id" :class="{
+                  'bg-yellow-100': !message.is_read,
+                  'bg-gray-100': message.is_read,
+                  'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
+                }" role="button" tabindex="0">
+                  {{ message.message }}
+                </li>
+                <li v-if="inboxStore.messages.length === 0">
+                  <p class="block px-4 py-2 text-gray-500">No Messages.</p>
+                </li>
+              </ul>
+              <!-- Fixed buttons for 'See All' and 'Mark All as Read' -->
+              <div class="flex flex-col px-4 py-2 border-t space-y-2"> <!-- Adjusted layout for better fit -->
+                <div class="flex justify-between">
+                  <NuxtLink :to="{ path: '/inbox', query: { userType: userType } }"
+                    class="flex items-center text-gray-700 hover:text-red-500">
+                    <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                    <span class="text-xs">See All</span>
+                  </NuxtLink>
+                  <button @click="addMessage = true" class="flex items-center text-gray-700 hover:text-green-500">
+                    <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span class="text-xs">Compose Message</span>
+                  </button>
+                </div>
+                <button @click="markAllMessagesAsRead"
+                  class="flex items-center w-full text-gray-700 hover:text-green-500">
+                  <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-xs">Mark All as Read</span>
+                </button>
+                <AddMessageModal v-if="addMessage" @closeAddMessageModal="addMessage = false" />
+              </div>
+            </div>
           </div>
+
+          <!--View Notification Bell-->
           <div class="relative">
-            <button @click="toggleNotificationDropdown"
+            <button @click="toggleNotificationDropdown" title="Notification"
               class="flex items-center py-2 px-3 text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:hover:bg-gray-700 md:dark:hover:bg-transparent cursor-pointer"
               aria-expanded="false">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -69,21 +119,46 @@
                   </g>
                 </g>
               </svg>
-              <span v-if="notificationsStore.unreadCount > 0" class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-600 rounded-full"></span>
+              <span v-if="notificationsStore.unreadCount > 0"
+                class="absolute top-0 right-0 w-4 h-4 bg-red-600 rounded-full text-xs text-white"> {{
+                  notificationsStore.unreadCount }}</span>
             </button>
             <div v-if="notificationDropdownOpen"
               class="absolute right-0 mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow-sm-light shadow-black dark:bg-gray-700">
-              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
-                <li v-for="notification in notificationsStore.notifications" :key="notification.notification_id"
-                  :class="{ 'bg-yellow-100': !notification.is_read, 'bg-gray-100': notification.is_read }">
-                  <button class="block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">{{
-                    notification.message }}</button>
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 max-h-48 overflow-y-auto no-scrollbar">
+                <li v-for="notification in notificationsStore.notifications" :key="notification.notification_id" :class="{
+                  'bg-yellow-100': !notification.is_read,
+                  'bg-gray-100': notification.is_read,
+                  'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
+                }" @click="viewAuction(notification)" role="button" tabindex="0"
+                  @keypress.enter="viewAuction(notification)">
+                  {{ notification.message }}
                 </li>
                 <li v-if="notificationsStore.notifications.length === 0">
                   <p class="block px-4 py-2 text-gray-500">No notifications</p>
                 </li>
               </ul>
+              <!-- Fixed buttons for 'See All' and 'Mark All as Read' -->
+              <div class="flex justify-between items-center px-4 py-2 border-t">
+                <NuxtLink :to="{ path: '/notification', query: { userType: userType } }"
+                  class="flex items-center text-gray-700 hover:text-red-500">
+                  <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                  </svg>
+                  <span class="text-xs">See All</span>
+                </NuxtLink>
+                <button @click="markAllNotificationsAsRead"
+                  class="flex items-center text-gray-700 hover:text-green-500">
+                  <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-xs">Mark All As Read</span>
+                </button>
+              </div>
             </div>
+
           </div>
 
           <div class="relative pr-8">
@@ -129,11 +204,9 @@
                     Logout
                   </button>
                 </li>
-
               </ul>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -145,39 +218,83 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
-import { useUserStore } from '@/stores/user-profile-image';
+import { useUserStore } from "@/stores/user-profile-image";
 import { useAuctionFilterStore } from "@/stores/fetch-auction-bidder-dashboard";
-import { useNotificationStore } from '@/stores/notification-store';
+import { useNotificationStore } from "@/stores/notification-store";
+import AddMessageModal from "~/components/add-message-modal.vue";
+import { useInboxStore } from '@/stores/inbox-store';
 
-
+const inboxStore = useInboxStore();
+const addMessage = ref(false);
 const notificationDropdownOpen = ref(false);
+const inboxDropdownOpen = ref(false);
 const profileDropdownOpen = ref(false);
 const router = useRouter();
+const route = useRoute();
 const userType = ref("");
 const userStore = useUserStore(); // Use the store
 const auctionStore = useAuctionFilterStore();
 const notificationsStore = useNotificationStore();
+const isBidderDashboard = ref(true);
 
 const toggleNotificationDropdown = async () => {
   notificationDropdownOpen.value = !notificationDropdownOpen.value;
   profileDropdownOpen.value = false;
-  if (notificationDropdownOpen.value && notificationsStore.notifications.length === 0) {
+  inboxDropdownOpen.value = false;
+  if (
+    notificationDropdownOpen.value &&
+    notificationsStore.notifications.length === 0
+  ) {
     await notificationsStore.fetchNotifications();
   }
 };
 
+const toggleInboxDropdown = async () => {
+  inboxDropdownOpen.value = !inboxDropdownOpen.value;
+  profileDropdownOpen.value = false;
+  notificationDropdownOpen.value = false;
+};
 
 const toggleProfileDropdown = () => {
   profileDropdownOpen.value = !profileDropdownOpen.value;
   notificationDropdownOpen.value = false;
+  inboxDropdownOpen.value = false;
 };
+
+const markAllMessagesAsRead = () => {
+  inboxStore.markAllAsRead()
+}
+
+const markAllNotificationsAsRead = () => {
+  notificationsStore.markAllAsRead()
+}
+
+const updateRouteCheck = () => {
+  isBidderDashboard.value = route.path === "/bidder/bidderdashboard";
+};
+
+watch(route, updateRouteCheck);
 
 const viewProfile = () => {
   profileDropdownOpen.value = false;
   router.replace("/bidder/bidderprofile");
+};
+
+const viewAuction = async (notification) => {
+  const auctionId = notification.auction_uuid;
+  try {
+    await axios.post("/api/auctions/bidder-join-auction", { auctionId });
+    await notificationsStore.markAsRead(notification.notification_id);
+    router.push({
+      path: "/bidder/bidder-auction",
+      query: { id: auctionId },
+    });
+  } catch (error) {
+    console.error("Failed to join or continue bidding in auction:", error);
+  }
 };
 
 const logout = async () => {
@@ -193,16 +310,6 @@ const logout = async () => {
   }
 };
 
-// const fetchNotifications = async () => {
-//   try {
-//     const { data } = await axios.get('/api/notifications/fetch-bidder-inbox-notification');
-//     notifications.value = data.notifications;
-//     unreadCount.value = data.notifications.filter(notification => !notification.read).length;
-//   } catch (error) {
-//     console.error("Failed to fetch notifications:", error);
-//   }
-// };
-
 const getUserType = async () => {
   try {
     const { data } = await axios.post("/api/get-usertype");
@@ -214,13 +321,17 @@ const getUserType = async () => {
 };
 
 onMounted(async () => {
+  updateRouteCheck();
   userStore.initializeProfileImage();
   await Promise.all([notificationsStore.fetchNotifications(), getUserType()]);
 });
 // Initialize the user's profile image from the store
-
 </script>
 
 <style scoped>
 /* Add custom styles here */
+.no-scrollbar {
+  overflow-x: hidden;
+  /* Prevent horizontal scrollbar */
+}
 </style>

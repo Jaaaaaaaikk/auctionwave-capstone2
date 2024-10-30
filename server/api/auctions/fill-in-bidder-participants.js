@@ -1,5 +1,4 @@
-// server/api/fill-in-bidder-participants.js
-import { defineEventHandler, getCookie, createError } from 'h3'; 
+import { defineEventHandler, getCookie, createError } from 'h3';
 import { getPool } from '../../db';
 import jwt from 'jsonwebtoken';
 
@@ -13,6 +12,7 @@ export default defineEventHandler(async (event) => {
   }
 
   let decoded;
+  let userId = null;
   try {
     // Get JWT token from cookie and verify it
     const token = getCookie(event, "accessToken");
@@ -20,33 +20,51 @@ export default defineEventHandler(async (event) => {
       throw createError({ statusCode: 401, message: "Unauthorized" });
     }
     decoded = jwt.verify(token, process.env.JWT_SECRET);
+    userId = decoded.userId;
   } catch (error) {
     throw createError({ statusCode: 401, message: 'Invalid token' });
   }
 
   try {
-    // Retrieve the latest bid for each distinct bidder, along with their previous bids for tracking
+    // Retrieve all bids for the specified auction(bidder-auction)
     const [biddersRows] = await pool.query(`
-      SELECT 
-          u.user_id,
-          u.firstname,
-          u.lastname,
-          b.bid_amount,
-          b.bid_time,
-          ROW_NUMBER() OVER (PARTITION BY u.user_id ORDER BY b.bid_time DESC) as rn
-      FROM 
-          Users u
-      JOIN 
-          AuctionVisits av ON u.user_id = av.bidder_id
-      JOIN 
-          Bids b ON b.participant_id = av.participant_id
-      WHERE 
-          av.listing_id = ?
-      ORDER BY 
-          b.bid_amount ASC;`, [listingId]);
+          SELECT 
+              u.user_id,
+              u.firstname,
+              u.lastname,
+              b.bid_amount,
+              b.bid_time
+          FROM 
+              Users u
+          JOIN 
+              AuctionVisits av ON u.user_id = av.bidder_id
+          JOIN 
+              Bids b ON b.participant_id = av.participant_id
+          WHERE 
+              av.listing_id = ?
+          ORDER BY 
+              b.bid_amount ASC;`, [listingId]);
 
-    // Filter to get only the latest bid per user
-    const latestBidders = biddersRows.filter(row => row.rn === 1);
+    // Retrieve all bids for the specified auction(viewAuctionModal)
+    const [bidderAuctionModalRows] = await pool.query(`
+      SELECT 
+        u.user_id,
+        u.firstname,
+        u.middlename,
+        u.lastname
+      FROM 
+        Users u
+      JOIN 
+        AuctionVisits av ON u.user_id = av.bidder_id
+      JOIN 
+        Bids b ON b.participant_id = av.participant_id
+      WHERE 
+        av.listing_id = ?
+      GROUP BY 
+        u.user_id
+      ORDER BY 
+        MIN(b.bid_amount) ASC
+    `, [listingId]);
 
     // Retrieve the lowest current bid for the auction
     const [lowestBidRow] = await pool.query(`
@@ -61,7 +79,8 @@ export default defineEventHandler(async (event) => {
 
     const lowestBid = lowestBidRow.length > 0 ? lowestBidRow[0].lowest_bid : null;
 
-    return { bidders: latestBidders, currentUserId: decoded.userId, lowestBid };
+    console.log('BidderRows', biddersRows);
+    return { bidders: biddersRows, bidderAuctionModal: bidderAuctionModalRows, currentUserId: userId, lowestBid };
   } catch (error) {
     throw createError({ statusCode: 500, message: 'Database query failed' });
   }

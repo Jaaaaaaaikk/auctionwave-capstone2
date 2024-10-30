@@ -1,125 +1,125 @@
 <template>
   <!-- Dynamically load the navbar layout based on user type -->
   <NuxtLayout :name="navbarLayout">
-    <div class="container mx-auto p-6">
-      <h1 class="text-2xl font-bold mb-6">Inbox</h1>
-
-      <!-- Display a message if there are no notifications -->
-      <div v-if="notifications.length === 0" class="text-center">
-        <p>No notifications yet.</p>
+    <div class="min-h-screen w-full bg-custom-white-green shadow-xl rounded-lg flex overflow-x-auto">
+      <div class=" min-h-screen w-64 bg-white px-4">
+        <!-- Button -->
+        <div class="h-16 flex items-center">
+          <button @click="addMessage = true"
+            class="w-48 mx-auto bg-custom-bluegreen hover:bg-custom-bluegreen hover:bg-opacity-80 flex items-center justify-center text-gray-100 py-2 rounded space-x-2 transition duration-150">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6">
+              </path>
+            </svg>
+            <span>Compose</span>
+          </button>
+          <AddMessageModal v-if="addMessage" @closeAddMessageModal="addMessage = false" />
+        </div>
+        <div class="px-2 pt-2  pb-8 border-r border-gray-300">
+          <ul class="space-y-2">
+            <!--Inbox Tab-->
+            <li>
+              <button @click="activeTab = 'inbox'"
+                :class="{ 'bg-custom-bluegreen bg-opacity-25 text-custom-bluegreen': activeTab === 'inbox' }"
+                class="hover:bg-custom-bluegreen hover:bg-opacity-25 hover:text-custom-bluegreen flex items-center text-gray-700 py-1.5 px-4 rounded space-x-2 cursor-pointer">
+                <span class="flex items-center space-x-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+                    </path>
+                  </svg>
+                  <span>Inbox</span>
+                </span>
+                <span
+                  class="bg-custom-bluegreen bg-opacity-80 text-gray-100 font-bold px-2 py-0.5 text-xs rounded-lg">3</span>
+              </button>
+            </li>
+            <!--Sent Tab-->
+            <li>
+              <button @click="activeTab = 'sent'"
+                :class="{ 'bg-custom-bluegreen bg-opacity-25 text-custom-bluegreen': activeTab === 'sent' }"
+                class="hover:bg-custom-bluegreen hover:bg-opacity-25 hover:text-custom-bluegreen flex items-center text-gray-700 py-1.5 px-4 rounded space-x-2 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 rotate-90" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8">
+                  </path>
+                </svg>
+                <span>Sent</span>
+              </button>
+            </li>
+            <!--Spam Tab-->
+            <li>
+              <button @click="activeTab = 'spam'"
+                :class="{ 'bg-custom-bluegreen bg-opacity-25 text-custom-bluegreen': activeTab === 'spam' }"
+                class="hover:bg-custom-bluegreen hover:bg-opacity-25 hover:text-custom-bluegreen flex items-center text-gray-700 py-1.5 px-4 rounded space-x-2 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                  </path>
+                </svg>
+                <span>Spam</span>
+              </button>
+            </li>
+            <!--Trash Tab-->
+            <li>
+              <button @click="activeTab = 'trash'"
+                :class="{ 'bg-custom-bluegreen bg-opacity-25 text-custom-bluegreen': activeTab === 'trash' }"
+                class="hover:bg-custom-bluegreen hover:bg-opacity-25 hover:text-custom-bluegreen flex items-center text-gray-700 py-1.5 px-4 rounded space-x-2 cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                  </path>
+                </svg>
+                <span>Trash</span>
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
-
-      <!-- Table for notifications -->
-      <div v-else>
-        <table class="min-w-full bg-white shadow-md rounded-lg">
-          <thead>
-            <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
-              <th class="py-3 px-6 text-center">Message</th>
-              <th class="py-3 px-6 text-center">Date</th>
-              <th class="py-3 px-6 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(notification, index) in notifications" :key="notification.notification_id"
-              :class="{ 'bg-yellow-100': notification.is_read === 0, 'bg-gray-100': notification.is_read === 1 }"
-              class="border-b border-gray-200 hover:bg-gray-100">
-              <td class="py-3 px-6 text-left">
-                {{ notification.message }}
-              </td>
-              <td class="py-3 px-6 text-left">
-                {{ formatDate(notification.created_at) }}
-              </td>
-              <td class="py-3 px-6 text-center">
-                <div class="flex justify-center space-x-4">
-                  <!-- Mark as Read Button with Tooltip and Styled -->
-                  <button @click="markAsRead(notification.notification_id, index)" class="btn-action tooltip"
-                    v-if="notification.is_read === 0">Mark as Read
-                    <i class="fas fa-check"></i>
-                    <span class="tooltip-text">Mark as Read</span>
-                  </button>
-
-                  <!-- Delete Button with Tooltip and Styled -->
-                  <button @click="deleteNotification(notification.notification_id, index)"
-                    class="btn-action tooltip">Delete
-                    <i class="fas fa-trash"></i>
-                    <span class="tooltip-text">Delete</span>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <InboxTab v-if="activeTab === 'inbox'" />
+      <SentTab v-if="activeTab === 'sent'" />
+      <ArchiveTab v-if="activeTab === 'archive'" />
+      <SpamTab v-if="activeTab === 'spam'" />
+      <TrashTab v-if="activeTab === 'trash'" />
     </div>
   </NuxtLayout>
-
   <!-- Load universal footer -->
   <NuxtLayout name="footer"></NuxtLayout>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import axios from 'axios';
+import AddMessageModal from "~/components/add-message-modal.vue";
+import InboxTab from '~/components/MessageTabs/InboxTab.vue';
+import SentTab from '~/components/MessageTabs/SentTab.vue';
+import ArchiveTab from '~/components/MessageTabs/ArchiveTab.vue';
+import SpamTab from '~/components/MessageTabs/SpamTab.vue';
+import TrashTab from '~/components/MessageTabs/TrashTab.vue';
 
+const addMessage = ref(false);
+const activeTab = ref('inbox');
+const router = useRouter();
 const route = useRoute();
+const userType = route.query.userType;
 const navbarLayout = ref('');
-const notifications = ref([]);
-
-// Fetch notifications from the API
-const fetchNotifications = async () => {
-  try {
-    const { data } = await axios.get('/api/notifications/fetch-bidder-inbox-notification');
-    console.log('Fetched notifications:', data.notifications);
-    notifications.value = data.notifications;
-  } catch (error) {
-    console.error("Failed to fetch notifications:", error);
-  }
-};
-
-// Mark a notification as read
-const markAsRead = async (notificationId, index) => {
-  try {
-    await axios.post('/api/notifications/mark-as-read', { id: notificationId });
-    notifications.value[index].is_read = 1; // Mark notification as read
-  } catch (error) {
-    console.error("Failed to mark notification as read:", error);
-  }
-};
-
-// Delete a notification
-const deleteNotification = async (notificationId, index) => {
-  try {
-    const response = await axios.post('/api/notifications/delete-notification-inbox', { id: notificationId });
-    console.log('response on deletion', response);
-    if (response.data.status === 200) {
-      notifications.value.splice(index, 1); // Remove the notification from the list
-    } else {
-      console.error("Failed to delete notification:", response.data.body.message);
-    }
-  } catch (error) {
-    console.error("Failed to delete notification:", error);
-  }
-};
-
-// Format date
-const formatDate = (date) => {
-  const options = { year: 'numeric', month: 'long', day: 'numeric' };
-  return new Date(date).toLocaleDateString(undefined, options);
-};
 
 // Set navbar layout based on user type
 onMounted(() => {
-  const userType = route.query.userType;
   if (userType === 'Bidder') {
     navbarLayout.value = 'biddernavbar';
   } else {
     navbarLayout.value = 'auctioneernavbar';
   }
 
-  // Fetch notifications after setting the navbar layout
-  fetchNotifications();
 });
+
 </script>
 
 <style scoped>

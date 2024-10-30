@@ -1,79 +1,104 @@
 <template>
   <div class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-6">
+    <div class="bg-white rounded-lg shadow-lg w-2/5 max-w-4xl p-6">
       <!-- Modal Header -->
-      <div class="flex justify-between items-center mb-4 border-b border-gray-400 pb-4">
-        <h2 class="text-2xl font-semibold truncate">{{ auction?.name || 'N/A' }}</h2>
-        <button @click="closeModal" class="text-gray-500 hover:text-gray-700">
-          <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+      <div class="flex flex-col   border-gray-400 pb-1">
+        <div class="flex justify-between items-center">
+          <h2 class="text-3xl font-semibold truncate">{{ auction?.name || 'N/A' }}</h2>
+          <button @click="closeModal" class="text-gray-500 hover:text-gray-700">
+            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Auctioneer Info -->
+        <div class="flex items-center  mb-4">
+          <img v-if="auction?.auctioneer_profile_image && auction.auctioneer_profile_image.length > 0"
+            :src="auction.auctioneer_profile_image" class="w-6 h-6 rounded-full mr-2" loading="lazy" />
+          <img v-else src="/images/default-profile-image.png" class="w-6 h-6 rounded-full mr-2" alt="No Image Available"
+            loading="lazy" />
+          <span class="text-gray-600 text-sm hover:underline hover:cursor-pointer">{{ auction.auctioneer_name ||
+            'No Name' }}</span>
+        </div>
+        <p class="text-gray-600 mb-2 text-lg">
+          {{ auction?.description || 'No description' }}
+        </p>
       </div>
 
       <div class="flex flex-wrap">
         <!-- Sidebar -->
-        <div class="w-full sm:w-1/3 pr-4 border-r border-gray-400 ml-5 mb-4 sm:mb-0">
+        <div class="w-full pr-4 mb-6 sm:mb-0 text-sm">
+
+
           <h3 class="text-gray-600 mb-2">
-            <strong>Bidding Type:</strong> {{ auction.bidding_type }}
+            Bidding Type: <span class="font-bold">{{ auction.bidding_type }}</span>
           </h3>
+
           <p class="text-gray-600 mb-2 truncate">
-            <strong>Location:</strong> {{ auction?.location || 'Not specified Location' }}
+            Location: <span class="font-bold">{{ auction?.location || 'Not specified Location' }}</span>
           </p>
+
           <p class="text-gray-600 mb-2 truncate" v-if="auction.bidding_type === 'Lowest-type'">
-            <strong>Starting Bid:</strong> {{ auction.starting_bid || 'N/A' }}
+            Starting Bid: <span class="font-bold">{{ auction.starting_bid || 'N/A' }}</span>
           </p>
+
           <p class="text-gray-600 mb-2 truncate">
-            <strong>Description:</strong> {{ auction?.description || 'No description' }}
+            Rarity: <span class="font-bold">{{ auction.rarity || 'No Rarity' }}</span>
           </p>
-          <p class="text-gray-600 mb-2 truncate">
-            <strong>Rarity:</strong> {{ auction.rarity || 'No Rarity' }}
-          </p>
+
           <div class="mb-2">
-            <strong>Categories:</strong>
-            <div class="flex flex-wrap mt-2">
-              <!-- <span v-if="auction.categories.length === 0" class="text-gray-500">No categories</span> -->
+            <p class="text-gray-600">Categories:</p>
+            <div class="flex flex-wrap mt-1">
               <span v-for="(category, index) in auction.categories" :key="index"
                 class="bg-gray-200 text-gray-700 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded">
-                {{ category }}
+                <span class="font-bold">{{ category }}</span>
               </span>
             </div>
           </div>
         </div>
 
         <!-- Bidders Participated Section -->
-        <div class="w-full sm:w-1/2 pl-6 mt-4" v-if="auction.bidding_type === 'Lowest-type'">
-          <h3 class="flex text-xl text-center font-semibold mb-4">Participated Bidders</h3>
+        <hr class="w-full my-4">
+
+        <div class="w-full sm:w-1/2  my-2" v-if="auction.bidding_type === 'Lowest-type'">
+          <h3 class="flex text-xl text-center font-semibold ">Participated Bidders</h3>
+          <!-- Eye Icon (Viewers Count) -->
+
           <div v-for="bidder in bidders" :key="bidder.user_id" class="mb-2">
-            <span>{{ bidder.firstname }} {{ bidder.lastname }} - {{ bidder.bid_amount }}
-              <span v-if="isCurrentUser(bidder.user_id)" class="text-teal-500 pr-10">(YOU)</span>
+            <span class="text-gray-600 text-sm flex">{{ bidder.firstname }} {{ bidder.lastname }}
+              <span v-if="isCurrentUser(bidder.user_id)" class="text-teal-500 pr-10 ml-1">(YOU)</span>
             </span>
           </div>
         </div>
-        <div class="w-full sm:w-1/2 pl-6 mt-4" v-else-if="auction.bidding_type === 'Offer-type'">
-          <h3 class="flex text-xl text-center font-semibold mb-4">Top Participated Bidders</h3>
-          <div v-for="comment in topComments" :key="comment.user_id" class="mb-2">
-            <span>{{ comment.firstname }} {{ comment.lastname }} (number of offers: {{ comment.offer_count }})
-              <span v-if="isCurrentUser(comment.user_id)" class="text-teal-500 pr-10">(YOU)</span>
+        <div class="w-full sm:w-1/2  my-2" v-else-if="auction.bidding_type === 'Offer-type'">
+          <h3 class="flex text-xl text-center font-semibold ">Top Participated Bidders</h3>
+          <!-- Eye Icon (Viewers Count) -->
+          <div v-for="comment in topComments" :key="comment.user_id" class="mb-2 text-gray-600">
+            <span class="text-gray-600 text-sm flex">{{ comment.firstname }} {{ comment.lastname }} (number of offers:
+              {{ comment.offer_count }})
+              <span v-if="isCurrentUser(comment.user_id)" class="text-custom-bluegreen pr-10">(YOU)</span>
             </span>
           </div>
         </div>
+
 
       </div>
+      <hr class="w-full my-4">
+      <div class="modal-footer mt-4 font-semibold flex justify-between items-center ">
+        <div class="flex items-center space-x-2">
+          <img src="/images/viewers-count-image.png" alt="Viewers Count" class="w-5 h-5 text-gray-600" />
+          <p class="text-gray-600 text-sm font-bold">{{ viewersCount || 0 }}</p>
+        </div>
 
-      <div class="modal-footer mt-4 font-semibold">
         <button
-          class="bg-teal-500 border border-teal-500 rounded-full hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 text-gray-900 px-4 py-2 shadow-sm-light shadow-black"
+          class="bg-custom-bluegreen rounded-md hover:bg-green-500 focus:ring-4 focus:outline-none focus:ring-teal-500 text-white px-4 py-2"
           @click="joinAuction">
           {{ buttonLabel }}
         </button>
-        <div class="flex items-center space-x-2 mb-2 justify-end">
-          <!-- Image Icon with Viewers Count -->
-          <img src="/images/viewers-count-image.png" alt="Viewers Count" class="w-5 h-5 text-gray-600" />
-          <p class="text-gray-600">{{ viewersCount || 0 }}</p>
-        </div>
       </div>
+
     </div>
   </div>
 </template>
@@ -92,7 +117,6 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'joinAuction', 'manageAuction']);
 const router = useRouter();
-const userRole = ref('');
 const currentUserId = ref(null);
 const bidders = ref([]);
 const viewersCount = ref({});
@@ -106,24 +130,14 @@ const closeModal = () => {
 
 const joinAuction = async () => {
   const auctionId = props.auction.uuid;
+  console.log('UUID', auctionId);
 
   try {
-    const { data } = await axios.get('/api/auctions/check-bidder-participation', { params: { auctionId } });
-    userRole.value = data.userType;
-    // If the user is a participant (has placed a bid), navigate to the bidding page
-    if (data.isParticipant) {
-      router.push({
-        path: '/bidder/bidder-auction',
-        query: { id: auctionId, userType: userRole.value },
-      });
-    } else {
-      // Otherwise, join the auction and navigate
-      await axios.post('/api/auctions/bidder-join-auction', { auctionId });
-      router.push({
-        path: '/bidder/bidder-auction',
-        query: { id: auctionId, userType: userRole.value },
-      });
-    }
+    await axios.post('/api/auctions/bidder-join-auction', { auctionId });
+    router.push({
+      path: '/bidder/bidder-auction',
+      query: { id: auctionId },
+    });
   } catch (error) {
     console.error('Failed to join or continue bidding in auction:', error);
   }
@@ -146,7 +160,12 @@ const isCurrentUser = (bidderId) => {
 };
 
 const buttonLabel = computed(() => {
-  return bidders.value.some(bidder => isCurrentUser(bidder.user_id)) ? 'Continue Bidding' : 'Join Auction';
+  if (props.auction.bidding_type === 'Lowest-type') {
+    return bidders.value?.some(bidder => isCurrentUser(bidder.user_id)) ? 'Continue Bidding' : 'Join Auction';
+  } else if (props.auction.bidding_type === 'Offer-type') {
+    return topComments.value?.some(comment => isCurrentUser(comment.user_id)) ? 'Continue Bidding' : 'Join Auction';
+  }
+  return 'Join Auction'; // Default return in case bidding_type is not recognized
 });
 
 const fetchBidders = async () => {
@@ -159,7 +178,7 @@ const fetchBidders = async () => {
   try {
     if (props.auction.bidding_type === 'Lowest-type') {
       const { data } = await axios.get(`/api/auctions/fill-in-bidder-participants`, { params: { id: listingId } });
-      bidders.value = data.bidders;
+      bidders.value = data.bidderAuctionModal;
       currentUserId.value = data.currentUserId;
       console.log('Fetched bidders for lowest-type:', bidders.value);
     } else if (props.auction.bidding_type === 'Offer-type') {
@@ -174,7 +193,6 @@ const fetchBidders = async () => {
     console.error('Failed to fetch data:', error);
   }
 };
-
 
 
 onMounted(() => {

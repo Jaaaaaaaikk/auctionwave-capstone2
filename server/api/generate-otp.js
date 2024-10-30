@@ -23,17 +23,17 @@ export default defineEventHandler(async (event) => {
 
     if (existingOtp.length > 0) {
       // If OTP already exists and is not expired, return a message to the user
-      return { 
-        status: 400, 
-        json: { message: "An OTP has already been sent. Please wait until it expires." } 
+      return {
+        status: 400,
+        json: { message: "An OTP has already been sent. Please wait until it expires." }
       };
     }
 
     // Generate a new OTP
     const otp = otpGenerator.generate(6, {
       digits: true,
-      upperCase: true,
-      specialChars: true,
+      upperCase: false,
+      specialChars: false,
     });
 
     // Save OTP to database with 1-minute expiry

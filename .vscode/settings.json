@@ -16,17 +16,27 @@
       "scope": "workspace"
     }
   },
+  
   "cSpell.ignoreWords": [
+    "TIMESTAMPDIFF",
+    "admindashboard",
+    "adminnavbar",
     "creation",
     "darkbrown",
+    "faqnobg",
+    "fetchbidders",
     "fuschia",
     "gnaj",
+    "headlessui",
+    "heroicons",
+    "inboxtab",
     "notif",
     "pinia",
+    "placebidmodal",
     "profilepicture",
     "profilepictures",
     "usertype",
     "variable",
     "xmkv"
-  ]
+  ],
 }

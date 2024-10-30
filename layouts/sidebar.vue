@@ -5,10 +5,11 @@
         <div class="h-full px-6 py-20 overflow-y-auto z-0  bg-custom-blue2 dark:bg-gray-800 ">
             <ul class="space-y-2 font-medium ">
                 <li>
-                    <NuxtLink to="/bidder/bidding-history">
+
+                    <NuxtLink to="/bidder/bidding-activity">
 
                         <div class="flex items-center pl-2 py-4 text-gray-900 rounded-lg dark:text-white
-                        hover:bg-custom-bluegreen hover:bg-opacity-25 dark:hover:bg-gray-700 group">
+hover:bg-custom-bluegreen hover:bg-opacity-25 dark:hover:bg-gray-700 group">
                             <svg viewBox="0 0 1024 1024" class="w-6 h-6" version="1.1"
                                 xmlns="http://www.w3.org/2000/svg" fill="#000000">
                                 <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
@@ -22,13 +23,12 @@
                                         fill="#5F6379"></path>
                                 </g>
                             </svg>
-                            <span class="flex-1 ms-3 whitespace-nowrap">Bidding Activities</span>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Bidding Activity</span>
                         </div>
-
                     </NuxtLink>
                 </li>
                 <li>
-                    <NuxtLink to="/bidder/bidderdashboard">
+                    <NuxtLink to="#">
 
                         <div
                             class="flex items-center pl-2 py-4 text-gray-900 rounded-lg dark:text-white hover:bg-custom-bluegreen hover:bg-opacity-25 dark:hover:bg-gray-700 group">
@@ -64,29 +64,6 @@
             </ul>
             <div class="my-4 ">
                 <hr class="h-px bg-gray-300  border-0 dark:bg-gray-700 ">
-            </div>
-
-            <div class="flex justify-between items-center p-2">
-                <p class="font-medium">Categories</p>
-                <button @click="clearAllCategories"
-                    class="text-sm font-medium text-custom-bluegreen hover:text-custom-bluegreen-dark hover:underline">
-                    Clear All
-                </button>
-            </div>
-
-
-            <!-- Categories Below Horizontal Line -->
-            <ul class="font-light p-2">
-                <li class="flex items-center mb-4" v-for="category in categories" :key="category">
-                    <input :id="category" type="radio" name="auction-categories" :value="category"
-                        v-model="auctionStore.selectedCategories"
-                        class="w-4 h-4 text-custom-bluegreen bg-gray-100 border-gray-300 focus:ring-custom-bluegreen dark:focus:ring-blue-600 dark:ring-offset-custom-bluegreen focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                    <label :for="category" class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">{{ category
-                        }}</label>
-                </li>
-            </ul>
-            <div>
-                <hr class="h-px bg-gray-300  border-0 dark:bg-gray-700">
             </div>
             <div class="flex justify-between items-center p-2">
                 <p class="font-medium">Bidding Type</p>

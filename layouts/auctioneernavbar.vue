@@ -1,68 +1,142 @@
   <template>
-    <div class="p-6 bg-white dark:bg-gray-900 min-h-screen">
+    <div class="p-6 bg-custom-blue2 dark:bg-gray-900 min-h-screen">
       <!-- Header Section -->
       <nav class="fixed top-0 left-0 right-0 px-4 py-4 flex justify-between items-center bg-white shadow-xl">
         <!-- Logo and Company Name -->
         <NuxtLink to="/auctioneer/auctioneerdashboard" class="flex justify-start space-x-3 rtl:space-x-reverse mr-8">
-          <img src="/public/images/auctionwave-logo-final.png" class="h-16" alt="Logo" />
+          <img src="/public/images/logo-no-text.jpg" class="h-16" alt="Logo" />
         </NuxtLink>
 
         <!-- Navigation Bar Section -->
         <div class="flex space-x-8 text-xl rtl:space-x-reverse w-full">
           <!-- Auctions Dropdown Button -->
-          <div class="relative">
-            <button id="dropdownNavbarLink" type="button"
-              class="flex items-center justify-between w-full py-2 px-3 text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:hover:bg-gray-700 md:dark:hover:bg-transparent"
-              @click="toggleAuctionsDropdown" aria-expanded="false">
-              Auctions
-              <svg class="w-2.5 h-2.5 ms-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                viewBox="0 0 10 6">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="m1 1 4 4 4-4" />
-              </svg>
-            </button>
-            <!-- Auctions Dropdown Menu -->
-            <div v-if="auctionsDropdownOpen"
-              class="absolute top-full mt-2 w-48 shadow-sm-light shadow-slate-950 bg-white divide-y divide-gray-100 rounded-lg dark:bg-gray-700">
-              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
-                <li>
-                  <NuxtLink to="/inbox"
-                    class="block px-4 py-2 w-full hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                    Transaction History</NuxtLink>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <NuxtLink :to="{ path: '/faq', query: { userType: userType } }"
-            class="text-gray-900 dark:text-white hover:text-blue-700 dark:hover:text-blue-500">
-            FAQ's</NuxtLink>
-          <NuxtLink :to="{ path: '/contactus', query: { userType: userType } }"
-            class="text-gray-900 dark:text-white hover:text-blue-700 dark:hover:text-blue-500">
-            Contact Us
-          </NuxtLink>
-          <NuxtLink :to="{ path: '/inbox', query: { userType: userType } }"
-            class="text-gray-900 dark:text-white text-xl hover:text-blue-700 dark:hover:text-blue-500">Inbox
+          <NuxtLink to="#" class="text-gray-900 dark:text-white text-xl hover:text-blue-700 dark:hover:text-blue-500">
+            Transaction
+            History
           </NuxtLink>
         </div>
 
         <!-- Notification and Profile Icons -->
         <div class="flex space-x-4 items-center">
+          <!--Inbox Icon-->
           <div class="relative">
-            <button @click="toggleNotificationDropdown" class="flex items-center py-2 px-3 text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:hover:bg-gray-700 md:dark:hover:bg-transparent cursor-pointer" aria-expanded="false">
-              <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 22c1.104 0 2-.896 2-2H10c0 1.104.896 2 2 2zM5 11V8a7 7 0 0 1 14 0v3l1 1v1H4v-1l1-1z" />
+            <button @click="toggleInboxDropdown"
+              class="flex items-center py-2 px-3 text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:hover:bg-gray-700 md:dark:hover:bg-transparent cursor-pointer"
+              aria-expanded="false">
+              <svg height="28px" width="28px" version="1.1" id="_x32_" xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve"
+                class="fill-current text-[#005262] hover:text-green-500">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g id="SVGRepo_iconCarrier">
+                  <g>
+                    <polygon class="st0" points="512,295.199 445.92,226.559 512,169.6" fill="currentColor"></polygon>
+                    <polygon class="st0" points="66.16,226.559 0,295.279 0,169.6" fill="currentColor"></polygon>
+                    <path class="st0"
+                      d="M512,357.6v63.199c0,15.281-12.4,27.682-27.68,27.682H27.68c-15.281,0-27.68-12.4-27.68-27.682V357.6 l98.959-102.721L212,352.238c11.76,10.082,27.359,15.682,44,15.682c16.641,0,32.32-5.6,44.08-15.682l112.959-97.359L512,357.6z"
+                      fill="currentColor"></path>
+                    <path class="st0"
+                      d="M512,91.119v27.68l-241.442,208c-7.76,6.72-21.359,6.72-29.119,0L0,118.799v-27.68 c0-15.279,12.398-27.6,27.68-27.6H484.32C499.6,63.519,512,75.84,512,91.119z"
+                      fill="currentColor"></path>
+                  </g>
+                </g>
               </svg>
-              <span v-if="notificationsStore.unreadCount > 0" class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-600 rounded-full"></span>
             </button>
-            <div v-if="notificationDropdownOpen" class="absolute right-0 mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow-sm-light shadow-black dark:bg-gray-700">
-              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
-                <li v-for="notification in notificationsStore.notifications" :key="notification.notification_id" :class="{ 'bg-yellow-100': !notification.is_read, 'bg-gray-100': notification.is_read }">
-                  <button class="block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">{{ notification.message }}</button>
+            <div v-if="inboxDropdownOpen"
+              class="absolute right-0 mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow-sm-light shadow-black dark:bg-gray-700">
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 max-h-48 overflow-y-auto no-scrollbar">
+                <!-- <li v-for="notification in notificationsStore.notifications" :key="notification.notification_id" :class="{
+                  'bg-yellow-100': !notification.is_read,
+                  'bg-gray-100': notification.is_read,
+                  'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
+                }" @click="viewAuction(notification)" role="button" tabindex="0"
+                  @keypress.enter="viewAuction(notification)">
+                  {{ notification.message }}
+                </li>
+                <li v-if="notificationsStore.notifications.length === 0">
+                  <p class="block px-4 py-2 text-gray-500">No notifications</p>
+                </li> -->
+              </ul>
+              <!-- Fixed buttons for 'See All' and 'Mark All as Read' -->
+              <div class="flex justify-between items-center px-4 py-2 border-t">
+                <NuxtLink :to="{ path: '/notification', query: { userType: userType } }"
+                  class="flex items-center text-gray-700 hover:text-red-500">
+                  <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                  </svg>
+                  <span class="text-xs">See All</span>
+                </NuxtLink>
+                <button class="flex items-center text-gray-700 hover:text-green-500">
+                  <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-xs">Mark All As Read</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!--Notification Bell-->
+          <div class="relative">
+            <button @click="toggleNotificationDropdown"
+              class="flex items-center py-2 px-3 text-gray-900 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 md:w-auto dark:text-white md:dark:hover:text-blue-500 dark:focus:text-white dark:hover:bg-gray-700 md:dark:hover:bg-transparent cursor-pointer"
+              aria-expanded="false">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                class="w-7 h-7 fill-current text-[#005262] hover:text-green-500">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g id="SVGRepo_iconCarrier">
+                  <g id="style=fill">
+                    <g id="notification-bell">
+                      <path id="vector (Stroke)" fill-rule="evenodd" clip-rule="evenodd"
+                        d="M14.802 19.8317C15.4184 19.7699 15.8349 20.4242 15.5437 20.9539C15.3385 21.3271 15.0493 21.6529 14.7029 21.9197C14.3496 22.1918 13.9397 22.4006 13.5 22.5408C13.0601 22.6812 12.593 22.7522 12.1242 22.7522C11.6554 22.7522 11.1883 22.6812 10.7484 22.5408C10.3087 22.4006 9.89883 22.1918 9.54556 21.9197C9.1991 21.6529 8.90988 21.3271 8.70472 20.9539C8.41354 20.4242 8.83002 19.7699 9.44644 19.8317C9.63869 19.851 11.1433 19.9981 12.1242 19.9981C13.1051 19.9981 14.6097 19.851 14.802 19.8317Z">
+                      </path>
+                      <path id="vector (Stroke)_2" fill-rule="evenodd" clip-rule="evenodd"
+                        d="M8.52901 2.08755C10.7932 1.00445 13.4465 0.967602 15.7423 1.98737L15.9475 2.07851C18.3532 3.14707 19.8934 5.4622 19.8934 8.0096L19.8934 9.27297C19.8934 10.2885 20.1236 11.2918 20.5681 12.213L20.8335 12.7632C22.0525 15.29 20.465 18.2435 17.6156 18.7498L17.455 18.7783C13.93 19.4046 10.3154 19.4046 6.79044 18.7783C3.90274 18.2653 2.37502 15.1943 3.77239 12.7115L3.99943 12.3082C4.55987 11.3124 4.85335 10.1981 4.85335 9.06596L4.85335 7.79233C4.85335 5.3744 6.27704 3.16478 8.52901 2.08755Z">
+                      </path>
+                    </g>
+                  </g>
+                </g>
+              </svg>
+              <span v-if="notificationsStore.unreadCount > 0"
+                class="absolute top-0 right-0 w-4 h-4 bg-red-600 rounded-full text-xs text-white"> {{
+                  notificationsStore.unreadCount }}</span>
+            </button>
+            <div v-if="notificationDropdownOpen"
+              class="absolute right-0 mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow-sm-light shadow-black dark:bg-gray-700">
+              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 max-h-48 overflow-y-auto no-scrollbar">
+                <li v-for="notification in notificationsStore.notifications" :key="notification.notification_id" :class="{
+                  'bg-yellow-100': !notification.is_read,
+                  'bg-gray-100': notification.is_read,
+                  'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
+                }" @click="viewAuction(notification)" role="button" tabindex="0"
+                  @keypress.enter="viewAuction(notification)">
+                  {{ notification.message }}
                 </li>
                 <li v-if="notificationsStore.notifications.length === 0">
                   <p class="block px-4 py-2 text-gray-500">No notifications</p>
                 </li>
               </ul>
+              <!-- Fixed buttons for 'See All' and 'Mark All as Read' -->
+              <div class="flex justify-between items-center px-4 py-2 border-t">
+                <NuxtLink :to="{ path: '/notification', query: { userType: userType } }"
+                  class="flex items-center text-gray-700 hover:text-red-500">
+                  <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                  </svg>
+                  <span class="text-xs">See All</span>
+                </NuxtLink>
+                <button class="flex items-center text-gray-700 hover:text-green-500">
+                  <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span class="text-xs">Mark All As Read</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -119,50 +193,51 @@ import { useUserStore } from '@/stores/user-profile-image';
 import { useNotificationStore } from '@/stores/notification-store';
 
 
-
+const inboxDropdownOpen = ref(false);
 const notificationDropdownOpen = ref(false);
 const profileDropdownOpen = ref(false);
-const auctionsDropdownOpen = ref(false); // Added state for auctions dropdown
 const router = useRouter();
 const userType = ref("");
 const userStore = useUserStore();
 const notificationsStore = useNotificationStore();
 
 
-const toggleNotificationDropdown =  async () => {
+const toggleInboxDropdown = async () => {
+  inboxDropdownOpen.value = !inboxDropdownOpen.value;
+  profileDropdownOpen.value = false;
+  notificationDropdownOpen.value = false;
+};
+
+const toggleNotificationDropdown = async () => {
   notificationDropdownOpen.value = !notificationDropdownOpen.value;
   profileDropdownOpen.value = false;
-  if (notificationDropdownOpen.value) {
+  if (
+    notificationDropdownOpen.value &&
+    notificationsStore.notifications.length === 0
+  ) {
     await notificationsStore.fetchNotifications();
   }
 };
 
-// const fetchNotifications = async () => {
-//   try {
-//     const { data } = await axios.get('/api/notifications/fetch-bidder-inbox-notification');
-//     notifications.value = data.notifications;
-//     unreadCount.value = data.notifications.filter(notification => !notification.read).length;
-//   } catch (error) {
-//     console.error("Failed to fetch notifications:", error);
-//   }
-// };
 
 const toggleProfileDropdown = () => {
   profileDropdownOpen.value = !profileDropdownOpen.value;
   notificationDropdownOpen.value = false;
-  auctionsDropdownOpen.value = false;
-};
-
-const toggleAuctionsDropdown = () => {
-  auctionsDropdownOpen.value = !auctionsDropdownOpen.value; // Toggle auctions dropdown
-  notificationDropdownOpen.value = false;
-  profileDropdownOpen.value = false;
+  inboxDropdownOpen.value = false;
 };
 
 function viewProfile() {
   profileDropdownOpen.value = false;
   router.replace("/auctioneer/auctioneerprofile");
 }
+
+const viewAuction = async (notification) => {
+  try {
+    router.push({ path: '/auctioneer/auctioneer-manage-auction', query: { id: notification.auction_uuid } });
+  } catch (error) {
+    console.error("failed to view the auction:", error);
+  }
+};
 
 const logout = async () => {
   try {
@@ -188,10 +263,15 @@ const getUserType = async () => {
   }
 };
 
-onMounted(async() => {
+onMounted(async () => {
   userStore.initializeProfileImage(); // Initialize from localStorage
   await Promise.all([notificationsStore.fetchNotifications(), getUserType()]);
 });
 </script>
 
-<style></style>
+<style scoped>
+.no-scrollbar {
+  overflow-x: hidden;
+  /* Prevent horizontal scrollbar */
+}
+</style>

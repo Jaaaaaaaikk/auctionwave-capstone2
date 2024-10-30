@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  // Create the base query to fetch trending auctions based on visit counts
+  // Query to fetch all 'Auction Pending' auctions, including only those with at least 1 visit
   let query = `
     SELECT
       al.listing_id, 
@@ -37,8 +37,10 @@ export default defineEventHandler(async (event) => {
       al.bidding_type,
       al.uuid,
       al.rarity,
+      CONCAT(u.firstname, ' ', u.lastname) AS auctioneer_name,
+      upi.profile_image_url AS auctioneer_profile_image,
       GROUP_CONCAT(DISTINCT c.category_name) AS categories,
-      COUNT(av.participant_id) AS visit_count
+      COUNT(DISTINCT av.participant_id) AS visit_count
     FROM 
       AuctionListings al 
     INNER JOIN 
@@ -49,15 +51,16 @@ export default defineEventHandler(async (event) => {
       Locations l ON al.location_id = l.location_id
     LEFT JOIN 
       AuctionVisits av ON al.listing_id = av.listing_id
+    LEFT JOIN
+      Users u ON al.auctioneer_id = u.user_id
+    LEFT JOIN
+      UserProfileImages upi ON u.user_id = upi.user_id AND upi.is_current_profile_image = TRUE
     WHERE 
       al.status = 'Auction Pending'
-  `;
-
-  // Group by listing_id to aggregate visit counts
-  query += `
     GROUP BY al.listing_id 
+    HAVING visit_count > 0  -- This line ensures only auctions with at least one visit are returned
     ORDER BY visit_count DESC
-    LIMIT 10; 
+    LIMIT 3; 
   `;
 
   // Open a connection to the database

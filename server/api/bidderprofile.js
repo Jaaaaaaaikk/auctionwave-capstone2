@@ -40,15 +40,28 @@ export default defineEventHandler(async (event) => {
       [user[0].location_id],
     );
 
+    // Query to get categories associated with the bidder
+    const [categories] = await pool.query(
+      `SELECT c.category_name
+           FROM Bidders b
+           JOIN Categories c ON b.category_id = c.category_id
+           WHERE b.bidder_id = ?`,
+      [userId],
+    );
+
     // Construct the response
     return {
       profile: {
-        fullname: `${user[0].firstname} ${user[0].middlename ? user[0].middlename + " " : ""}${user[0].lastname}`,
+        firstName: user[0].firstname,
+        middleName: user[0].middlename,
+        lastName: user[0].lastname,
         email: user[0].email,
         location: location.length ? location[0].location_name : "Unknown", // Handle case if location is not found
+        categories: categories.map((c) => c.category_name),
         about: user[0].about
       },
     };
+
   } catch (error) {
     console.error("Error:", error.message);
     throw createError({ statusCode: 401, message: "Invalid or expired token" });

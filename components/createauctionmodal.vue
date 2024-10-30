@@ -27,6 +27,14 @@
             </div>
 
 
+            <!-- Item Details Field -->
+            <div class="col-span-2 mb-4">
+              <label for="itemDetails" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Item
+                Details</label>
+              <textarea v-model="auctionData.itemDetails" id="itemDetails" rows="3"
+                class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-custom-bluegreen focus:border-custom-bluegreen dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Provide detailed specifications, requirements, and other essential information about the item or project..."></textarea>
+            </div>
 
             <div class="col-span-2 mb-4">
               <label for="description"
@@ -62,7 +70,7 @@
                 </select>
               </div>
 
-              <div v-if="auctionData.biddingType !== 'Offer-type'" class="w-66 flex flex-col">
+              <div v-if="auctionData.biddingType === 'Lowest-type'" class="w-66 flex flex-col">
                 <label for="startingBid" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Starting
                   Bid</label>
                 <div class="relative">
@@ -72,6 +80,15 @@
                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 pl-8 focus:ring-custom-bluegreen focus:border-custom-bluegreen dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                     placeholder="0" required />
                 </div>
+              </div>
+
+              <div v-if="auctionData.biddingType === 'Lowest-type'" class="w-66 flex flex-col">
+                <label for="duration_hours"
+                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Duration
+                  (hours)</label>
+                <input v-model.number="auctionData.duration_hours" id="duration_hours" type="number" step="1" min="1"
+                  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 focus:ring-custom-bluegreen focus:border-custom-bluegreen dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                  placeholder="Duration in hours" required />
               </div>
             </div>
 
@@ -123,7 +140,7 @@
                   <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG</p>
                 </div>
 
-                <input id="dropzone-file" type="file" class="hidden" @change="onImageChange" />
+                <input id="dropzone-file" type="file" class="hidden" accept="image/*" @change="onImageChange" />
               </label>
             </div>
 
@@ -161,9 +178,11 @@ const auctionData = ref({
   name: "",
   location_id: 0,
   location_name: "",
+  itemDetails: '',
   description: "",
   startingBid: 0,
   biddingType: "",
+  duration_hours: null,
   categories: [], // Stores selected category IDs
   rarity: "",
   image: null,
@@ -240,9 +259,11 @@ const createAuction = async () => {
     console.log("Auction data being sent:", {
       name: auctionData.value.name,
       location_id: auctionData.value.location_id,
+      item_details: auctionData.value.itemDetails,
       description: auctionData.value.description,
       starting_bid: auctionData.value.startingBid,
       bidding_type: auctionData.value.biddingType,
+      duration_hours: auctionData.value.biddingType === 'Lowest-type' ? auctionData.value.duration_hours : null,
       rarity: auctionData.value.rarity,
       categories: auctionData.value.categories, // Ensure this is an array of IDs
       image: auctionData.value.image // Ensure the image URL is included
@@ -253,9 +274,11 @@ const createAuction = async () => {
       {
         name: auctionData.value.name,
         location_id: auctionData.value.location_id,
+        item_details: auctionData.value.itemDetails,
         description: auctionData.value.description,
         starting_bid: auctionData.value.startingBid,
         bidding_type: auctionData.value.biddingType,
+        duration_hours: auctionData.value.biddingType === 'Lowest-type' ? auctionData.value.duration_hours : null,
         rarity: auctionData.value.rarity,
         categories: auctionData.value.categories, // Send category IDs to the backend
         image: auctionData.value.image // Include the image URL

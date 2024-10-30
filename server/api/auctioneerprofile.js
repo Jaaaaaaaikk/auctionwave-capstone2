@@ -11,37 +11,47 @@ export default defineEventHandler(async (event) => {
       // No token found, return an unauthorized error
       throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
     }
-    
+
     // Verify and decode JWT token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Use your actual secret key
 
     // Extract userId from decoded token
     const userId = decoded.userId;
 
     const pool = await getPool();
 
-    // Query to get user profile and location from the Users and Locations tables
+    // Query to get user profile from the Users table
     const [user] = await pool.query(
-      `SELECT u.firstname, u.middlename, u.lastname, u.email, u.about, l.location_name 
+      `SELECT u.user_id, u.firstname, u.middlename, u.lastname, u.email, u.about, u.location_id
        FROM Users u 
-       JOIN Locations l ON u.location_id = l.location_id 
        WHERE u.user_id = ?`,
-      [userId]
+      [userId],
     );
 
     if (!user.length) {
       throw createError({ statusCode: 404, message: "User not found" });
     }
 
-    // Prepare profile data to return
+    // Query to get location name associated with the user
+    const [location] = await pool.query(
+      `SELECT l.location_name 
+       FROM Locations l 
+       WHERE l.location_id = ?`,
+      [user[0].location_id],
+    );
+
+    // Construct the response
     return {
       profile: {
-        fullname: `${user[0].firstname} ${user[0].middlename ? user[0].middlename + " " : ""}${user[0].lastname}`,
+        firstName: user[0].firstname,
+        middleName: user[0].middlename,
+        lastName: user[0].lastname,
         email: user[0].email,
-        location: user[0].location_name, // Use location_name from Locations table
-        about: user[0].about,
+        location: location.length ? location[0].location_name : "Unknown",
+        about: user[0].about
       },
     };
+
   } catch (error) {
     console.error("Error:", error.message);
     throw createError({ statusCode: 401, message: "Invalid or expired token" });

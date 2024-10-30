@@ -6,18 +6,10 @@
         <h1 class="text-3xl font-semibold mb-2">Auction Name: {{ auction.name }}</h1>
         <div class="w-full flex flex-col items-center justify-center mb-4">
           <!-- Display auction image or fallback to a default image -->
-          <img 
-            v-if="auction.image_url" 
-            :src="auction.image_url" 
-            alt="Auction Image Preview" 
-            class="w-48 h-48 object-cover rounded-lg shadow-xl"
-          />
-          <img 
-            v-else 
-            src="public/images/no-image.jpg" 
-            alt="No Image Available" 
-            class="w-48 h-48 object-cover rounded-lg shadow-xl" 
-          />
+          <img v-if="auction.image_url" :src="auction.image_url" alt="Auction Image Preview"
+            class="w-48 h-48 object-cover rounded-lg shadow-xl" />
+          <img v-else src="public/images/no-image.jpg" alt="No Image Available"
+            class="w-48 h-48 object-cover rounded-lg shadow-xl" />
         </div>
         <div class="flex items-center space-x-4 mb-4">
           <span class="text-xl font-medium">Bidding Type:</span>
@@ -33,7 +25,15 @@
         </div>
         <div class="space-y-4">
           <div class="p-4 bg-gray-100 rounded-lg shadow-md">
+            <h3 class="text-lg font-medium">Item Details</h3>
+            <p v-if="!auction.item_details" class="text-gray-500">No Item Details Provided.</p>
+            <p v-else class="text-gray-500">{{ auction.item_details }}</p>
+          </div>
+        </div>
+        <div class="space-y-4">
+          <div class="p-4 bg-gray-100 rounded-lg shadow-md">
             <h3 class="text-lg font-medium">Description</h3>
+            <p v-if="!auction.description" class="text-gray-500">No Description Provided.</p>
             <p class="text-gray-500">{{ auction.description }}</p>
           </div>
         </div>
@@ -49,10 +49,29 @@
       <!-- Participated Bidders -->
       <div class="space-y-4">
         <div class="p-4 bg-gray-100 rounded-lg shadow-md">
-          <h1 class="text-3xl mb-2">Participated Bidders</h1>
-          <!-- Example static data, replace with dynamic data -->
-          <h3 class="text-lg font-medium">John Doe</h3>
-          <p class="text-gray-500">Location</p>
+          <h2 class="flex text-xl text-center font-semibold mb-4"> {{ h2Label }} </h2>
+          <template v-if="auction.bidding_type === 'Lowest-type'">
+            <div v-if="bidders.length === 0" class="text-gray-500 mb-2">
+              No participated bidders yet.
+            </div>
+            <div v-else>
+              <div v-for="bidder in bidders" :key="bidder.user_id" class="mb-2">
+                <span>{{ bidder.firstname }} {{ bidder.lastname }} - {{ bidder.bid_amount }}
+                </span>
+              </div>
+            </div>
+          </template>
+          <template v-else-if="auction.bidding_type === 'Offer-type'">
+            <div v-if="topComments.length === 0" class="text-gray-500 mb-2">
+              No offers have been posted yet.
+            </div>
+            <div v-else>
+              <div v-for="comment in topComments" :key="comment.user_id" class="mb-2">
+                <span>{{ comment.firstname }} {{ comment.lastname }} (number of offers: {{ comment.offer_count }})
+                </span>
+              </div>
+            </div>
+          </template>
         </div>
       </div>
       <div class="space-y-4">
@@ -77,6 +96,9 @@ import { toast } from "vue3-toastify";
 const route = useRoute();
 const auction = ref({});
 const isEmailBlastSent = ref(false);
+const bidders = ref([]);
+const topComments = ref([]);
+
 
 const fetchAuctionDetails = async () => {
   try {
@@ -84,11 +106,38 @@ const fetchAuctionDetails = async () => {
     console.log(data);
     auction.value = data;
 
+    fetchBidders(auction.value.id);
+
     if (data.email_blast_sent === 1) {
       isEmailBlastSent.value = true;
     }
   } catch (error) {
     console.error("Failed to fetch auction details:", error);
+  }
+};
+
+const fetchBidders = async (listingId) => {
+  console.log('auction.listing_id', listingId);
+  if (listingId && auction.value.bidding_type === 'Lowest-type') { // Corrected access here
+    try {
+      const { data } = await axios.get(`/api/auctions/fill-in-bidder-participants?id=${listingId}`);
+      bidders.value = data.bidders;
+      console.log('fetch bidder in bidder-auction', data);
+
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    }
+  } else if (listingId && auction.value.bidding_type === 'Offer-type') { // Corrected access here
+    try {
+      const { data } = await axios.get(`/api/auctions/fill-in-offer-participants?id=${listingId}`);
+      topComments.value = data.offers; // Store the fetched top comments
+
+      console.log('fetch Top comments in bidder-auction', topComments.value);
+    } catch (error) {
+      console.error('Failed to fetch data:', error);
+    }
+  } else {
+    console.error('No listing ID available');
   }
 };
 
@@ -109,6 +158,10 @@ const sendEmailBlast = async () => {
     toast.error("Failed to send email blast.");
   }
 };
+
+const h2Label = computed(() => {
+  return auction.value.bidding_type === 'Lowest-type' ? 'Participated Bidders' : 'Top Comments';
+});
 
 onMounted(() => {
   fetchAuctionDetails();
