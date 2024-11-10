@@ -91,6 +91,9 @@
 <script setup>
 import { ClipboardDocumentCheckIcon, ClockIcon, CheckCircleIcon, EllipsisHorizontalCircleIcon } from '@heroicons/vue/24/outline'
 
+
+
+
 const stats = [
     { id: 1, name: 'Approved', stat: '71,897', icon: CheckCircleIcon },
     { id: 2, name: 'Pending', stat: '587', icon: EllipsisHorizontalCircleIcon },
@@ -111,4 +114,11 @@ const auction = [
     { id: 3, name: 'Auction 3', info: 'Rare item from china', status: 'In Progress' },
     { id: 4, name: 'Auction 4', info: 'Rare item from china', status: 'Complete' },
 ]
+
+
+
+
+
+
+
 </script>

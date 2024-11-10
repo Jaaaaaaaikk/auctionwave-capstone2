@@ -17,20 +17,46 @@ export default defineEventHandler(async (event) => {
         let notifications;
         if (userType === 'Auctioneer') {
             [notifications] = await pool.query(
-                `SELECT n.*, a.uuid AS auction_uuid, a.bidding_type
-                 FROM Notifications n
-                 JOIN AuctionListings a ON n.auction_id = a.listing_id
-                 WHERE a.auctioneer_id = ? AND n.user_id = ?
-                 ORDER BY n.created_at DESC`,
+                `SELECT 
+                    n.*, 
+                    a.uuid AS auction_uuid, 
+                    a.bidding_type, 
+                    CONCAT(sender.firstname, IFNULL(CONCAT(' ', sender.middlename), ''), ' ', sender.lastname) AS sender_full_name,
+                    CONCAT(receiver.firstname, IFNULL(CONCAT(' ', receiver.middlename), ''), ' ', receiver.lastname) AS receiver_full_name
+                FROM 
+                    Notifications n
+                JOIN 
+                    AuctionListings a ON n.auction_id = a.listing_id
+                JOIN 
+                    Users sender ON n.sender_id = sender.user_id  -- Sender join
+                JOIN 
+                    Users receiver ON n.receiver_id = receiver.user_id  -- Receiver join
+                WHERE 
+                    a.auctioneer_id = ? AND n.receiver_id = ?
+                ORDER BY    
+                    n.created_at DESC;`,
                 [userId, userId]
             );
         } else if (userType === 'Bidder') {
             [notifications] = await pool.query(
-                `SELECT n.*, a.uuid AS auction_uuid, a.bidding_type
-                 FROM Notifications n
-                 JOIN AuctionListings a ON n.auction_id = a.listing_id
-                 WHERE n.user_id = ?
-                 ORDER BY n.created_at DESC`,
+                `SELECT 
+                    n.*, 
+                    a.uuid AS auction_uuid, 
+                    a.bidding_type, 
+                    CONCAT(sender.firstname, IFNULL(CONCAT(' ', sender.middlename), ''), ' ', sender.lastname) AS sender_full_name,
+                    CONCAT(receiver.firstname, IFNULL(CONCAT(' ', receiver.middlename), ''), ' ', receiver.lastname) AS receiver_full_name
+                FROM 
+                    Notifications n
+                JOIN 
+                    AuctionListings a ON n.auction_id = a.listing_id
+                JOIN 
+                    Users sender ON n.sender_id = sender.user_id  -- Sender join
+                JOIN 
+                    Users receiver ON n.receiver_id = receiver.user_id  -- Receiver join
+                WHERE 
+                    n.receiver_id = ?
+                ORDER BY 
+                    n.created_at DESC;`,
                 [userId]
             );
         }

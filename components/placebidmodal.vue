@@ -63,10 +63,12 @@
 import { ref, defineProps, computed } from 'vue';
 import { useAuctionStore } from '@/stores/fetch-bidder-store';
 import axios from "axios";
-
+import { useInboxSocketStore } from '@/stores/socketStore';
+import { toast } from 'vue3-toastify';
 
 const auctionStore = useAuctionStore();
 const emit = defineEmits();
+const socketStore = useInboxSocketStore();
 
 const props = defineProps({
   auctionUuid: {
@@ -111,12 +113,12 @@ const confirmBid = () => {
   // Validate bid based on the number of existing bidders
   if (auctionStore.bidders.length > 0) {
     if (isNaN(amount) || amount < auctionStore.minBid || amount >= auctionStore.maxBid) {
-      alert(`Bid amount must be between ${auctionStore.minBid} and ${auctionStore.maxBid - 1}.`);
+      toast.warn(`Bid amount must be between ${auctionStore.minBid} and ${auctionStore.maxBid - 1}.`);
       return;
     }
   } else {
     if (isNaN(amount) || amount !== parseFloat(startingBid)) {
-      alert(`Bid amount must be the starting bid since there are no bidders yet.`);
+      toast.warn(`Bid amount must be the starting bid since there are no bidders yet.`);
       return;
     }
   }
@@ -136,13 +138,27 @@ const placeBid = async (amount) => {
       throw new Error("Auction ID is missing");
     }
 
-    await axios.post('/api/auctions/place-bid', { auctionId, bidAmount: amount });
-    alert("Bid placed successfully!");
+    const response = await axios.post('/api/auctions/place-bid', { auctionId, bidAmount: amount });
+    console.log('Server Response:', response);
+    // Emit the message to the server with the recipient's ID
+    socketStore.socket.emit('bid-message', {
+      recipientId: response.data.auctioneer_id,
+      notification: {
+        sender_full_name: response.data.bidder_name,
+        bidder_name: response.data,
+        listing_id: response.data.listing_id,
+        message: response.data.message,
+        created_at: response.data.created_at,
+        unreadCount: response.data.unreadCount,
+        bid_amount: response.data.bidAmount
+      }
+    });
+    toast.success("Bid placed successfully!");
     closeModal();
 
-  } catch (err) {
-    console.error("Failed to place bid:", err);
-    alert("Failed to place bid.");
+  } catch (error) {
+    console.error("Failed to place bid:", error.response ? error.response.data : error.message);
+    toast.error(`Failed to place bid: ${error.response?.data?.message || error.message}`);
   }
 };
 

@@ -95,28 +95,11 @@
                                 <!--checkbox for each message-->
                                 <input @click.stop type="checkbox" v-model="selectedMessages"
                                     :value="notification.notification_id" class="focus:ring-0" />
-                                <!-- Star Button -->
-                                <button title="Not starred" @click.stop>
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                        class="text-gray-500 hover:text-custom-bluegreen h-5 w-5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z">
-                                        </path>
-                                    </svg>
-                                </button>
-                                <!-- Important Button -->
-                                <button title="Click to mark this email as important" @click.stop>
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                        class="text-gray-500 hover:text-custom-bluegreen h-5 w-5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
-                                    </svg>
-                                </button>
                             </div>
                             <!-- Message Info -->
-                            <span class="w-56 pr-2 truncate">Name of the person who notify </span>
+                            <span class="w-56 pr-2 truncate">
+                                <span>From: </span>
+                                {{ notification.sender_full_name }}</span>
                             <span class="w-96 text-gray-600 text-sm truncate">
                                 - {{ notification.message }}
                             </span>
@@ -213,7 +196,7 @@ const viewAuction = async (notification) => {
 
 // Format date
 const formatDate = (date) => {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
     return new Date(date).toLocaleDateString(undefined, options);
 };
 
@@ -383,62 +366,3 @@ thead {
     opacity: 1;
 }
 </style>
-
-
-
-
-
-
-
-
-
-<!-- <div class="container flex-1 mx-auto p-6 px-2 py-3">
-            <h1 class="text-2xl font-bold mb-6">Inbox</h1>
-            <button @click="markAllAsRead" class="btn-action tooltip mb-4">Mark All As Read</button>
-
-            <div v-if="notificationsStore.notifications.length === 0" class="text-center">
-                <p>No notifications yet.</p>
-            </div>
-
-
-            <div v-else>
-                <table class="min-w-full bg-white shadow-md rounded-lg">
-                    <thead>
-                        <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
-                            <th class="py-3 px-6 text-center">Message</th>
-                            <th class="py-3 px-6 text-center">Date</th>
-                            <th class="py-3 px-6 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="(notification, index) in notificationsStore.notifications"
-                            :key="notification.notification_id"
-                            :class="{ 'bg-yellow-100': notification.is_read === 0, 'bg-gray-100': notification.is_read === 1 }"
-                            class="border-b border-gray-200 hover:bg-gray-100">
-                            <td class="py-3 px-6 text-left">
-                                {{ notification.message }}
-                            </td>
-                            <td class="py-3 px-6 text-left">
-                                {{ formatDate(notification.created_at) }}
-                            </td>
-                            <td class="py-3 px-6 text-center">
-                                <div class="flex justify-center space-x-4">
-
-                                    <button class="btn-action tooltip" @click="viewAuction(notification)">View
-                                        <i class="fas fa-check"></i>
-                                        <span class="tooltip-text">View</span>
-                                    </button>
-
-
-                                    <button @click="deleteNotification(notification.notification_id)"
-                                        class="btn-action tooltip">Delete
-                                        <i class="fas fa-trash"></i>
-                                        <span class="tooltip-text">Delete</span>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div> -->

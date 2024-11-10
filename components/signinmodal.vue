@@ -3,9 +3,9 @@
 
     <div
       class="fixed inset-0 flex items-center justify-center z-50 overflow-x-hidden overflow-y-auto bg-gray-900 bg-opacity-50">
-      <div class="relative w-full max-w-md px-4 h-full md:h-auto">
+      <div class="relative w-full max-w-md px-4 h-96 sm:h-auto ">
         <!-- Modal content -->
-        <div class="bg-white rounded-lg shadow relative dark:bg-gray-700">
+        <div class="bg-white rounded-lg shadow relative dark:bg-gray-700 ">
           <div class="flex justify-end p-2">
             <button type="button"
               class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
@@ -17,7 +17,7 @@
               </svg>
             </button>
           </div>
-          <form class="space-y-6 px-6 lg:px-8 pb-4 sm:pb-6 xl:pb-8" @submit.prevent="login">
+          <form class="space-y-6 px-4 lg:px-8 pb-4 sm:pb-6 xl:pb-8" @submit.prevent="login">
             <h3 class="text-xl font-medium text-gray-900 dark:text-white">Sign in to <p
                 class="text-custom-bluegreen2 font-bold">AuctionWave</p>
             </h3>
@@ -42,25 +42,40 @@
             <div v-if="errorMessage" class="text-red-500 text-center mb-4">
               {{ errorMessage }}
             </div>
+
             <div class="flex justify-between">
               <div class="flex items-start">
-                <div class="flex items-center h-5">
+                <div class="items-center h-5 hidden lg:inline-block">
                   <input id="remember" type="checkbox"
                     class="bg-gray-50 border border-gray-300 focus:ring-3 focus:ring-custom-bluegreen h-4 w-4 rounded dark:bg-gray-600 dark:border-gray-500 dark:focus:ring-custom-bluegreen">
                 </div>
-                <div class="text-sm ml-3">
+                <div class="text-sm ml-3 hidden lg:inline-block">
                   <label for="remember" class="font-medium text-gray-900 dark:text-gray-300">Remember me</label>
                 </div>
               </div>
+              <a href="#" class="text-sm text-blue-700 hover:underline dark:text-blue-500 hidden lg:inline-block">
+                Forgot Password?
+              </a>
+            </div>
+            <button type="submit"
+              class="w-full text-white bg-custom-bluegreen border border-custom-bluegreen hover:border-green-500 hover:bg-green-500  font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Login
+            </button>
+
+            <div class="text-center lg:hidden">
               <a href="#" class="text-sm text-blue-700 hover:underline dark:text-blue-500">Forgot Password?</a>
             </div>
             <button type="submit"
-              class="w-full text-white bg-custom-bluegreen hover:bg-green-500  font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Login
-              to your account</button>
+              class="lg:hidden w-full text-custom-bluegreen border border-custom-bluegreen bg-none   font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800"
+              @click="toggleSignupModal">Create
+              account</button>
           </form>
-          <div class="text-sm font-medium text-gray-500 dark:text-gray-300 space-y-6 px-6 lg:px-8 pb-4 sm:pb-6 xl:pb-8">
-            Not registered? <button class="text-blue-700 hover:underline dark:text-blue-500"
-              @click="toggleSignupModal">Create account</button>
+
+          <div
+            class="text-sm font-medium text-gray-500 dark:text-gray-300 space-y-6 px-6 lg:px-8 pb-4 sm:pb-6 xl:pb-8 hidden lg:block">
+            Not registered?
+            <button class="text-blue-700 hover:underline dark:text-blue-500" @click="toggleSignupModal">
+              Create account
+            </button>
           </div>
         </div>
       </div>

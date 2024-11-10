@@ -1,8 +1,8 @@
 <template>
     <NuxtLayout name="biddernavbar">
         <div class="flex w-full">
-            <NuxtLayout name="sidebar"></NuxtLayout>
-            <div class="flex-grow bg-custom-blue2 mx-auto justify-center" @focus="autoCloseDropDown">
+            <NuxtLayout name="biddersidebar"></NuxtLayout>
+            <div class="flex-grow bg-custom-blue2 mx-auto justify-center">
                 <h2 class="text-2xl font-semibold mb-4 justify-center ml-96"></h2>
 
                 <div v-if="paginatedListings.length === 0" class="text-center py-4 text-red-500">No auctions available.
@@ -48,7 +48,7 @@
                         </div>
                     </div>
 
-                    <div class="my-20 mx-auto flex justify-center">
+                    <div v-if="paginatedListings.length > 0" class="my-20 mx-auto flex justify-center">
                         <div class="inline-flex -space-x-px text-sm">
                             <button @click="firstPage" :disabled="currentPage === 1"
                                 class="flex items-center justify-center px-3 h-8 ms-0 leading-tight text-gray-500 bg-white border border-e-0 border-gray-300 rounded-s-lg hover:bg-custom-bluegreen hover:bg-opacity-25 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white cursor-pointer">
@@ -130,7 +130,6 @@ import ViewAuctionModal from "~/components/viewauctionmodal.vue";
 import { useAuctionFilterStore } from '@/stores/fetch-auction-bidder-dashboard';
 
 const filterStore = useAuctionFilterStore();
-
 const pageSize = ref(12);
 const currentPage = ref(1);
 const totalPages = ref(0);
@@ -138,7 +137,6 @@ const totalListings = ref(0);
 const selectedBiddingType = ref(filterStore.selectedBiddingType);
 const selectedRarity = ref(filterStore.selectedRarity);
 const searchAuction = ref(filterStore.searchTerm);
-const dropdownOpen = ref(false);
 const showModal = ref(false);
 const selectedAuction = ref(null);
 const listings = ref([]);
@@ -168,6 +166,11 @@ const fetchListings = async () => {
         listings.value = response.data.listings;
         totalListings.value = response.data.totalListings;
         totalPages.value = response.data.totalPages;
+
+        if (listings.value.length === 0) {
+            currentPage.value = 1;  // Reset to first page if no listings
+        }
+
     } catch (error) {
         console.error("Failed to fetch auction listings:", error);
     }
@@ -214,10 +217,6 @@ const lastPage = () => {
     }
 };
 
-const autoCloseDropDown = () => {
-    dropdownOpen.value = false;
-};
-
 const openModal = (auction) => {
     selectedAuction.value = auction;
     showModal.value = true;
@@ -227,6 +226,7 @@ const closeModal = () => {
     showModal.value = false;
     selectedAuction.value = null;
 };
+
 
 onMounted(async () => {
     await Promise.all([fetchListings(), fetchMostVisitedAuctions()]);

@@ -1,5 +1,6 @@
 <template>
   <NuxtLayout name="auctioneernavbar">
+    <NuxtLayout name="auctioneersidebar"></NuxtLayout>
     <client-only>
       <div class="min-h-screen bg-custom-white w-full mt-16">
         <div class="bg-white w-3/5 mx-auto px-12 py-12 rounded-lg flex items-start relative">
@@ -117,8 +118,8 @@
             <!-- Location Field -->
             <div class="mb-4">
               <label class="block font-medium">Location:</label>
-              <input v-model="editProfile.location" type="text" class="w-full border border-gray-300 p-2 rounded-lg"
-                required />
+              <input v-model="editProfile.location" type="text"
+                class="w-full border border-gray-300 p-2 rounded-lg bg-gray-200 cursor-not-allowed" readonly />
             </div>
             <div class="mb-4">
               <label class="block font-medium">About:</label>

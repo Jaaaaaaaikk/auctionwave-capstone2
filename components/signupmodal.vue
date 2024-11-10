@@ -128,178 +128,84 @@
           </span>
         </div>
 
+        <!-- Add Terms and Conditions Checkbox -->
+        <div class="flex items-center px-2">
+          <input type="checkbox" id="agreeTnC" v-model="form.agreeTnC" class="mr-2" required />
+          <label for="agreeTnC" class="text-gray-700 dark:text-gray-300 text-sm">
+            I agree to the
+            <span class="text-blue-500 hover:underline cursor-pointer" @click="showTnCModal = true">
+              Terms and Conditions
+            </span>
+          </label>
+        </div>
+
         <button type="button" @click="toggleOtpModal"
           class="w-full text-white bg-custom-bluegreen hover:bg-green-500 focus:ring-4 focus:ring-custom-bluegreen font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Next</button>
 
         <div class="text-sm font-medium text-gray-500 dark:text-gray-300">
-          Already have an account? <button class="text-blue-700 hover:underline dark:text-blue-500" @click="$emit('close-signup')">Sign in</button>
+          Already have an account? <button class="text-blue-700 hover:underline dark:text-blue-500"
+            @click="$emit('close-signup')">Sign in</button>
         </div>
       </form>
+
+      <!-- Terms and Conditions Modal -->
+      <transition name="fade">
+        <div v-if="showTnCModal" class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+          <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg mx-auto">
+            <h2 class="text-xl font-semibold mb-4">Terms and Conditions</h2>
+            <div class="overflow-y-auto max-h-60 text-sm text-gray-700">
+              <p>
+                1. By using this platform, you agree to comply with these terms and conditions. Our role is as a
+                middleman
+                or facilitator for auctions and transactions between users. We do not guarantee the quality or delivery
+                of items nor are responsible for disputes arising between users.
+              </p>
+              <br>
+              <p>
+                2. Users must provide accurate and up-to-date information. Users are responsible for safeguarding their
+                account details and maintaining the confidentiality of their login credentials.
+              </p>
+              <br>
+              <p>
+                3. The platform is only a facilitator and is not involved in the actual transaction or exchange of goods
+                or
+                services. Any transaction disputes arising outside the platform are the responsibility of the involved
+                parties. The platform will only mediate according to its policies as stated herein.
+              </p>
+              <br>
+              <p>
+                4. To participate in certain auctions, bidders may be required to deposit a refundable cash bond. The
+                cash
+                bond may be retained in cases where a dispute arises and cannot be resolved or if the user fails to
+                adhere to agreed-upon terms within the platform.
+              </p>
+              <br>
+              <p>
+                5. Disputes between users must be resolved by mutual agreement. If a dispute cannot be resolved within a
+                set timeframe, the platform may automatically handle the cash bond per its policies but assumes no
+                liability beyond platform involvement.
+              </p>
+              <br>
+              <p>
+                6. By signing up and using the platform, users agree to these terms, acknowledge that their
+                participation
+                in transactions is at their own risk, and understand that the platform assumes no liability for disputes
+                arising outside its framework.
+              </p>
+            </div>
+            <div class="flex justify-end mt-4">
+              <button @click="showTnCModal = false"
+                class="w-full text-white bg-custom-bluegreen hover:bg-green-500 focus:ring-4 focus:ring-custom-bluegreen font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </transition>
+
       <OtpModal v-if="showOtpModal" @close_otp_modal="showOtpModal = false" @show-signin="showSigninModalHandler"
         :form="form" />
     </div>
-
-
-
-    <!-- <div class="font-mono fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-      <div class="bg-gray-300 shadow-lg rounded-3xl overflow-hidden w-11/12 max-w-lg mx-auto p-5">
-        <header class="p-4 border-b">
-          <button type="button" @click="$emit('close-signup')" class="text-gray-600 hover:text-gray-800">
-            <svg class="w-full h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M19 12H5" />
-              <path d="M12 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h1 class="text-2xl font-bold text-center">Sign Up Form</h1>
-        </header>
-        <section class="p-4">
-          <form @submit.prevent="submitForm">
-            Group First Name, Middle Name, Last Name
-            <div class="flex flex-wrap -mx-2 mb-5">
-              <div class="w-full sm:w-1/3 px-2 mb-4 sm:mb-0">
-                <div class="relative z-0 w-full group">
-                  <input v-model="form.firstname" id="firstname" type="text"
-                    class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                    placeholder=" " required />
-                  <label for="firstname"
-                    class="peer-focus:font-medium pl-2 left-1 bg-gray-300 absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                    First Name</label>
-                </div>
-              </div>
-              <div class="w-full sm:w-1/3 px-2 mb-4 sm:mb-0">
-                <div class="relative z-0 w-full group">
-                  <input v-model="form.middlename" id="middlename" type="text"
-                    class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                    placeholder=" " />
-                  <label for="middlename"
-                    class="peer-focus:font-medium pl-2 left-1 bg-gray-300 absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                    Middle Name</label>
-                </div>
-              </div>
-              <div class="w-full sm:w-1/3 px-2">
-                <div class="relative z-0 w-full group">
-                  <input v-model="form.lastname" id="lastname" type="text"
-                    class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                    placeholder=" " required />
-                  <label for="lastname"
-                    class="peer-focus:font-medium pl-2 left-1 bg-gray-300 absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                    Last Name</label>
-                </div>
-              </div>
-            </div>
-
-            Email, and Location Field Group 
-            <div class="flex flex-wrap -mx-2 mb-5">
-              <div class="w-full sm:w-1/2 px-2 mb-4 sm:mb-0">
-                <div class="relative z-0 w-full mb-5 group">
-                  <input v-model="form.email" id="email" type="email"
-                    class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                    placeholder=" " required />
-                  <label for="email"
-                    class="peer-focus:font-medium pl-2 left-1 bg-gray-300 absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                    Email address</label>
-                  <span v-if="emailError" class="text-red-500 text-sm">{{ emailError }}</span>
-                </div>
-              </div>
-              <div class="w-full sm:w-1/2 px-2">
-                <input type="text" v-model="selectedCity.name"
-                  class="text-gray-500 bg-transparent border-2 rounded-md w-full" placeholder="City Location" readonly
-                  required />
-                <button type="button" @click="toggleMap"
-                  class="bg-teal-500 border border-teal-500 rounded-full hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-600 text-gray-900 px-4 ml-3 shadow-sm-light shadow-black text-xs">
-                  Select City on Map
-                </button>
-                <CityMap v-if="showMap" @citySelected="setCity" />
-              </div>
-            </div>
-
-            <!-- Group Password and Confirm Password 
-            <div class="flex flex-wrap -mx-2 mb-5">
-              <div class="w-full sm:w-1/2 px-2 mb-4 sm:mb-0">
-                <div class="relative z-0 w-full group">
-                  <input v-model="form.password" id="password" type="password"
-                    class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                    placeholder=" " required autocomplete="off"/>
-                  <label for="password"
-                    class="peer-focus:font-medium pl-2 left-1 bg-gray-300 absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                    Password</label>
-                </div>
-              </div>
-              <div class="w-full sm:w-1/2 px-2">
-                <div class="relative z-0 w-full group">
-                  <input v-model="form.confirmPassword" id="confirmPassword" type="password"
-                    class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                    placeholder=" " required autocomplete="off"/>
-                  <label for="confirmPassword"
-                    class="peer-focus:font-medium pl-2 left-1 bg-gray-300 absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                    Confirm Password</label>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex flex-wrap -mx-2 mb-5">
-              <!-- User Type Field
-              <div class="w-full sm:w-1/2 px-2">
-                <div class="relative z-0 w-full mb-5 group">
-                  <select v-model="form.userType" id="userType" @change="handleUserTypeChange"
-                    class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                    required>
-                    <option disabled>Select User Type</option>
-                    <option value="Bidder">Bidder</option>
-                    <option value="Auctioneer">Auctioneer</option>
-                  </select>
-                  <label for="userType"
-                    class="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                    User Type</label>
-                </div>
-              </div>
-
-              <div class="w-full sm:w-1/2 px-2">
-                <!-- Bidder Category Selection
-                <div v-if="form.userType === 'Bidder'" class="relative z-0 w-full mb-5 group">
-                  <select v-model="selectedCategory" @change="addCategory"
-                    class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer">
-                    <option value="" disabled>Select Category</option>
-                    <option v-for="category in categories" :key="category" :value="category">
-                      {{ category }}
-                    </option>
-                  </select>
-                  <label for="category"
-                    class="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                    Bidder Category</label>
-                </div>
-              </div>
-            </div>
-
-            <!-- Selected Categories Display
-            <div v-if="form.userType === 'Bidder'" class="mb-5">
-              <span v-for="category in form.categories" :key="category"
-                class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-                {{ category }}
-                <button type="button" @click="removeCategory(category)" class="text-red-500 ml-1">
-                  x
-                </button>
-              </span>
-            </div>
-
-            <!-- Submit and Back to Login Buttons
-            <div class="flex justify-end mt-4">
-              <!-- <button type="submit"
-                class="bg-teal-500 border border-teal-500 rounded-full hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-600 text-gray-900 py-2 px-4 shadow-sm-light shadow-black font-semibold">
-                Sign Up
-              </button>
-              <button type="button" @click="toggleOtpModal"
-                class="bg-teal-500 border border-teal-500 rounded-full hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-600 text-gray-900 py-2 px-4 shadow-sm-light shadow-black font-semibold">
-                Next
-              </button>
-              <OtpModal v-if="showOtpModal" @close_otp_modal="showOtpModal = false"
-                @show-signin="showSigninModalHandler" :form="form" />
-            </div>
-          </form>
-        </section>
-      </div>
-    </div> -->
   </transition>
 </template>
 
@@ -316,6 +222,7 @@ const showOtpModal = ref(false)
 const selectedCity = ref({ name: '', id: '' });
 const selectedCategory = ref("");
 const emailError = ref("");
+const showTnCModal = ref(false);
 
 const form = ref({
   firstname: "",
@@ -327,6 +234,7 @@ const form = ref({
   confirmPassword: "",
   userType: "",
   categories: [], // Array to store selected categories for bidders
+  agreeTnC: false,
 });
 
 const categories = ref([
@@ -335,6 +243,19 @@ const categories = ref([
   "Collectibles",
   "Furniture",
   "Real Estate",
+  "Jewelry & Watches",
+  "Vehicles",
+  "Sports Memorabilia",
+  "Home Appliances",
+  "Books",
+  "Antiques",
+  "Music Instruments",
+  "Manuscripts",
+  "Tickets",
+  "Vintage",
+  "Coins",
+  "Pet Supplies",
+  "DIY Materials",
 ]);
 
 // Watch for email changes and validate in email address field
@@ -377,12 +298,6 @@ const validateForm = () => {
     }
   }
 
-  // Check if passwords match
-  if (form.value.password !== form.value.confirmPassword) {
-    toast.warning("Passwords do not match");
-    return false;
-  }
-
   // Check email domain
   const emailRegex = /^[\w-.]+@gmail\.com$/;
   if (!emailRegex.test(form.value.email)) {
@@ -401,8 +316,33 @@ const validateForm = () => {
     return false;
   }
 
+  // Check if passwords match
+  if (form.value.password !== form.value.confirmPassword) {
+    toast.warning("Passwords do not match");
+    return false;
+  }
+
+  // Check for User Type selection
+  if (!form.value.userType) {
+    toast.warning("Please select a User Type.");
+    return false;
+  }
+
+  // Check for at least one category if the user type is "Bidder"
+  if (form.value.userType === 'Bidder' && form.value.categories.length === 0) {
+    toast.warning("Please select at least one category.");
+    return false;
+  }
+
+  // Ensure T&C checkbox is checked
+  if (!form.value.agreeTnC) {
+    toast.warning("Please agree to the Terms and Conditions.");
+    return false;
+  }
+
   return true; // if All validations passed then return true.
 };
+
 
 const toggleOtpModal = async () => {
   if (validateForm()) {
@@ -475,5 +415,16 @@ const removeCategory = (category) => {
 .modal-width-leave-to {
   opacity: 0;
   transform: scale(0.9);
+}
+
+/* Transition for modal background */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>

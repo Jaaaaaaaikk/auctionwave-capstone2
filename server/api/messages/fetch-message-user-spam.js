@@ -40,7 +40,7 @@ export default defineEventHandler(async (event) => {
             FROM Messages m
             JOIN MessageParticipants mp ON m.message_id = mp.message_id
             JOIN Users u ON m.sender_id = u.user_id 
-            WHERE mp.user_id = 12 AND mp.role = 'recipient' AND mp.status = 'Spam'
+            WHERE mp.user_id = ? AND mp.role = 'recipient' AND mp.status = 'Spam'
             ORDER BY m.created_at DESC
         `, [userId]);
 

@@ -3,7 +3,6 @@ import { getPool } from "../../db";
 import jwt from "jsonwebtoken";
 
 export default defineEventHandler(async (event) => {
-
   const listingId = event.req.url?.split('?')[1]?.split('=')[1];
 
   // Retrieve the access token from cookies
@@ -24,24 +23,53 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  console.log('the listing id', listingId);
   // Connect to the database
   const pool = await getPool();
 
-  // Retrieve the count of bidders for the specified auction
+  // First, fetch the auction details to determine the bidding type
   try {
-    const [rows] = await pool.query(
-      `SELECT COUNT(DISTINCT participant_id) AS bidder_count
-       FROM Bids
-       WHERE listing_id = ? AND status = 'Pending'`,
-      [listingId] // The auction ID from query parameters
+    const [auctionRows] = await pool.query(
+      `SELECT bidding_type FROM AuctionListings WHERE listing_id = ?`,
+      [listingId]
     );
 
-    // If no rows are found, return a count of zero
-    const bidderCount = rows.length > 0 ? rows[0].bidder_count : 0;
+    if (auctionRows.length === 0) {
+      throw createError({
+        statusCode: 404,
+        message: "Auction not found",
+      });
+    }
 
-    return { bidderCount }; // Return the count of bidders
+    console.log('the auction rows', auctionRows);
+    const biddingType = auctionRows[0].bidding_type;
+
+    // Retrieve the count of bidders based on the auction type
+    let bidderCount = 0;
+
+    if (biddingType === 'Lowest-type') {
+      const [bidRows] = await pool.query(
+        `SELECT COUNT(DISTINCT bidder_id) AS bidder_count
+         FROM Bids
+         WHERE listing_id = ? AND status = 'Active'`,
+        [listingId]
+      );
+      bidderCount = bidRows.length > 0 ? bidRows[0].bidder_count : 0;
+    } else if (biddingType === 'Offer-type') {
+      const [offerRows] = await pool.query(
+        `SELECT COUNT(DISTINCT bidder_id) AS bidder_count
+         FROM Offers
+         WHERE listing_id = ? AND review_status IN ('Offer Pending', 'Provide More')`,
+        [listingId]
+      );
+      bidderCount = offerRows.length > 0 ? offerRows[0].bidder_count : 0;
+    }
+
+    console.log('the auction rows', bidderCount);
+
+    return { bidderCount };
   } catch (error) {
     console.error("Database query error:", error);
-    throw createError({ statusCode: 500, message: "Internal Server Error" });
+    throw createError({ statusCode: 500, message: "Server Error" });
   }
 });

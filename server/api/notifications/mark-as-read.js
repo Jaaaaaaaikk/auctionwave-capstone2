@@ -34,11 +34,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const pool = getPool();
-  
+
   try {
     // Update the notification to mark it as read only if it belongs to the current user
     const [result] = await pool.query(
-      "UPDATE Notifications SET is_read = TRUE WHERE notification_id = ? AND user_id = ?",
+      "UPDATE Notifications SET is_read = TRUE WHERE notification_id = ? AND receiver_id = ?",
       [notificationId, userId]
     );
 

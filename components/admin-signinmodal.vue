@@ -13,64 +13,71 @@
                 </svg>
             </button>
 
-            <div class="text-center text-3xl font-bold px-5 text-custom-bluegreen my-14">Sign in as Admin</div>
+            <form @submit.prevent="login">
+                <div class="text-center text-3xl font-bold px-5 text-custom-bluegreen my-14">Sign in as Admin</div>
+                <!-- Error message -->
+                <div v-if="errorMessage" class="text-red-500 text-center mb-4">{{ errorMessage }}</div>
 
-            <!-- Error message -->
-            <div v-if="error" class="text-red-500 text-center mb-4">{{ error }}</div>
+                <!-- Email input -->
+                <div class="flex justify-center mt-4">
+                    <input v-model="email" type="text" id="email" name="email"
+                        class="border p-2 w-5/6 rounded-lg h-14 focus:outline-none focus:border-custom-bluegreen focus:ring-1 focus:ring-custom-bluegreen"
+                        placeholder="Email Address">
+                </div>
 
-            <!-- Email input -->
-            <div class="flex justify-center mt-4">
-                <input v-model="email" type="text" id="email" name="email"
-                    class="border p-2 w-5/6 rounded-lg h-14 focus:outline-none focus:border-custom-bluegreen focus:ring-1 focus:ring-custom-bluegreen"
-                    placeholder="Email Address">
-            </div>
+                <!-- Password input -->
+                <div class="flex justify-center mt-4">
+                    <input v-model="password" type="password" id="password" name="password"
+                        class="border p-2 w-5/6 rounded-lg h-14 focus:outline-none focus:border-custom-bluegreen focus:ring-1 focus:ring-custom-bluegreen"
+                        placeholder="Password">
+                </div>
 
-            <!-- Password input -->
-            <div class="flex justify-center mt-4">
-                <input v-model="password" type="password" id="password" name="password"
-                    class="border p-2 w-5/6 rounded-lg h-14 focus:outline-none focus:border-custom-bluegreen focus:ring-1 focus:ring-custom-bluegreen"
-                    placeholder="Password">
-            </div>
+                <!-- Divider -->
+                <div class="flex justify-center mt-4">
+                    <hr class="w-5/6">
+                </div>
 
-            <!-- Divider -->
-            <div class="flex justify-center mt-4">
-                <hr class="w-5/6">
-            </div>
-
-            <!-- Login button -->
-            <div class="flex justify-center mt-4">
-                <button @click="handleLogin" type="button"
-                    class="border w-5/6 bg-custom-bluegreen rounded-lg text-white h-14 transition-shadow duration-300 hover:shadow-inner">Log
-                    In</button>
-            </div>
-
-
+                <!-- Login button -->
+                <div class="flex justify-center mt-4">
+                    <button type="submit"
+                        class="border w-5/6 bg-custom-bluegreen rounded-lg text-white h-14 transition-shadow duration-300 hover:shadow-inner">Log
+                        In</button>
+                </div>
+            </form>
         </div>
     </div>
 </template>
 
-<script>
-export default {
-    data() {
-        return {
-            email: '',
-            password: '',
-            error: null
-        }
-    },
-    methods: {
-        handleLogin() {
-            // Check for correct credentials
-            if (this.email === 'admin' && this.password === '1234') {
-                // Navigate to the admin dashboard if credentials are correct
-                this.$router.push('/admin/admindashboard');
-            } else {
-                // Show an error message if credentials are incorrect
-                this.error = 'Invalid login credentials. Please try again.';
-            }
+<script setup>
+import { ref } from "vue";
+import axios from "axios";
+import { useRouter } from "vue-router";
+import { toast } from "vue3-toastify";
+
+const emit = defineEmits();
+const email = ref("");
+const password = ref("");
+const router = useRouter();
+const errorMessage = ref("");
+
+const login = async () => {
+    try {
+        await axios.post("/api/adminlogin", {
+            email: email.value,
+            password: password.value,
+        });
+        router.replace("/admin/admindashboard");
+
+    } catch (error) {
+        if (error.response && error.response.data) {
+            errorMessage.value = error.response.data.message;
+            toast.error(errorMessage.value);
+        } else {
+            toast.error("An unexpected error occurred");
         }
     }
-}
+};
+
 </script>
 
 <style scoped>

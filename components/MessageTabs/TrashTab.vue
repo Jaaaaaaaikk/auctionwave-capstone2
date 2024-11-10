@@ -15,7 +15,7 @@
                     <div class="w-full flex items-center justify-between p-1 my-1 cursor-pointer">
                         <div class="flex items-center ml-4">
                             <!-- Message Info -->
-                            <span class="w-56 pr-2 truncate mx-4">{{ message.sender_name }}</span>
+                            <span class="w-56 pr-2 truncate mx-4">From: {{ message.sender_name }}</span>
                             <span class="w-64 truncate mx-4">{{ message.subject }}</span>
                             <span class="mx-4">-</span>
                             <span class="w-96 text-gray-600 text-sm truncate mx-4">
@@ -31,16 +31,6 @@
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                        </path>
-                                    </svg>
-                                </button>
-                                <!-- Mark as Unread Button -->
-                                <button title="Mark As Unread">
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                        class="text-gray-500 hover:text-custom-bluegreen h-5 w-5" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
                                         </path>
                                     </svg>
                                 </button>
@@ -64,18 +54,23 @@ const hoverStates = ref({});
 
 const fetchUserTrash = async () => {
     try {
+        await new Promise(resolve => setTimeout(resolve, 1200));
+
         const response = await axios.get('/api/messages/fetch-message-user-trash');
         messages.value = response.data.messages;
     } catch (error) {
-        console.error('Error fetching sent messages:', error);
+        console.error('Error fetching Trash messages:', error);
     }
 }
 
+const setMessageHover = (messageId, isHovered) => {
+    hoverStates.value[messageId] = isHovered;
+};
 
 // Utility function to format the date
-const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const formatDate = (date) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(date).toLocaleDateString(undefined, options);
 };
 
 onMounted(() => {

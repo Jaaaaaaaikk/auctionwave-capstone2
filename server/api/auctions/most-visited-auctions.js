@@ -57,10 +57,11 @@ export default defineEventHandler(async (event) => {
       UserProfileImages upi ON u.user_id = upi.user_id AND upi.is_current_profile_image = TRUE
     WHERE 
       al.status = 'Auction Pending'
+      AND al.location_id = ? -- Filter by the user’s location ID
     GROUP BY al.listing_id 
-    HAVING visit_count > 0  -- This line ensures only auctions with at least one visit are returned
+    HAVING visit_count > 0  -- Only include auctions with at least one visit
     ORDER BY visit_count DESC
-    LIMIT 3; 
+    LIMIT 3;
   `;
 
   // Open a connection to the database
@@ -68,7 +69,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     // Execute the query
-    const [rows] = await pool.query(query);
+    const [rows] = await pool.query(query, [userLocation]);
 
     rows.forEach(row => {
       row.categories = row.categories ? row.categories.split(',') : [];

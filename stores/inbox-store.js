@@ -1,54 +1,29 @@
 import { defineStore } from 'pinia';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
 import axios from 'axios';
 
 export const useInboxStore = defineStore('inbox', () => {
     const messages = ref([]);
     const unreadCount = ref(0);
-    // let socket;
-
-    // const connectWebSocket = () => {
-    //     try {
-    //         socket = new WebSocket('ws://localhost:3001/ws'); // Ensure this URL is correct
-    //         socket.onopen = () => {
-    //             console.log("WebSocket connection established.");
-    //         };
-    //         socket.onmessage = (event) => {
-    //             const newMessage = JSON.parse(event.data);
-    //             console.log("New message received:", newMessage); // Log received messages
-    //             messages.value.unshift(newMessage); // Add to start of inbox
-    //             if (!newMessage.is_read) unreadCount.value++;
-    //         };
-
-    //         socket.onclose = () => {
-    //             console.log("WebSocket closed. Reconnecting...");
-    //             setTimeout(connectWebSocket, 5000); // Reconnect after a delay
-    //         };
-
-    //         socket.onerror = (error) => {
-    //             console.error("WebSocket error observed:", error);
-    //         };
-    //     } catch (error) {
-    //         console.error("WebSocket connection failed:", error);
-    //     }
-    // };
-
-    // const addMessage = (newMessage) => {
-    //     messages.value.push(newMessage);
-    // };
+    const isLoading = ref(false);
 
     const fetchInbox = async () => {
-        try {
-            // Introduce a delay of 1.5 seconds (1500 milliseconds)
-            await new Promise(resolve => setTimeout(resolve, 1200));
+        if (isLoading.value) return; // Prevent further calls if already loading
 
+        isLoading.value = true; // Set loading state
+        console.log("Fetching inbox...");
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1200));
             const { data } = await axios.get('/api/messages/fetch-message-user-inbox');
             messages.value = data.messages;
-            unreadCount.value = data.messages.filter(message => !message.is_read).length; // Ensure correct property
+            unreadCount.value = data.messages.filter(message => !message.is_read).length;
         } catch (error) {
             console.error("Failed to fetch messages:", error);
+        } finally {
+            isLoading.value = false; // Reset loading state
         }
     };
+
 
     // Mark a message as read
     const markAsRead = async (messageId) => {
@@ -145,6 +120,7 @@ export const useInboxStore = defineStore('inbox', () => {
             messages.value[messageIndex].is_read = 1; // Rollback
         }
     };
+
 
 
     return { messages, unreadCount, fetchInbox, markAsRead, markAllAsRead, spamMessage, trashMessage, deleteMessage, markAsUnread };

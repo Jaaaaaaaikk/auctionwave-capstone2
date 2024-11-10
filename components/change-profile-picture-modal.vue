@@ -31,7 +31,7 @@
           <h1 class="text-2xl font-bold text-start mb-4">Your Uploads</h1>
           <div v-if="previousUploads.length > 0" class="grid grid-cols-2 gap-4">
             <div v-for="image in previousUploads" :key="image.profile_image_id"
-             @click="confirmSetAsProfileImage(image.profile_image_id)"
+              @click="confirmSetAsProfileImage(image.profile_image_id)"
               class="cursor-pointer border-2 rounded-lg p-2 hover:border-custom-bluegreen">
               <img :src="image.profile_image_url" alt="Uploaded Image" class="w-full h-auto object-cover rounded-md" />
             </div>
@@ -71,7 +71,7 @@ const userStore = useUserStore(); // Use the user store
 const fetchPreviousUploads = async () => {
   try {
     const response = await axios.get('/api/user-uploads');  // Fetch previously uploaded images
-    console.log("Fetched uploads:", response.data); 
+    console.log("Fetched uploads:", response.data);
     previousUploads.value = response.data.uploads;
   } catch (error) {
     console.error('Error fetching previous uploads:', error);
@@ -114,9 +114,6 @@ const saveProfileImage = async () => {
   const formData = new FormData();
   formData.append("image", file);
 
-   // Log file type for debugging
-   console.log("Uploaded file type:", file.type);
-
   try {
     // Send the image to the server for upload
     const response = await axios.post("/api/upload-profile-image", formData, {
@@ -126,7 +123,7 @@ const saveProfileImage = async () => {
     });
 
     const newProfileImageUrl = response.data.user_profile_picture;
-    
+
     // Update the profile image in the store
     userStore.setProfileImage(newProfileImageUrl); // Set the new profile image in Pinia store
 

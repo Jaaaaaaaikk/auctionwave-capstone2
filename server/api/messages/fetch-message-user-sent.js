@@ -33,15 +33,16 @@ export default defineEventHandler(async (event) => {
                 m.subject, 
                 m.message, 
                 m.created_at, 
-                CONCAT(u.firstname, ' ', u.middlename, ' ', u.lastname) AS recipient_name 
+                CONCAT(u.firstname, IFNULL(CONCAT(' ', u.middlename), ''), ' ', u.lastname) AS recipient_name 
             FROM 
                  MessageParticipants mp
             JOIN
                 Messages m ON mp.message_id = m.message_id
             JOIN 
-                Users u ON m.sender_id = u.user_id 
+                Users u ON mp.user_id = u.user_id 
             WHERE 
-                m.sender_id = ?
+                m.sender_id = 12 AND mp.role = 'recipient'
+            ORDER BY m.created_at DESC
             `,
             [senderId]
         );

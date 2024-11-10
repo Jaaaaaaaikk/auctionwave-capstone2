@@ -53,6 +53,7 @@ const hoverStates = ref({});
 
 const fetchUserSent = async () => {
     try {
+        await new Promise(resolve => setTimeout(resolve, 1800));
         const response = await axios.get('/api/messages/fetch-message-user-sent');
         messages.value = response.data.messages;
     } catch (error) {
@@ -67,19 +68,14 @@ const deleteMessage = async (messageId) => {
     console.log(`Delete message with ID: ${messageId}`);
 };
 
-const markAsUnread = async (messageId) => {
-    // Implement mark as unread logic here
-    console.log(`Mark message with ID: ${messageId} as unread`);
-};
-
 const setMessageHover = (messageId, isHovered) => {
     hoverStates.value[messageId] = isHovered;
 };
 
 // Utility function to format the date
-const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const formatDate = (date) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+    return new Date(date).toLocaleDateString(undefined, options);
 };
 
 onMounted(() => {

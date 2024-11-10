@@ -64,21 +64,27 @@
 
         <div class="w-full sm:w-1/2  my-2" v-if="auction.bidding_type === 'Lowest-type'">
           <h3 class="flex text-xl text-center font-semibold ">Participated Bidders</h3>
+          <div v-if="bidders.length === 0" class="mb-2">
+            <span class="text-gray-600 text-sm flex pr-10 ml-1 mt-2">No participated bidders yet.
+            </span>
+          </div>
           <!-- Eye Icon (Viewers Count) -->
-
           <div v-for="bidder in bidders" :key="bidder.user_id" class="mb-2">
-            <span class="text-gray-600 text-sm flex">{{ bidder.firstname }} {{ bidder.lastname }}
+            <span class="text-gray-600 text-sm flex mt-1">{{ bidder.full_name }}
               <span v-if="isCurrentUser(bidder.user_id)" class="text-teal-500 pr-10 ml-1">(YOU)</span>
             </span>
           </div>
         </div>
         <div class="w-full sm:w-1/2  my-2" v-else-if="auction.bidding_type === 'Offer-type'">
-          <h3 class="flex text-xl text-center font-semibold ">Top Participated Bidders</h3>
+          <h3 class="flex text-xl text-center font-semibold ">Participated Bidders</h3>
+          <div v-if="topComments.length === 0" class="mb-2">
+            <span class="text-gray-600 text-sm flex pr-10 ml-1 mt-2">No participated bidders yet.
+            </span>
+          </div>
           <!-- Eye Icon (Viewers Count) -->
           <div v-for="comment in topComments" :key="comment.user_id" class="mb-2 text-gray-600">
-            <span class="text-gray-600 text-sm flex">{{ comment.firstname }} {{ comment.lastname }} (number of offers:
-              {{ comment.offer_count }})
-              <span v-if="isCurrentUser(comment.user_id)" class="text-custom-bluegreen pr-10">(YOU)</span>
+            <span class="text-gray-600 text-sm flex mt-1">{{ comment.full_name }}
+              <span v-if="isCurrentUser(comment.user_id)" class="text-custom-bluegreen pr-10 ml-1">(YOU)</span>
             </span>
           </div>
         </div>
@@ -183,7 +189,7 @@ const fetchBidders = async () => {
       console.log('Fetched bidders for lowest-type:', bidders.value);
     } else if (props.auction.bidding_type === 'Offer-type') {
       const { data } = await axios.get(`/api/auctions/fill-in-offer-participants`, { params: { id: listingId } });
-      topComments.value = data.offers;
+      topComments.value = data.offers2;
       currentUserId.value = data.currentUserId;
       console.log('Fetched top comments for offer-type:', topComments.value);
     } else {

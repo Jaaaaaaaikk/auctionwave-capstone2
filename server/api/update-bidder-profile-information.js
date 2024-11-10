@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
     const userId = decoded.userId;
 
     // Read body and retrieve the provided fields
-    const { firstName, middleName, lastName, location, about, categories } = await readBody(event);
+    const { firstName, middleName, lastName, location_id, about, categories } = await readBody(event);
 
     const pool = await getPool();
 
@@ -36,9 +36,12 @@ export default defineEventHandler(async (event) => {
       updateQueries.push("lastname = ?");
       updateValues.push(lastName);
     }
-    if (location) {
+
+    let locationUpdated = false;
+    if (location_id) {
       updateQueries.push("location_id = ?");
-      updateValues.push(location);
+      updateValues.push(location_id);
+      locationUpdated = true;
     }
     if (about) {
       updateQueries.push("about = ?");
@@ -97,6 +100,18 @@ export default defineEventHandler(async (event) => {
           [userId, categoriesToRemove]
         );
       }
+    }
+
+    // Regenerate JWT token if location was updated
+    if (locationUpdated) {
+      const newToken = jwt.sign(
+        { userId, user_Location: location_id, userType: decoded.userType },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Set the updated token as an HTTP-only cookie
+      setHeader(event, "Set-Cookie", `accessToken=${newToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=${24 * 60 * 60}`);
     }
 
     return { message: "Profile and categories updated successfully" };

@@ -23,6 +23,10 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
         } else if (userType === 'Auctioneer' && to.path !== '/auctioneer/auctioneerdashboard') {
           return navigateTo('/auctioneer/auctioneerdashboard', { replace: true }); // Redirect Auctioneer to their dashboard
         }
+        else if (userType === 'admin' && to.path !== '/admin/admindashboard') {
+          return navigateTo('/admin/admindashboard', { replace: true }); // Redirect Admin to their dashboard
+        }
+
       }
 
       // Prevent access to Bidder routes if the user is not a Bidder
@@ -32,6 +36,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
       // Prevent access to Auctioneer routes if the user is not an Auctioneer
       if (to.path.startsWith('/auctioneer') && userType !== 'Auctioneer') {
+        return navigateTo('/homepage');
+      }
+
+      // Prevent access to Bidder routes if the user is not a Bidder
+      if (to.path.startsWith('/admin') && userType !== 'admin') {
         return navigateTo('/homepage');
       }
     }

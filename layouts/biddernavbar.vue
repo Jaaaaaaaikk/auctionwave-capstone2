@@ -48,6 +48,9 @@
                   </g>
                 </g>
               </svg>
+              <span v-if="inboxStore.unreadCount > 0"
+                class="absolute top-0 right-0 w-4 h-4 bg-red-600 rounded-full text-xs text-white"> {{
+                  inboxStore.unreadCount }}</span>
             </button>
             <div v-if="inboxDropdownOpen"
               class="absolute right-0 mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow-sm-light shadow-black dark:bg-gray-700">
@@ -58,14 +61,14 @@
                   'bg-gray-100': message.is_read,
                   'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
                 }" role="button" tabindex="0">
-                  {{ message.message }}
+                  From: {{ message.sender_name }} - {{ message.message }} - {{ formatDate(message.created_at) }}
                 </li>
                 <li v-if="inboxStore.messages.length === 0">
                   <p class="block px-4 py-2 text-gray-500">No Messages.</p>
                 </li>
               </ul>
               <!-- Fixed buttons for 'See All' and 'Mark All as Read' -->
-              <div class="flex flex-col px-4 py-2 border-t space-y-2"> <!-- Adjusted layout for better fit -->
+              <div class="flex flex-col px-4 py-2 border-t space-y-2">
                 <div class="flex justify-between">
                   <NuxtLink :to="{ path: '/inbox', query: { userType: userType } }"
                     class="flex items-center text-gray-700 hover:text-red-500">
@@ -132,7 +135,9 @@
                   'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
                 }" @click="viewAuction(notification)" role="button" tabindex="0"
                   @keypress.enter="viewAuction(notification)">
-                  {{ notification.message }}
+                  From: {{ notification.sender_full_name }} - {{ notification.message }} - {{
+                    formatDate(notification.created_at)
+                  }}
                 </li>
                 <li v-if="notificationsStore.notifications.length === 0">
                   <p class="block px-4 py-2 text-gray-500">No notifications</p>
@@ -218,7 +223,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, onBeforeUnmount } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import axios from "axios";
 import { useUserStore } from "@/stores/user-profile-image";
@@ -226,7 +231,10 @@ import { useAuctionFilterStore } from "@/stores/fetch-auction-bidder-dashboard";
 import { useNotificationStore } from "@/stores/notification-store";
 import AddMessageModal from "~/components/add-message-modal.vue";
 import { useInboxStore } from '@/stores/inbox-store';
+import { useInboxSocketStore } from '@/stores/socketStore';
+import { toast } from 'vue3-toastify';
 
+const socketStore = useInboxSocketStore();
 const inboxStore = useInboxStore();
 const addMessage = ref(false);
 const notificationDropdownOpen = ref(false);
@@ -303,6 +311,9 @@ const logout = async () => {
 
     localStorage.removeItem("user_profile_picture");
 
+    // Disconnect the WebSocket
+    socketStore.disconnectSocket();
+
     router.replace("/homepage");
   } catch (error) {
     console.error("Logout failed:", error);
@@ -320,12 +331,60 @@ const getUserType = async () => {
   }
 };
 
+const handleIncomingMessage = (newMessage) => {
+  console.log('Received message in inbox:', newMessage);
+  inboxStore.messages.unshift(newMessage); // Update messages list
+  inboxStore.unreadCount = newMessage.unreadCount;
+
+  toast(`New message from ${newMessage.senderId}: ${newMessage.subject}`, {
+    type: 'info',
+    autoClose: 3000,
+    position: 'top-right',
+  });
+};
+
+const handleIncomingNotification = (newNotificationMessage) => {
+  console.log('Received new notification message in BidderNavbar:', newNotificationMessage);
+  notificationsStore.notifications.unshift(newNotificationMessage.notification);
+
+  // Update unread count if necessary
+  notificationsStore.unreadCount = newNotificationMessage.notification.unreadCount;
+
+  // Display a toast notification
+  toast(`New notification from ${newNotificationMessage.notification.sender_full_name}: ${newNotificationMessage.notification.message}`, {
+    type: 'info',
+    autoClose: 3000,
+    position: 'top-right',
+  });
+};
+
+const formatDate = (date) => {
+  const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+  return new Date(date).toLocaleDateString(undefined, options);
+};
+
 onMounted(async () => {
   updateRouteCheck();
   userStore.initializeProfileImage();
-  await Promise.all([notificationsStore.fetchNotifications(), getUserType()]);
+  await Promise.all([notificationsStore.fetchNotifications(), inboxStore.fetchInbox(), getUserType()]);
+
+  if (!socketStore.socket) {
+    socketStore.connectSocket();
+  }
+
+  // Attach listeners
+  socketStore.socket.on('message-channel', handleIncomingMessage);
+  socketStore.socket.on('notification-channel', handleIncomingNotification);
+
 });
-// Initialize the user's profile image from the store
+
+onBeforeUnmount(() => {
+  if (socketStore.socket) {
+    socketStore.socket.off('message-channel', handleIncomingMessage);
+    socketStore.socket.off('notification-channel', handleIncomingNotification);
+  }
+  socketStore.disconnectSocket();
+});
 </script>
 
 <style scoped>

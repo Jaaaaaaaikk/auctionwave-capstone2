@@ -2,6 +2,7 @@
   <NuxtLayout name="biddernavbar">
     <client-only>
       <div class="min-h-screen bg-custom-white w-full mt-16">
+        <NuxtLayout name="biddersidebar"></NuxtLayout>
         <div class="bg-white w-3/5 mx-auto px-12 py-12 rounded-lg flex items-start relative">
 
           <!-- Breadcrumbs Section -->
@@ -124,10 +125,20 @@
             </div>
 
             <!-- Location Field -->
-            <div class="mb-4">
-              <label class="block font-medium">Location:</label>
-              <input v-model="editProfile.location" type="text" class="w-full border border-gray-300 p-2 rounded-lg"
-                required />
+            <div class="mb-4 relative">
+              <input type="text" v-model="editProfile.location" placeholder="City Location"
+                class="bg-gray-50 border-2 appearance-none text-gray-900 sm:text-sm rounded-md focus:ring-custom-bluegreen focus:border-custom-bluegreen block w-full p-2 pr-10"
+                readonly required />
+              <span class="absolute inset-y-0 right-3 flex items-center">
+                <svg class="w-8 h-10 text-custom-bluegreen cursor-pointer hover:text-green-500" fill="currentColor"
+                  viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" @click="toggleMap">
+                  <path fill-rule="evenodd"
+                    d="M12 2a7 7 0 00-7 7c0 4.418 7 13 7 13s7-8.582 7-13a7 7 0 00-7-7zm0 9a2 2 0 110-4 2 2 0 010 4z"
+                    clip-rule="evenodd"></path>
+                </svg>
+                <!-- Leaflet Map Modal -->
+                <CityMap v-if="showMap" @citySelected="setCity" />
+              </span>
             </div>
             <div class="mb-4">
               <select v-model="selectedCategory" @change="addCategory"
@@ -171,16 +182,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import axios from "axios";
 import profileModal from "~/components/change-profile-picture-modal.vue";
 import { useUserStore } from '@/stores/user-profile-image';
+import CityMap from '~/components/city-map.vue';
 
 const profile = ref({
   firstName: "",
   middleName: "",
   lastName: "",
   email: "",
+  location_id: "",
   location: "",
   categories: [],
   about: "",
@@ -191,6 +204,7 @@ const editProfile = ref({
   middleName: "",
   lastName: "",
   email: "",
+  location_id: "",
   location: "",
   categories: [],
   about: "",
@@ -203,14 +217,44 @@ const allAvailableCategories = [
   "Collectibles",
   "Furniture",
   "Real Estate",
+  "Jewelry & Watches",
+  "Vehicles",
+  "Sports Memorabilia",
+  "Home Appliances",
+  "Books",
+  "Antiques",
+  "Music Instruments",
+  "Manuscripts",
+  "Tickets",
+  "Vintage",
+  "Coins",
+  "Pet Supplies",
+  "DIY Materials",
 ];
 
+const selectedCity = ref({ name: '', id: '' });
+const showMap = ref(false)
 const availableCategories = ref([...allAvailableCategories]);
 const profile_modal = ref(false);
 const showModal = ref(false);
 const userStore = useUserStore();
 const modalContent = ref(null);
 const selectedCategory = ref("");
+
+
+const setCity = (city) => {
+  editProfile.value.location = city.name;
+  editProfile.value.location_id = city.id; // Update location with the selected city name
+  showMap.value = false; // Close the map modal after selection
+};
+
+watch(selectedCity, (newCity) => {
+  editProfile.value.location_id = newCity.id;
+});
+
+const toggleMap = () => {
+  showMap.value = !showMap.value;
+};
 
 // Fetch user's profile data
 const fetchProfile = async () => {
@@ -231,6 +275,7 @@ const hasChanges = () => {
     editProfile.value.middleName !== profile.value.middleName ||
     editProfile.value.lastName !== profile.value.lastName ||
     editProfile.value.location !== profile.value.location ||
+    editProfile.value.location_id !== profile.value.location_id ||
     editProfile.value.about !== profile.value.about ||
     JSON.stringify(editProfile.value.categories) !== JSON.stringify(profile.value.categories)
   );
@@ -256,8 +301,8 @@ const saveProfileChanges = async () => {
     if (editProfile.value.lastName !== profile.value.lastName) {
       profileChanges.lastName = editProfile.value.lastName;
     }
-    if (editProfile.value.location !== profile.value.location) {
-      profileChanges.location = editProfile.value.location;
+    if (editProfile.value.location_id !== profile.value.location_id) {
+      profileChanges.location_id = editProfile.value.location_id;
     }
     if (editProfile.value.about !== profile.value.about) {
       profileChanges.about = editProfile.value.about;
@@ -290,6 +335,7 @@ const toggleModal = () => {
       lastName: profile.value.lastName,
       email: profile.value.email,
       location: profile.value.location,
+      location_id: profile.value.location_id,
       categories: [...profile.value.categories],
       about: profile.value.about,
     };

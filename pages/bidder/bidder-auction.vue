@@ -57,7 +57,7 @@
                 yet.</span>
               <div v-else v-for="(bid, index) in auctionStore.bidders" :key="index" class="text-sm text-gray-500 mt-3">
                 <span>
-                  {{ bid.firstname }} {{ bid.lastname }} - <strong>{{ bid.bid_amount }}</strong> on {{
+                  {{ bid.bidder_name }} - <strong>{{ bid.bid_amount }}</strong> on {{
                     formatDate(bid.bid_time)
                   }}
                   <span v-if="isCurrentUser(bid.user_id)" class="pr-2"> <strong>(YOU)</strong></span>
@@ -78,6 +78,17 @@
                 <p class="text-2xl font-extrabold text-gray-900 sm:text-3xl dark:text-white">
                   ₱{{ auction.starting_bid }}
                 </p>
+              </div>
+            </div>
+
+            <div class="mt-3 mb-3 sm:gap-4 sm:items-center sm:flex ">
+              <div class="mb-2">
+                <p class="text-gray-500">Cash Bond:</p>
+                <div class="flex flex-wrap mt-2">
+                  <p class="text-xs font-semibold text-gray-900 sm:text-lg dark:text-white">
+                    ₱{{ auction.cashbond_amount }}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -205,19 +216,20 @@
                 </div>
               </div>
 
-              <a href="#"
+              <NuxtLink to="#"
                 class=" text-custom-bluegreen py-2 px-4 mt-3 rounded hover:underline transition duration-200">View
-                Auction Policy for Details</a>
+                Auction Policy for Details</NuxtLink>
 
             </section>
           </div>
         </div>
         <div class="flex flex-col items-end mt-6 w-full">
           <section class="w-full rounded-lg  p-4 my-8 mx-auto " v-if="auction.bidding_type === 'Offer-type'">
-            <h3 class="font-os text-lg font-bold">Comments</h3>
+            <h3 class="font-os text-lg font-bold">Recent Offers</h3>
 
-            <div v-for="comment in comments" :key="comment.id" class="flex mt-4">
-              <div class="w-14 h-14 rounded-full  flex-shrink-0 flex items-center justify-center">
+            <div v-for="(comment, index) in comments.slice(0, offersToShow)" :key="comment.id" class="flex mt-4">
+              <!-- Display user's profile image -->
+              <div class="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center">
                 <img class="h-12 w-12 rounded-full object-cover"
                   :src="comment.userImageUrl || '/images/default-profile-image.png'" alt="User Image">
               </div>
@@ -225,27 +237,103 @@
               <div class="ml-3">
                 <div class="font-medium text-gray-900">{{ comment.firstname }} {{ comment.lastname }}</div>
                 <div class="text-gray-600 text-sm">Posted on {{ formatDate(comment.offer_time) }}</div>
-                <div class="mt-2 text-gray-900">{{ comment.comment }}</div>
+                <div class="mt-2 text-gray-900 max-w-lg break-words">{{ comment.comment }}</div>
+              </div>
+              <div class="ml-auto flex items-start space-x-4">
+                <!-- Offer Images Section -->
+                <div v-if="comment.commentImages && comment.commentImages.length > 0" class="text-center">
+                  <strong>Offer Images</strong>
+                  <div class="flex flex-wrap gap-2 mt-2">
+                    <div v-for="(image, idx) in comment.commentImages" :key="idx" class="w-16 h-16">
+                      <img @click="openImageModal(image)" :src="image" alt="Offer Image"
+                        class="w-full h-full object-cover rounded cursor-pointer" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Status Section -->
+                <div class="bg-gray-200 text-gray-800 py-1 px-3 rounded-lg text-sm text-center">
+                  <strong>Status</strong>
+                  <p :class="{
+                    'bg-yellow-200 text-yellow-800': comment.review_status === 'Offer Pending',
+                    'bg-green-200 text-green-800': comment.review_status === 'Accepted Offer',
+                    'bg-red-200 text-red-800': comment.review_status === 'Offer Discarded',
+                    'bg-purple-200 text-purple-800': comment.review_status === 'Provide More'
+                  }" class="mt-2 text-sm py-1 px-3 rounded-lg">
+                    {{ comment.review_status }}
+                  </p>
+                </div>
+              </div>
+
+            </div>
+            <!-- Add an <hr> to separate offers visually -->
+            <hr v-if="comments.length > 0" class="my-4 border-t border-gray-300">
+
+            <!-- See More Button -->
+            <div v-if="offersToShow < comments.length" class="text-center mt-4">
+              <button @click="loadMoreOffers" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                See More
+              </button>
+            </div>
+
+            <!-- Modal to display the clicked image -->
+            <div v-if="isPictureViewModalOpen" @click="closeModal"
+              class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+              <div class="relative">
+                <img :src="modalImageSrc" alt="Large View" class="max-w-4xl max-h-[70vh] object-contain" />
+                <!-- Close button -->
+                <button @click="closeModal"
+                  class="absolute top-0 right-0 bg-gray-900 text-white rounded-full p-2 cursor-pointer">
+                  x
+                </button>
               </div>
             </div>
 
             <!-- Comment Form -->
-            <div class="relative my-4">
-              <textarea id="comment" v-model="offerComment"
-                class="border border-white bg-gray-200 p-2 w-full rounded pr-24"
-                placeholder="Enter your offer comment here" required></textarea>
+            <div class="relative my-4 flex items-start w-full">
+
+              <!-- Comment Textarea -->
+              <div class="flex items-start w-full">
+                <!-- Text Area for Comment -->
+                <textarea id="comment" v-model="offerComment" class="border border-white bg-gray-200 p-6 w-full rounded"
+                  placeholder="Enter your offer comment here" required></textarea>
+              </div>
+              <!-- Validation Label -->
+              <p v-if="offerValidationMessage" class="absolute right-2 flex top-28 text-sm text-red-500 mt-1">
+                {{ offerValidationMessage }}
+              </p>
+
+              <!-- Display uploaded images horizontally -->
+              <div v-if="uploadedImages.length" class="absolute right-40 flex top-4 space-x-2">
+                <div v-for="(image, index) in uploadedImages" :key="index" class="relative">
+                  <img :src="image" alt="Uploaded image" class="w-16 h-16 object-cover rounded" />
+                  <!-- Remove button for each image -->
+                  <button @click="removeImage(index)"
+                    class="absolute top-0 right-0 bg-gray-700 text-white rounded-full w-6 h-6 flex items-center justify-center">
+                    ×
+                  </button>
+                </div>
+              </div>
+
+              <!-- File Upload Button -->
+              <button class="custom-upload absolute right-20 top-1/2 transform -translate-y-1/2"
+                @click="triggerFileUpload">
+                <svg class="hover:text-custom-bluegreen w-6 h-6 text-gray-800 dark:text-black"
+                  xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M7 8v8a5 5 0 1 0 10 0V6.5a3.5 3.5 0 1 0-7 0V15a2 2 0 0 0 4 0V8" />
+                </svg>
+                <input type="file" ref="fileInput" @change="handleImageUpload" accept="image/*" class="hidden" />
+              </button>
+
+              <!-- Post Button -->
               <button @click="confirmOffer"
                 class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-custom-bluegreen text-white font-medium py-1 px-4 rounded hover:bg-green-500">
                 Post
               </button>
+
             </div>
           </section>
-
-          <!--It should be comment section here-->
-          <template v-else-if="auction.bidding_type === 'Offer-type'">
-            <textarea v-model="offerComment" class="rounded-xl" placeholder="Enter your offer comment here"
-              required></textarea>
-          </template>
         </div>
       </div>
       <PlaceBidModal v-if="showPlaceBidModal" @close="showPlaceBidModal = false" :auctionUuid="auctionId"
@@ -299,8 +387,11 @@ import { useRoute } from "vue-router";
 import axios from "axios";
 import PlaceBidModal from '~/components/placebidmodal.vue'
 import { useAuctionStore } from '@/stores/fetch-bidder-store';
+import { useInboxSocketStore } from '@/stores/socketStore';
+import { toast } from 'vue3-toastify';
 
 const auctionStore = useAuctionStore();
+const socketStore = useInboxSocketStore();
 const showPlaceBidModal = ref(false)
 const route = useRoute();
 const auction = ref(null);
@@ -311,6 +402,64 @@ const biddersCount = ref(null);
 let timerInterval = null;
 const auctionId = ref(null);
 const recommendedAuctions = ref([]);
+const fileInput = ref(null);
+const uploadedImages = ref([]);
+const offerValidationMessage = ref('');
+const isPictureViewModalOpen = ref(false);
+const modalImageSrc = ref('');
+const offersToShow = ref(3); // Initially show 3 offers
+
+// Function to load more offers
+const loadMoreOffers = () => {
+  offersToShow.value += 3; // Show 3 more offers when the button is clicked
+};
+
+// Function to open the modal with the clicked image's source
+const openImageModal = (imageSrc) => {
+  modalImageSrc.value = imageSrc;
+  isPictureViewModalOpen.value = true;
+};
+
+// Function to close the modal
+const closeModal = () => {
+  isPictureViewModalOpen.value = false;
+  modalImageSrc.value = '';  // Reset the modal image source
+};
+
+// Trigger hidden file input
+const triggerFileUpload = () => {
+  fileInput.value?.click();
+};
+
+// Handle image upload with validation and preview
+const handleImageUpload = (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    const validTypes = ["image/jpeg", "image/png", "image/gif"];
+    if (!validTypes.includes(file.type)) {
+      toast.warn("Please upload an image in PNG, JPG, JPEG, or GIF format.");
+      return;
+    }
+
+    if (uploadedImages.value.length < 3) {  // Limit to 3 images
+      // Convert the image file to base64
+      const reader = new FileReader();
+      reader.onload = () => {
+        const base64String = reader.result;
+        uploadedImages.value.push(base64String); // Save base64 string
+      };
+      reader.readAsDataURL(file);
+    } else {
+      toast.warn("You can only upload up to 3 images.");
+    }
+  }
+};
+
+
+// Function to remove an image from the uploaded list
+const removeImage = (index) => {
+  uploadedImages.value.splice(index, 1);
+};
 
 // Function to fetch recommended auctions
 const fetchRecommendedAuctions = async () => {
@@ -390,38 +539,79 @@ const fetchBiddersCount = async (listingId) => {
   }
 };
 
+// Function to handle offer submission
 const confirmOffer = () => {
   const comment = offerComment.value.trim();
 
-  if (!comment) {
-    alert("Please enter a valid offer comment.");
+  // Check if there is a comment and no image
+  if (!comment && uploadedImages.value.length === 0) {
+    offerValidationMessage.value = 'Please enter a comment and upload at least one image.';
     return;
   }
 
+  // Check if there is a comment but no image
+  if (comment && uploadedImages.value.length === 0) {
+    offerValidationMessage.value = 'You have added a comment, but adding images would strengthen your offer.';
+    return;
+  }
+
+  // Check if there is an image but no comment
+  if (uploadedImages.value.length > 0 && !comment) {
+    offerValidationMessage.value = 'You have uploaded images, but you need to add a comment to strengthen your offer.';
+    return;
+  }
+
+  // After passing all checks, ask for confirmation
   const confirmed = confirm(`Are you sure you want to place the offer: "${comment}"?`);
   if (confirmed) {
+    offerValidationMessage.value = '';
     placeOffer(comment);
   }
 };
 
+
 const placeOffer = async (comment) => {
   try {
 
-    if (!auctionId) {
+    if (!auctionId.value) {
       throw new Error("Auction ID is missing");
     }
 
-    await axios.post('/api/auctions/place-offer', { auctionId, offerComment: comment });
-    alert("Offer placed successfully!");
+    const response = await axios.post('/api/auctions/place-offer', {
+      auctionId: auctionId.value, offerComment: comment,
+      imageUrls: uploadedImages.value
+    });
 
-    // Reset offer comment
+    const notificationDetails = response.data.results;
+
+    // Emit notifications for each bidder
+    notificationDetails.forEach(notification => {
+      console.log('notification data', notification)
+      socketStore.socket.emit('offer-message', {
+        recipientId: notification.auctioneerId,
+        notification: {
+          location: notification.notificationDetails.location_id,
+          sender_full_name: notification.notificationDetails.sender_full_name,
+          auction_name: notification.notificationDetails.auction_name,
+          listing_id: notification.notificationDetails.listing_id,
+          message: notification.notificationDetails.message,
+          is_read: notification.notificationDetails.is_read,
+          created_at: notification.notificationDetails.created_at,
+          unreadCount: notification.unreadCount
+        }
+      });
+    });
+
+    toast.success("Offer placed successfully!");
+
+    // Reset offer comment and remove browsed images.
     offerComment.value = '';
+    uploadedImages.value = [];
 
-    // Optionally, you may want to fetch updated bids or offer participants
     fetchComments(auction.value.id);
   } catch (err) {
     console.error("Failed to place offer:", err);
-    alert("Failed to place offer.");
+    toast.error("Failed to place offer.");
   }
 };
 
@@ -504,10 +694,11 @@ onMounted(() => {
   if (route.query.id) {
     auctionId.value = route.query.id;
     fetchAuction();
-    fetchComments();
-    fetchBiddersCount();
     fetchRecommendedAuctions();
     clearInterval(timerInterval);
+  }
+  else {
+    console.error('Auction UUID is not provided in route.');
   }
 });
 
@@ -516,144 +707,3 @@ onMounted(() => {
 <style scoped>
 /* Add any specific styles for the auction page here */
 </style>
-
-
-
-
-
-
-
-
-
-<!-- 
-      <h2 class="text-2xl font-semibold mb-4 text-center">Auction Details</h2>
-
-      <div v-if="auction" class="bg-white p-6 rounded-lg shadow-md">
-        <h3 class="text-2xl font-semibold mb-4">{{ auction.name }}</h3>
-        <div v-if="auction.bidding_type === 'Lowest-type'" class="mb-4">
-          <strong>Time Left: </strong>
-          <span v-if="remainingTime > 0" class="text-red-400">{{ formattedTime }}</span>
-          <span v-if="remainingTime <= 0" class="text-red-500"> (Auction Ended)</span>
-        </div>
-        <p class="text-gray-700 mb-2">
-          <strong>Description:</strong> {{ auction.description }}
-        </p>
-        <p class="text-gray-500 mb-2">
-          <strong>Location:</strong> {{ auction.location }}
-        </p>
-        <p class="text-gray-500 mb-2" v-if="auction.bidding_type === 'Lowest-type'">
-          <strong>Starting Bid:</strong> {{ auction.starting_bid }}
-        </p>
-        <p class="text-gray-500 mb-2">
-          <strong>Bidding Type:</strong> {{ auction.bidding_type }}
-        </p>
-        <p class="text-gray-500 mb-2">
-          <strong>Rarity:</strong> {{ auction.rarity }}
-        </p>
-
-        <div class="mb-2">
-          <strong>Categories:</strong>
-          <div class="flex flex-wrap mt-2">
-            <span v-if="auction.categories.length === 0" class="text-gray-500">No categories</span>
-            <span v-for="(category) in auction.categories"
-              class="bg-gray-200 text-gray-700 text-xs font-semibold mr-2 mb-2 px-2.5 py-0.5 rounded">
-              {{ category }}
-            </span>
-          </div>
-        </div>
-
-        <div class="w-1/2 flex flex-col items-end justify-end mb-4">
-          <img v-if="auction.image_url" :src="auction.image_url" alt="Auction Image Preview"
-            class="w-48 h-48 object-cover rounded-lg shadow-xl"
-            @error="auction.image_url = 'public/images/no-image.jpg'" />
-          <img v-else src="public/images/no-image.jpg" alt="No Image Available"
-            class="w-48 h-48 object-cover rounded-lg shadow-xl" />
-        </div>
-
-
-        <div class="flex flex-col items-end mt-6">
-      <template v-if="auction.bidding_type === 'Lowest-type'">
-        <input v-model.number="bidAmount" class="rounded-xl" type="number" step="1" :min="minBid" :max="maxBid"
-          placeholder="Amount bid" required @input="validateBidAmount" />
-        <p v-if="bidders.length === 0 && bidAmount !== auction.starting_bid" class="text-red-500 p-12">
-          Bid amount must be the starting bid since there are no bidders yet.
-        </p>
-        <p v-if="bidders.length > 0 && (bidAmount < minBid || bidAmount >= maxBid)" class="text-red-500 p-12">
-          Bid amount must be between {{ minBid }} and {{ maxBid - 1 }}.
-        </p>
-      </template>
-
-      <section class="w-full rounded-lg border-2 border-purple-600 p-4 my-8 mx-auto max-w-xl"
-        v-else-if="auction.bidding_type === 'Offer-type'">
-        <h3 class="font-os text-lg font-bold">Comments</h3>
-
-        <div v-for="comment in comments" :key="comment.id" class="flex mt-4">
-          <div class="w-14 h-14 rounded-full bg-purple-400/50 flex-shrink-0 flex items-center justify-center">
-            <img class="h-12 w-12 rounded-full object-cover"
-              :src="comment.userImageUrl || '/images/default-profile-image.png'" alt="User Image">
-          </div>
-
-          <div class="ml-3">
-            <div class="font-medium text-purple-800">{{ comment.firstname }} {{ comment.lastname }}</div>
-            <div class="text-gray-600 text-sm">Posted on {{ formatDate(comment.offer_time) }}</div>
-            <div class="mt-2 text-purple-800">{{ comment.comment }}</div>
-          </div>
-        </div>
-
-        <div class="my-4">
-          <textarea id="comment" v-model="offerComment" class="border-2 border-purple-600 p-2 w-full rounded"
-            placeholder="Enter your offer comment here" required></textarea>
-        </div>
-
-        <button @click="confirmBidOrOffer"
-          class="bg-purple-700 text-white font-medium py-2 px-4 rounded hover:bg-purple-600">Post
-          Offer</button>
-      </section>
-
-      <template v-else-if="auction.bidding_type === 'Offer-type'">
-        <textarea v-model="offerComment" class="rounded-xl" placeholder="Enter your offer comment here"
-          required></textarea>
-      </template>
-      </div>
-
-
-
-      <div class="flex justify-end mt-6">
-        <button @click="confirmBidOrOffer" v-if="auction.bidding_type === 'Lowest-type'"
-          class="bg-teal-500 border font-semibold border-teal-500 shadow-sm-light shadow-black hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-teal-500 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-600 text-gray-900 px-4 py-2 rounded-full">
-          Enter Bid
-        </button>
-      </div>
-
-      <div class="w-full pl-6 mt-4">
-        <h3 class="flex text-xl text-center font-semibold mb-4"> {{ h3Label }} </h3>
-        <template v-if="auction.bidding_type === 'Lowest-type'">
-          <div v-if="bidders.length === 0" class="text-gray-500 mb-2">
-            No participated bidders yet.
-          </div>
-          <div v-else>
-            <div v-for="bidder in bidders" :key="bidder.user_id" class="mb-2">
-              <span>{{ bidder.firstname }} {{ bidder.lastname }} - {{ bidder.bid_amount }}
-                <span v-if="isCurrentUser(bidder.user_id)" class="text-teal-500 pr-10">(YOU)</span>
-              </span>
-            </div>
-          </div>
-        </template>
-        <template v-else-if="auction.bidding_type === 'Offer-type'">
-          <div v-if="topComments.length === 0" class="text-gray-500 mb-2">
-            No offers have been posted yet.
-          </div>
-          <div v-else>
-            <div v-for="comment in topComments" :key="comment.user_id" class="mb-2">
-              <span>{{ comment.firstname }} {{ comment.lastname }} (number of offers: {{ comment.offer_count }})
-                <span v-if="isCurrentUser(comment.user_id)" class="text-teal-500 pr-10">(YOU)</span>
-              </span>
-            </div>
-          </div>
-        </template>
-      </div>
-      </div>
-
-      <div v-else class="text-xl text-center text-red-500">
-        <p>No auction details available.</p>
-      </div> -->

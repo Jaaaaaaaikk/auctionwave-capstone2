@@ -34,12 +34,18 @@ export default defineEventHandler(async (event) => {
                 u.user_id,
                 u.firstname,
                 u.lastname,
-                (SELECT profile_image_url FROM UserProfileImages WHERE user_id = u.user_id AND is_current_profile_image = TRUE LIMIT 1) AS userImageUrl
+                (SELECT profile_image_url FROM UserProfileImages WHERE user_id = u.user_id AND is_current_profile_image = TRUE LIMIT 1) AS userImageUrl,
+                (SELECT GROUP_CONCAT(image_url ORDER BY oi.uploaded_at ASC) FROM OfferImages oi WHERE oi.offer_id = o.offer_id LIMIT 3) AS commentImages,
+                o.review_status
             FROM Offers o
             JOIN Users u ON o.bidder_id = u.user_id
             WHERE o.listing_id = ?
             ORDER BY o.offer_time DESC
         `, [listingId]);
+
+        commentsRows.forEach(row => {
+            row.commentImages = row.commentImages ? row.commentImages.split(',') : [];
+        });
 
         return { comments: commentsRows, currentUserId: decoded.userId };
     } catch (error) {

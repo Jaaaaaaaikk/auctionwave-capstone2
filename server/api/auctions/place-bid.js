@@ -40,29 +40,52 @@ export default defineEventHandler(async (event) => {
         const auctioneerId = result[0].auctioneer_id; // Get the auctioneer ID
         const auction_name = result[0].name;
 
-        // Retrieve participant_id
-        const [participantResult] = await pool.query(
-            `SELECT participant_id FROM AuctionVisits WHERE listing_id = ? AND bidder_id = ?`,
+        // Check for current lowest bidder
+        const [lowestBidResult] = await pool.query(
+            `SELECT b.bidder_id FROM Bids b 
+                     WHERE b.listing_id = ? 
+                     ORDER BY b.bid_amount ASC LIMIT 1`,
+            [listingId]
+        );
+
+        // If there are existing bids, check if the user is the lowest bidder
+        if (lowestBidResult.length > 0) {
+            const lowestBidderId = lowestBidResult[0].bidder_id;
+
+            if (lowestBidderId === bidderId) {
+                throw createError({ statusCode: 403, message: 'You cannot place a bid as you are currently the lowest bidder.' });
+            }
+        }
+
+        // Attempt to get existing bid and bidder's name
+        let bidderName;
+        const [existingBidResult] = await pool.query(
+            `SELECT b.bid_id, CONCAT(u.firstname, IFNULL(CONCAT(' ', u.middlename), ''), ' ', u.lastname) AS sender_full_name
+             FROM Bids b
+             JOIN Users u ON b.bidder_id = u.user_id
+             WHERE b.listing_id = ? AND b.bidder_id = ?`,
             [listingId, bidderId]
         );
 
-        if (participantResult.length === 0) {
-            throw createError({ statusCode: 404, message: 'Participant not found' });
+        if (existingBidResult.length > 0) {
+            bidderName = existingBidResult[0].bidder_name;
+        } else {
+            // Fallback to fetch the bidder's name directly if no bids are found
+            const [userResult] = await pool.query(
+                `SELECT CONCAT(firstname, IFNULL(CONCAT(' ', middlename), ''), ' ', lastname) AS sender_full_name 
+                 FROM Users WHERE user_id = ?`,
+                [bidderId]
+            );
+
+            bidderName = userResult.length > 0 ? userResult[0].sender_full_name : null;
         }
 
-        const participantId = participantResult[0].participant_id;
-
-        // Check if this is the first bid by this bidder for this auction
-        const [existingBidResult] = await pool.query(
-            `SELECT bid_id FROM Bids WHERE listing_id = ? AND participant_id = ?`,
-            [listingId, participantId]
-        );
-
+        console.log('existingBidResult ', existingBidResult);
         // Insert bid into Bids table
         await pool.query(
-            `INSERT INTO Bids (listing_id, participant_id, bid_amount) 
+            `INSERT INTO Bids (listing_id, bidder_id, bid_amount) 
              VALUES (?, ?, ?)`,
-            [listingId, participantId, bidAmount]
+            [listingId, bidderId, bidAmount]
         );
 
         let message;
@@ -75,15 +98,44 @@ export default defineEventHandler(async (event) => {
         }
 
         // Insert notification for the auctioneer about the bid
-        await pool.query(
-            `INSERT INTO Notifications (user_id, auction_id, notification_type, message) 
-             VALUES (?, ?, 'BidPlaced', ?)`,
-            [auctioneerId, listingId, message]
+        const [notificationResult] = await pool.query(
+            `INSERT INTO Notifications (sender_id, receiver_id, auction_id, notification_type, message) 
+             VALUES (?, ?, ?, 'BidPlaced', ?)`,
+            [bidderId, auctioneerId, listingId, message]
         );
 
-        return { status: 'success' };
+        // Retrieve the created_at of the newly inserted notification
+        const notificationId = notificationResult.insertId;
+        const [createdAtResult] = await pool.query(
+            `SELECT created_at, is_read FROM Notifications WHERE notification_id = ? AND is_read = false ORDER BY created_at DESC LIMIT 1`,
+            [notificationId]
+        );
+
+        const [unread_count] = await pool.query(
+            `SELECT COUNT(*) AS unread_count FROM Notifications WHERE receiver_id = ? AND is_read = false`,
+            [auctioneerId]
+        );
+
+        const createdAt = createdAtResult[0].created_at;
+        const unreadCount = unread_count[0].unread_count;
+
+        // Format bidAmount to two decimal places for consistent display
+        const formattedBidAmount = parseFloat(bidAmount).toFixed(2);
+
+
+        return {
+            status: 'success',
+            bidder_name: bidderName,
+            auctioneer_id: auctioneerId,
+            listing_id: listingId,
+            message,
+            created_at: createdAt,
+            unreadCount: unreadCount,
+            bidAmount: formattedBidAmount
+        };
     } catch (error) {
         // Handle database errors
+        console.error('Error processing bid:', error);
         throw createError({ statusCode: 500, message: 'Internal Server Error' });
     }
 });

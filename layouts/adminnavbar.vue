@@ -11,8 +11,11 @@
                 <!--Button-->
                 <div class="hidden md:flex items-center mt-2 space-x-2">
                     <ul class="flex flex-col md:flex-row md:space-x-6">
-                        <li><a class="flex items-center px-2 py-2 text-black text-lg font-semibold hover:text-[#005262]"
-                                href="#">Home</a></li>
+                        <li>
+                            <NuxtLink to="/admin/admindashboard"
+                                class="flex items-center px-2 py-2 text-black text-lg font-semibold hover:text-[#005262]">
+                                Home</NuxtLink>
+                        </li>
 
                     </ul>
                     <!--History Dropdown Button-->
@@ -151,7 +154,7 @@
             </div>
             <!--Search-->
             <div class=" flex items-center px-4 space-x-5">
-                <div class="relative inline-block flex item-center">
+                <div class="relative item-center">
                     <form action="">
                         <input
                             class="border-2 border-gray-300 bg-white h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none"
@@ -178,7 +181,7 @@
                 </div>
 
                 <!--Notification-->
-                <div class="relative inline-block flex item-center">
+                <div class="relative item-center">
                     <!-- Icon (Bell)  -->
                     <button class="text-gray-800 hover:text-[#005262] focus:outline-none">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
@@ -192,14 +195,43 @@
                         class="absolute top-0 right-0 inline-block w-2 h-2 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full"></span>
                 </div>
                 <!-- Profile Image -->
-                <div class="relative inline-block flex item-center ">
-                    <button type="button"
+                <div class="relative item-center ">
+                    <button @click="toggleProfileDropdown"
                         class="flex item-center text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
                         id="user-menu-button" aria-expanded="false" data-dropdown-toggle="user-dropdown"
                         data-dropdown-placement="bottom">
                         <span class="sr-only">Open user menu</span>
-                        <img class="w-10 h-10 rounded-full" src="../public/images/Mizuho.jpg">
+                        <img class="w-10 h-10 rounded-full" src="/images/default-profile-image.png">
                     </button>
+                    <div v-if="profileDropdownOpen"
+                        class="absolute right-0 mx-10 mt-2 w-44 bg-white divide-y divide-gray-100 rounded-lg shadow-md shadow-gray-300 drop-shadow-md dark:bg-gray-700">
+                        <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
+                            <li>
+                                <button
+                                    class="flex items-center px-4 py-2 w-full hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                    <svg class="w-4 h-4 mr-2 text-gray-500 dark:text-gray-200"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <path fill-rule="evenodd" clip-rule="evenodd"
+                                            d="M12 19.5C16.1421 19.5 19.5 16.1421 19.5 12C19.5 7.85786 16.1421 4.5 12 4.5C7.85786 4.5 4.5 7.85786 4.5 12C4.5 16.1421 7.85786 19.5 12 19.5ZM12 21C16.9706 21 21 16.9706 21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21ZM12.75 15V16.5H11.25V15H12.75ZM10.5 10.4318C10.5 9.66263 11.1497 9 12 9C12.8503 9 13.5 9.66263 13.5 10.4318C13.5 10.739 13.3151 11.1031 12.9076 11.5159C12.5126 11.9161 12.0104 12.2593 11.5928 12.5292L11.25 12.7509V14.25H12.75V13.5623C13.1312 13.303 13.5828 12.9671 13.9752 12.5696C14.4818 12.0564 15 11.3296 15 10.4318C15 8.79103 13.6349 7.5 12 7.5C10.3651 7.5 9 8.79103 9 10.4318H10.5Z"
+                                            fill="#6B7280"></path>
+                                    </svg>
+                                    Help
+                                </button>
+                            </li>
+                            <li>
+                                <button @click="logout"
+                                    class="flex items-center px-4 py-2 w-full hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                    <svg class="w-4 h-4 mr-2 text-gray-500 dark:text-gray-200"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 11-6 0v-1m6-10V5a3 3 0 00-6 0v1" />
+                                    </svg>
+                                    Logout
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             <!-- Mobile Menu -->
@@ -221,38 +253,48 @@
         </nav>
     </div>
 </template>
-<script>
-export default {
-    data() {
-        return {
-            isMenuOpen: false,
-            helpDropdownOpen: false,
-            historyDropdownOpen: false
-        };
-    },
-    methods: {
-        toggleMenu() {
-            this.isMenuOpen = !this.isMenuOpen;
-        },
-        toggleHelpDropdown() {
-            this.helpDropdownOpen = !this.helpDropdownOpen;
-        },
-        toggleHistoryDropdown() {
-            this.historyDropdownOpen = !this.historyDropdownOpen;
-        },
-        handleClickOutside(event) {
-            if (!this.$el.contains(event.target)) {
-                this.helpDropdownOpen = false;
-                this.historyDropdownOpen = false;
-            }
-        }
-    },
-    mounted() {
-        document.addEventListener("click", this.handleClickOutside);
-    },
-    beforeDestroy() {
-        document.removeEventListener("click", this.handleClickOutside);
+<script setup>
+import { ref } from "vue";
+import axios from "axios";
+import { useRouter, useRoute } from "vue-router";
+import { toast } from 'vue3-toastify';
+
+
+const router = useRouter();
+const route = useRoute();
+const isMenuOpen = ref(false);
+const helpDropdownOpen = ref(false);
+const historyDropdownOpen = ref(false);
+const profileDropdownOpen = ref(false);
+
+const logout = async () => {
+    try {
+        await axios.post("/api/logout");
+
+        router.replace("/homepage");
+    } catch (error) {
+        console.error("Logout failed:", error);
+        // handle logout error
     }
+};
+
+const toggleProfileDropdown = () => {
+    profileDropdownOpen.value = !profileDropdownOpen.value;
+};
+
+const toggleMenu = () => {
+    isMenuOpen.value = !isMenuOpen.value;
+    profileDropdownOpen.value = !profileDropdownOpen.value;
+};
+
+const toggleHelpDropdown = () => {
+    helpDropdownOpen.value = !helpDropdownOpen.value;
+    profileDropdownOpen.value = !profileDropdownOpen.value;
+};
+
+const toggleHistoryDropdown = () => {
+    historyDropdownOpen.value = !historyDropdownOpen.value;
+    profileDropdownOpen.value = !profileDropdownOpen.value;
 };
 </script>
 <style>

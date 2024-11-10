@@ -26,12 +26,11 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    // Retrieve all bids for the specified auction(bidder-auction)
+    // Retrieve all bids for the specified auction(bidder-auction) and (auctioneer-manage-auction)
     const [biddersRows] = await pool.query(`
           SELECT 
               u.user_id,
-              u.firstname,
-              u.lastname,
+              CONCAT(u.firstname, IFNULL(CONCAT(' ', u.middlename), ''), ' ', u.lastname) AS bidder_name,
               b.bid_amount,
               b.bid_time
           FROM 
@@ -39,7 +38,7 @@ export default defineEventHandler(async (event) => {
           JOIN 
               AuctionVisits av ON u.user_id = av.bidder_id
           JOIN 
-              Bids b ON b.participant_id = av.participant_id
+              Bids b ON b.bidder_id = av.bidder_id
           WHERE 
               av.listing_id = ?
           ORDER BY 
@@ -49,15 +48,13 @@ export default defineEventHandler(async (event) => {
     const [bidderAuctionModalRows] = await pool.query(`
       SELECT 
         u.user_id,
-        u.firstname,
-        u.middlename,
-        u.lastname
+        CONCAT(u.firstname, IFNULL(CONCAT(' ', u.middlename), ''), ' ', u.lastname) AS full_name
       FROM 
         Users u
       JOIN 
         AuctionVisits av ON u.user_id = av.bidder_id
       JOIN 
-        Bids b ON b.participant_id = av.participant_id
+        Bids b ON b.bidder_id = av.bidder_id
       WHERE 
         av.listing_id = ?
       GROUP BY 
@@ -73,7 +70,7 @@ export default defineEventHandler(async (event) => {
       FROM 
           Bids b
       JOIN 
-          AuctionVisits av ON b.participant_id = av.participant_id
+          AuctionVisits av ON b.bidder_id = av.bidder_id
       WHERE 
           av.listing_id = ?;`, [listingId]);
 

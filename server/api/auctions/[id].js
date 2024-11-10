@@ -47,6 +47,7 @@ export default defineEventHandler(async (event) => {
     al.starting_bid, 
     al.bidding_type, 
     al.rarity,
+    al.cashbond_amount,
     al.status,
     al.email_blast_sent,
     al.duration_hours,

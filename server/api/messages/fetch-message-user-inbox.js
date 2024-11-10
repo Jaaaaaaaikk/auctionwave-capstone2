@@ -30,7 +30,10 @@ export default defineEventHandler(async (event) => {
             SELECT 
                 m.message_id,
                 m.sender_id,
-                CONCAT(u.firstname, ' ', u.middlename, ' ', u.lastname) AS sender_name,
+                CONCAT(u.firstname, 
+                       IFNULL(CONCAT(' ', u.middlename), ''), 
+                       ' ', 
+                       u.lastname) AS sender_name,
                 m.subject,
                 m.message,
                 mp.is_read,

@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
     try {
         const pool = await getPool(); // Get the database connection pool
         const [result] = await pool.execute(
-            'UPDATE Notifications SET is_read = TRUE WHERE user_id = ?',
+            'UPDATE Notifications SET is_read = TRUE WHERE receiver_id = ?',
             [userId]
         );
 

@@ -34,7 +34,7 @@ export default defineEventHandler(async (event) => {
       al.uuid AS auction_uuid
     FROM AuctionListings al
     LEFT JOIN Bids b ON al.listing_id = b.listing_id 
-    LEFT JOIN AuctionVisits av ON b.participant_id = av.participant_id
+    LEFT JOIN AuctionVisits av ON b.bidder_id = av.bidder_id
     WHERE av.bidder_id = 12
     
     GROUP BY al.listing_id

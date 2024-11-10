@@ -2,8 +2,7 @@
   <!-- Dynamically load the navbar layout based on user type -->
   <NuxtLayout :name="navbarLayout">
     <div class="min-h-screen w-full bg-custom-white-green shadow-xl rounded-lg flex overflow-x-auto">
-      <div class=" min-h-screen w-64 bg-white px-4">
-        <!-- Button -->
+      <div class=" min-h-screen w-64 bg-white px-1 py-2">
         <div class="h-16 flex items-center">
           <button @click="addMessage = true"
             class="w-48 mx-auto bg-custom-bluegreen hover:bg-custom-bluegreen hover:bg-opacity-80 flex items-center justify-center text-gray-100 py-2 rounded space-x-2 transition duration-150">
@@ -17,6 +16,7 @@
           <AddMessageModal v-if="addMessage" @closeAddMessageModal="addMessage = false" />
         </div>
         <div class="px-2 pt-2  pb-8 border-r border-gray-300">
+
           <ul class="space-y-2">
             <!--Inbox Tab-->
             <li>
@@ -81,25 +81,23 @@
           </ul>
         </div>
       </div>
-      <InboxTab v-if="activeTab === 'inbox'" />
-      <SentTab v-if="activeTab === 'sent'" />
-      <ArchiveTab v-if="activeTab === 'archive'" />
-      <SpamTab v-if="activeTab === 'spam'" />
-      <TrashTab v-if="activeTab === 'trash'" />
+      <InboxTab v-show="activeTab === 'inbox'" />
+      <SentTab v-show="activeTab === 'sent'" />
+      <SpamTab v-show="activeTab === 'spam'" />
+      <TrashTab v-show="activeTab === 'trash'" />
     </div>
+    <!-- Load universal footer -->
   </NuxtLayout>
-  <!-- Load universal footer -->
+
   <NuxtLayout name="footer"></NuxtLayout>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import axios from 'axios';
 import AddMessageModal from "~/components/add-message-modal.vue";
 import InboxTab from '~/components/MessageTabs/InboxTab.vue';
 import SentTab from '~/components/MessageTabs/SentTab.vue';
-import ArchiveTab from '~/components/MessageTabs/ArchiveTab.vue';
 import SpamTab from '~/components/MessageTabs/SpamTab.vue';
 import TrashTab from '~/components/MessageTabs/TrashTab.vue';
 

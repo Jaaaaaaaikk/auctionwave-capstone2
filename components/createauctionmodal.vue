@@ -31,15 +31,15 @@
             <div class="col-span-2 mb-4">
               <label for="itemDetails" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Item
                 Details</label>
-              <textarea v-model="auctionData.itemDetails" id="itemDetails" rows="3"
+              <textarea v-model="auctionData.itemDetails" id="itemDetails" rows="2"
                 class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-custom-bluegreen focus:border-custom-bluegreen dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                placeholder="Provide detailed specifications, requirements, and other essential information about the item or project..."></textarea>
+                placeholder="Provide detailed specifications, requirements, and other essential information about the item ..."></textarea>
             </div>
 
             <div class="col-span-2 mb-4">
               <label for="description"
                 class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Description</label>
-              <textarea v-model="auctionData.description" id="description" rows="3"
+              <textarea v-model="auctionData.description" id="description" rows="2"
                 class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-custom-bluegreen focus:border-custom-bluegreen dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 placeholder="Description"></textarea>
             </div>
@@ -64,9 +64,9 @@
                 <select v-model="auctionData.rarity" id="rarity"
                   class=" focus:ring-custom-bluegreen focus:border-custom-bluegreen bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                   <option value="" disabled>Select Rarity</option>
-                  <option value="Common">Common (5%)</option>
-                  <option value="Uncommon">Uncommon (10%)</option>
-                  <option value="Rare">Rare (20%)</option>
+                  <option value="Common">Common</option>
+                  <option value="Uncommon">Uncommon</option>
+                  <option value="Rare">Rare</option>
                 </select>
               </div>
 
@@ -90,19 +90,32 @@
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 focus:ring-custom-bluegreen focus:border-custom-bluegreen dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                   placeholder="Duration in hours" required />
               </div>
+
+              <div v-if="auctionData.biddingType && auctionData.rarity" class=" w-66 flex flex-col">
+                <label for="rarity" class=" block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cashbond
+                  Amount</label>
+                <select v-model="auctionData.cashbondAmount" id="rarity"
+                  class=" focus:ring-custom-bluegreen focus:border-custom-bluegreen bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                  <option value="" disabled>Select Amount</option>
+                  <option v-for="amount in presetAmounts" :key="amount" :value="amount">
+                    {{ amount }}
+                  </option>
+                </select>
+              </div>
             </div>
 
 
-            <div class="gap-4 mb-5">
+            <div class="gap-2 mb-5">
               <div class="flex-1 flex flex-col">
                 <label for="category"
                   class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category</label>
-                <div class="flex flex-wrap gap-2"> <!-- Added this div for controlling width -->
+                <div class="flex flex-wrap">
                   <ul
-                    class="flex flex-row text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    class="flex flex-row flex-wrap text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     <li v-for="(name, id) in categoryMap" :key="id"
-                      class="flex items-center border-r last:border-0 dark:border-gray-600">
-                      <div class="flex items-center p-3">
+                      class="flex items-center border-r last:border-0 dark:border-gray-600 w-1/2 sm:w-1/3 md:w-1/6">
+                      <!-- Adjusted item width -->
+                      <div class="flex items-center px-2 py-1">
                         <input type="checkbox" :id="'category-' + id" :checked="auctionData.categories.includes(id)"
                           @change="handleCategoryChange(id, $event.target.checked)"
                           class="w-4 h-4 text-custom-bluegreen bg-gray-100 border-gray-300 rounded focus:ring-custom-bluegreen dark:focus:ring-custom-bluegreen dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" />
@@ -117,13 +130,14 @@
               </div>
             </div>
 
+
             <!-- Centered Image Upload Section with Preview -->
             <div class="flex justify-center col-span-2 mb-4">
               <label for="dropzone-file"
-                class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
                 <div v-if="auctionData.image" class="flex flex-col items-center justify-center pt-5 pb-6">
                   <!-- Image Preview Section -->
-                  <img :src="auctionData.image" alt="Image Preview" class="max-h-44 object-contain mb-2" />
+                  <img :src="auctionData.image" alt="Image Preview" class="max-h-24 object-contain mb-2 p-2" />
                   <p class="text-xs text-gray-500 dark:text-gray-400">Click to upload a new image</p>
                 </div>
 
@@ -168,7 +182,7 @@
 
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
 import { toast } from "vue3-toastify";
@@ -185,9 +199,10 @@ const auctionData = ref({
   duration_hours: null,
   categories: [], // Stores selected category IDs
   rarity: "",
+  cashbondAmount: 0,
   image: null,
 });
-
+auctionData.cashbondAmount
 const isLoading = ref(false);
 const emit = defineEmits();
 const selectedCategory = ref("");
@@ -197,10 +212,84 @@ const categoryMap = ref({
   3: "Collectibles",
   4: "Furniture",
   5: "Real Estate",
+  6: "Jewelry & Watches",
+  7: "Vehicles",
+  8: "Sports Memorabilia",
+  9: "Home Appliances",
+  10: "Books",
+  11: "Antiques",
+  12: "Music Instruments",
+  13: "Manuscripts",
+  14: "Tickets",
+  15: "Vintage",
+  16: "Coins",
+  17: "Pet Supplies",
+  18: "DIY Materials",
 });
 const errorMessage = ref("");
 const router = useRouter();
 
+
+// Define preset amounts based on rarity for cashbond 
+const presetAmounts = computed(() => {
+  const rarity = auctionData.value.rarity;
+  let minCashbond = 0;
+  let maxCashbond = 0;
+  let increment = 10; // Default increment for common items
+  let startCashbond = 0;
+
+  if (rarity === 'Rare') {
+    minCashbond = 2501;
+    maxCashbond = 5000;
+    increment = 90; // First increment for rare items
+    startCashbond = 2510; // Start from 2510 for rare items
+  } else if (rarity === 'Uncommon') {
+    minCashbond = 501;
+    maxCashbond = 2500;
+    increment = 90; // First increment for uncommon items
+    startCashbond = 510; // Start from 510 for uncommon items
+  } else {
+    // For Common or any other rarity, return the preset for Common
+    minCashbond = 250;
+    maxCashbond = 500;
+    increment = 10; // Increment for common items
+    startCashbond = 250; // Start from 250 for common items
+    let amounts = [];
+    for (let i = startCashbond; i <= maxCashbond; i += increment) {
+      amounts.push(i);
+    }
+    return amounts;
+  }
+
+  // Generate the amounts based on the calculated increments for Rare and Uncommon
+  let amounts = [];
+  let isFirstIncrement = true; // Flag to track the first increment
+
+  for (let i = startCashbond; i <= maxCashbond;) {
+    amounts.push(i);
+
+    // For the first increment, use the custom increment (90)
+    if (isFirstIncrement) {
+      i += increment; // Apply the first increment of 90
+      isFirstIncrement = false;
+    } else {
+      // After the first increment, apply the 100 increment
+      i += 100;
+    }
+  }
+
+  return amounts;
+});
+
+
+
+
+
+// Watch for changes in the rarity selection and update cashbondAmount options
+watch(() => auctionData.value.rarity, () => {
+  // Optionally clear the selected amount when rarity changes
+  auctionData.value.cashbondAmount = null;
+});
 
 const onImageChange = async (event) => {
   const file = event.target.files[0];
@@ -265,6 +354,7 @@ const createAuction = async () => {
       bidding_type: auctionData.value.biddingType,
       duration_hours: auctionData.value.biddingType === 'Lowest-type' ? auctionData.value.duration_hours : null,
       rarity: auctionData.value.rarity,
+      cashbond_amount: auctionData.value.cashbondAmount,
       categories: auctionData.value.categories, // Ensure this is an array of IDs
       image: auctionData.value.image // Ensure the image URL is included
     });
@@ -280,6 +370,7 @@ const createAuction = async () => {
         bidding_type: auctionData.value.biddingType,
         duration_hours: auctionData.value.biddingType === 'Lowest-type' ? auctionData.value.duration_hours : null,
         rarity: auctionData.value.rarity,
+        cashbond_amount: auctionData.value.cashbondAmount,
         categories: auctionData.value.categories, // Send category IDs to the backend
         image: auctionData.value.image // Include the image URL
       }

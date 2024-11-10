@@ -13,6 +13,7 @@ const transporter = nodemailer.createTransport({
 export default defineEventHandler(async (event) => {
     const pool = await getPool();
     const body = await readBody(event);
+    const results = [];
 
     try {
         // Retrieve the access token from cookies
@@ -27,7 +28,7 @@ export default defineEventHandler(async (event) => {
 
         // Fetch auction details by UUID
         const [[auction]] = await pool.query(
-            `SELECT listing_id, name, location_id, email_blast_sent FROM AuctionListings WHERE uuid = ?`,
+            `SELECT listing_id, auctioneer_id, name, location_id, email_blast_sent FROM AuctionListings WHERE uuid = ?`,
             [auctionUuid]
         );
 
@@ -42,9 +43,8 @@ export default defineEventHandler(async (event) => {
 
         const listingId = auction.listing_id;
         const location_id = auction.location_id;
+        const auctioneer_id = auction.auctioneer_id;
         const auction_name = auction.name;
-
-        console.log("yeah", auction_name);
 
         // Fetch categories associated with the auction
         const [categories] = await pool.query(
@@ -69,17 +69,19 @@ export default defineEventHandler(async (event) => {
 
         // Send notifications to the bidders
         const notifications = bidders.map(bidder => ({
-            user_id: bidder.bidder_id,
+            sender_id: auctioneer_id,
+            receiver_id: bidder.bidder_id,
             auction_id: listingId,
             message: `Don’t miss out! A new auction, "${auction_name}", has been created just for you. Explore it now!`,
             is_read: false
         }));
 
         await pool.query(
-            `INSERT INTO Notifications (user_id, auction_id, notification_type, message, is_read)
+            `INSERT INTO Notifications (sender_id, receiver_id, auction_id, notification_type, message, is_read)
        VALUES ?`,
-            [notifications.map(notif => [notif.user_id, notif.auction_id, 'EmailBlast', notif.message, notif.is_read])]
+            [notifications.map(notif => [notif.sender_id, notif.receiver_id, notif.auction_id, 'EmailBlast', notif.message, notif.is_read])]
         );
+
 
         const baseUrl = process.env.BASE_URL;
         const auctionLink = `${baseUrl}/bidder/bidder-auction?id=${auctionUuid}`;
@@ -104,7 +106,36 @@ export default defineEventHandler(async (event) => {
         );
 
 
-        return { success: true, message: 'Notifications sent successfully' };
+        // Fetch notification details and unread counts for each bidder
+        for (const bidder of bidders) {
+            const [notificationDetails] = await pool.query(
+                `SELECT a.location_id, 
+                        CONCAT(auctioneer.firstname, IFNULL(CONCAT(' ', auctioneer.middlename), ''), ' ', auctioneer.lastname) AS sender_full_name, 
+                        CONCAT(bidder.firstname, IFNULL(CONCAT(' ', bidder.middlename), ''), ' ', bidder.lastname) AS receiver_full_name, 
+                        a.name AS auction_name, a.listing_id, n.message, n.is_read, n.created_at
+                 FROM Notifications n
+                 JOIN AuctionListings a ON n.auction_id = a.listing_id
+                 JOIN Users auctioneer ON a.auctioneer_id = auctioneer.user_id
+                 JOIN Users bidder ON n.receiver_id = bidder.user_id
+                 WHERE n.receiver_id = ? AND n.auction_id = ? AND n.notification_type = 'EmailBlast'
+                 ORDER BY n.created_at DESC LIMIT 1`,
+                [bidder.bidder_id, listingId]
+            );
+
+            const [unreadCount] = await pool.query(
+                `SELECT COUNT(*) AS unread_count FROM Notifications WHERE receiver_id = ? AND is_read = false`,
+                [bidder.bidder_id]
+            );
+
+            // Push results into the results array
+            results.push({
+                bidderId: bidder.bidder_id,
+                notificationDetails: notificationDetails[0], // Assuming only one detail is returned
+                unreadCount: unreadCount[0].unread_count
+            });
+        }
+
+        return { success: true, message: 'Notifications sent successfully', results };
     } catch (error) {
         console.error('Error processing email blast:', error);
         throw createError({ statusCode: 500, message: 'Internal server error' });
