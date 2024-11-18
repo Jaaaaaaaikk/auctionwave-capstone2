@@ -1,0 +1,60 @@
+{
+  "cSpell.words": [
+    "axios",
+    "createauctionmodal",
+    "emailblastmodal",
+    "firstname",
+    "lastname",
+    "middlename",
+    "profilepage"
+  ],
+  "cSpell.customDictionaries": {
+    "custom-dictionary-workspace": {
+      "name": "custom-dictionary-workspace",
+      "path": "${workspaceFolder:auctionwave-final}/.cspell/custom-dictionary-workspace.txt",
+      "addWords": true,
+      "scope": "workspace"
+    }
+  },
+  
+  "cSpell.ignoreWords": [
+    "ARRAYAGG",
+    "Admindetails",
+    "CURDATE",
+    "Cashbonds",
+    "Emailblast",
+    "IFNULL",
+    "SVGID",
+    "TIMESTAMPDIFF",
+    "admindashboard",
+    "adminlogin",
+    "adminnavbar",
+    "auctioneerleaderboards",
+    "auctioneersidebar",
+    "auctionid",
+    "bidderleaderboards",
+    "biddersidebar",
+    "creation",
+    "darkbrown",
+    "faqnobg",
+    "fetchbidders",
+    "fuschia",
+    "gnaj",
+    "googleusers",
+    "headlessui",
+    "heroicons",
+    "inboxtab",
+    "leaderboards",
+    "notif",
+    "offerimages",
+    "pinia",
+    "placebidmodal",
+    "profilepicture",
+    "profilepictures",
+    "timeframe",
+    "usagefee_1234",
+    "usertype",
+    "variable",
+    "xmkv"
+  ],
+}
