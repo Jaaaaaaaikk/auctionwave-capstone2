@@ -1,0 +1,397 @@
+CREATE TABLE Users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    firstname VARCHAR(100) NOT NULL,
+    middlename VARCHAR(100),
+    lastname VARCHAR(100) NOT NULL,
+    location_id INT NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    about TEXT,
+    user_type ENUM('Bidder', 'Auctioneer') NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (location_id) REFERENCES Locations(location_id) ON DELETE CASCADE
+);
+
+CREATE TABLE UserProfileImages (
+    profile_image_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    profile_image_url VARCHAR(512) NOT NULL,
+    is_current_profile_image BOOLEAN DEFAULT FALSE, -- To indicate the current profile image
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE Locations (
+    location_id INT AUTO_INCREMENT PRIMARY KEY,
+    location_name VARCHAR(100) NOT NULL,
+    latitude DECIMAL(10, 7),
+    longitude DECIMAL(10, 7)
+);
+
+CREATE TABLE OTPs (
+  otp_id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  otp VARCHAR(6) NOT NULL, --adjust COLLATE utf8mb4_bin to case-sensitive
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create Bidders table
+CREATE TABLE Bidders (
+    bidder_category_id INT AUTO_INCREMENT PRIMARY KEY,
+    bidder_id INT NOT NULL,
+    category_id INT NOT NULL,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES Categories(category_id) ON DELETE CASCADE
+);
+
+-- Create Categories table
+CREATE TABLE Categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    category_name VARCHAR(250) NOT NULL
+);
+
+CREATE TABLE AuctionListings (
+    listing_id INT AUTO_INCREMENT PRIMARY KEY,
+    auctioneer_id INT NOT NULL,
+    name VARCHAR(250) NOT NULL,
+    location_id INT NOT NULL,
+    caption TEXT,
+    description TEXT,
+    starting_bid DECIMAL(10,2) NOT NULL,
+    bidding_type ENUM('Lowest-type', 'Offer-type') NOT NULL,
+    rarity ENUM('Common', 'Uncommon', 'Rare'),
+    cashbond_amount DECIMAL(10,2) NOT NULL,
+    status ENUM('Auction Pending', Awaiting Bidder Cashbond, 'Auction Ended' ) DEFAULT 'Auction Pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    duration_hours INT DEFAULT NULL,
+    uuid CHAR(36) NOT NULL,
+    end_time DATETIME GENERATED ALWAYS AS (created_at + INTERVAL duration_hours HOUR) STORED,
+    FOREIGN KEY (auctioneer_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (location_id) REFERENCES Locations(location_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Payments (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,                  -- Links to the AuctionListings
+    user_id INT NOT NULL,                     -- User making the payment
+    amount DECIMAL(10,2) NOT NULL,            -- Amount paid
+    payment_type ENUM('Emailblast Fee', 'Usage Fee') NOT NULL, 
+    payment_status ENUM('Payment Completed', 'Payment Refunded') DEFAULT 'Payment Completed',
+    order_id VARCHAR(255) DEFAULT NULL,
+    payment_method ENUM('Credit Card', 'PayPal') DEFAULT 'Paypal',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Transactions (
+    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,                  -- Links to the AuctionListings
+    bidder_id INT NOT NULL,                    	-- The provider in this case (bidder)
+    auctioneer_id INT NOT NULL,					-- The receiver in this case (auctioneer)
+    transaction_status ENUM('Transaction Pending', 'Transaction Completed', 'Transaction Failed') DEFAULT 'Transaction Pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (auctioneer_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE AuctionImages (
+    image_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,
+    image_url VARCHAR(512) NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE
+);
+
+
+-- Create AuctionListingCategories table
+CREATE TABLE AuctionListingCategories (
+    listing_id INT NOT NULL,
+    category_id INT NOT NULL,
+    PRIMARY KEY (listing_id, category_id),
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES Categories(category_id) ON DELETE CASCADE
+);
+
+-- Create AuctionVisits table
+CREATE TABLE AuctionVisits (
+    participant_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,
+    bidder_id INT NOT NULL,
+    initial_joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_interaction_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    UNIQUE KEY unique_listing_bidder (listing_id, bidder_id)
+);
+
+
+CREATE TABLE Bids (
+    bid_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,
+    bidder_id INT NOT NULL,
+    bid_amount DECIMAL(10,2) NOT NULL,
+    bid_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('Active', 'Outbid', 'Usage Fee Payment Completed', 'Payment Response Failed', 'Usage Fee Payment Pending') DEFAULT 'Active',
+    response_deadline DATETIME DEFAULT NULL,
+    response_status ENUM('Pending', 'Accepted', 'Expired') DEFAULT 'Pending',
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE Offers (
+    offer_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,          -- Links the offer to a specific auction listing
+    bidder_id INT NOT NULL,           -- Identifies the bidder who made the offer
+    comment TEXT NOT NULL,            -- The offer comment made by the bidder
+    version INT NOT NULL DEFAULT 1,   -- Tracks offer version if the bidder needs to update it
+    offer_time DATETIME DEFAULT CURRENT_TIMESTAMP,  -- Timestamp when the offer was made
+    review_status ENUM(
+        'Offer Pending', 
+        'Offer Accepted', 
+        'Offer Discarded', 
+        'Provide More'
+    ) DEFAULT 'Offer Pending',       -- The status of the offer
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE OfferImages (
+    image_id INT AUTO_INCREMENT PRIMARY KEY,
+    offer_id INT NOT NULL,            -- Links the image to a specific offer
+    image_url VARCHAR(255) NOT NULL,   -- URL or path to the image file
+    uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,  -- Timestamp when the image was uploaded
+    FOREIGN KEY (offer_id) REFERENCES Offers(offer_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE Messages (
+    message_id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    parent_message_id INT DEFAULT NULL,
+    thread_id INT DEFAULT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (parent_message_id) REFERENCES Messages(message_id) ON DELETE SET NULL
+);
+
+CREATE TABLE MessageParticipants (
+    participant_id INT AUTO_INCREMENT PRIMARY KEY,
+    message_id INT NOT NULL,
+    user_id INT NOT NULL,
+    role ENUM('sender', 'recipient') NOT NULL,   -- Specifies if the user is the sender or recipient
+    status ENUM('Sent', 'Received', 'Trash', 'Spam') DEFAULT 'Received',
+    is_read BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (message_id) REFERENCES Messages(message_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE Notifications (
+    notification_id INT AUTO_INCREMENT PRIMARY KEY,               
+    sender_id INT, 			      -- Who initiated the notification
+    receiver_id INT NOT NULL,                 -- Receiver of the notification              
+    auction_id INT,                           -- Related auction, if applicable
+    notification_type ENUM('EmailBlast', 'BidPlaced', 'OfferPlaced', 'Response,   'AuctionEnded', 'AuctionWinner') NOT NULL,
+    message TEXT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (receiver_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (sender_id) REFERENCES Users(user_id) ON DELETE SET NULL,
+    FOREIGN KEY (auction_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE
+);
+
+
+
+
+
+
+INSERT INTO Categories (category_name) VALUES
+('Art'),
+('Electronics'),
+('Collectibles'),
+('Furniture'),
+('Real Estate'),
+('Jewelry & Watches'),
+('Vehicles'),
+('Sports Memorabilia'),
+('Home Appliances'),
+('Books'),
+('Antiques'),
+('Music Instruments'),
+('Manuscripts'),
+('Tickets'),
+('Vintage'),
+('Coins'),
+('Pet Supplies'),
+('DIY Materials')
+
+
+
+
+INSERT INTO Locations (location_name, latitude, longitude) VALUES
+('Davao City', 7.1907, 125.4553),
+('Zamboanga City', 6.9214, 122.0790),
+('Cagayan de Oro', 8.4542, 124.6319),
+('General Santos City', 6.1164, 125.1716),
+('Butuan', 8.9494, 125.5433),
+('Iligan', 8.2280, 124.2452),
+('Cotabato City', 7.2044, 124.2439),
+('Tagum', 7.4477, 125.8047),
+('Valencia', 7.9062, 125.0927),
+('Pagadian', 7.8256, 123.4372),
+('Panabo', 7.3081, 125.6846),
+('Marawi', 8.0057, 124.2928),
+('Koronadal', 6.5032, 124.8463),
+('Malaybalay', 8.1571, 125.1277),
+('Digos', 6.7499, 125.3572),
+('Polomolok', 6.2164, 125.0636),
+('Surigao City', 9.7577, 125.5135),
+('Kidapawan', 7.0084, 125.0894),
+('Mati', 6.9495, 126.2166),
+('Ozamiz', 8.1462, 123.8504),
+('Dipolog', 8.5886, 123.3405),
+('Tacurong', 6.6922, 124.6738),
+('Bislig', 8.2109, 126.3161),
+('Bayugan', 8.7566, 125.7516),
+('El Salvador', 8.5553, 124.5598),
+('Lamitan', 6.6500, 122.1333),
+('Tandag', 9.0783, 126.1988),
+('Sultan Kudarat', 6.6314, 124.5385),
+('Isabela City', 6.7042, 121.9719);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE AuctioneerRatings (
+    rating_id INT AUTO_INCREMENT PRIMARY KEY,
+    auctioneer_id INT NOT NULL,           -- Auctioneer being rated
+    bidder_id INT NOT NULL,               -- Bidder giving the rating
+    listing_id INT NOT NULL,              -- Auction listing being rated
+    rating INT NOT NULL,                  -- Rating score (e.g., 1-5)
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (auctioneer_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE BidderRatings (
+    rating_id INT AUTO_INCREMENT PRIMARY KEY,
+    bidder_id INT NOT NULL,               -- Bidder being rated
+    auctioneer_id INT NOT NULL,           -- Auctioneer giving the rating
+    listing_id INT NOT NULL,              -- Auction listing being rated
+    rating INT NOT NULL,                  -- Rating score (e.g., 1-5) 
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (bidder_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (auctioneer_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE
+);
+
+
+CREATE TABLE AdminDetails (
+    admin_id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) NOT NULL UNIQUE, 
+    password VARCHAR(100) NOT NULL,
+    firstname VARCHAR(100) NOT NULL,
+    lastname VARCHAR(100) NOT NULL,
+    user_type varchar(100) DEFAULT 'admin',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE BlockedUsers (
+    block_id INT AUTO_INCREMENT PRIMARY KEY,
+    admin_id INT NOT NULL,                    -- Who blocked the user
+    user_id INT NOT NULL,                     -- Who was blocked
+    block_reason TEXT,                        -- Reason for blocking
+    blocked_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- When the user was blocked
+    FOREIGN KEY (admin_id) REFERENCES AdminDetails(admin_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+CREATE TABLE AuctionTransactionLogs (
+    transaction_log_id INT AUTO_INCREMENT PRIMARY KEY,
+    listing_id INT NOT NULL,                   -- Auction listing ID
+    transaction_status ENUM('Pending', 'Successful', 'Failed', 'Refunded') NOT NULL, -- Transaction status at the time
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- Timestamp for the change
+    admin_id INT,                              -- Admin who handled the transaction
+    reason TEXT,                               -- Reason for the status change
+    FOREIGN KEY (listing_id) REFERENCES AuctionListings(listing_id) ON DELETE CASCADE,
+    FOREIGN KEY (admin_id) REFERENCES AdminDetails(admin_id) ON DELETE CASCADE
+);
+
+CREATE TABLE UserConcerns (
+    concern_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,                       -- Who raised the concern
+    concern_type ENUM('Delivery Issue', 'Item Not Received', 'Transaction Issue', 'Other') NOT NULL, -- Type of issue
+    concern_description TEXT,                   -- Detailed description of the issue
+    concern_status ENUM('Open', 'Resolved', 'Pending') DEFAULT 'Open', -- Current status
+    resolved_at DATETIME,                       -- When the issue was resolved (if applicable)
+    admin_id INT,                               -- Admin who handled the issue
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (admin_id) REFERENCES AdminDetails(admin_id) ON DELETE CASCADE
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
