@@ -2,7 +2,7 @@
   <transition name="modal-fade">
 
     <div
-      class="fixed inset-0 flex items-center justify-center z-50 overflow-x-hidden overflow-y-auto bg-gray-900 bg-opacity-50">
+      class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto bg-gray-900 bg-opacity-50">
       <div class="relative w-full max-w-md px-4 h-96 sm:h-auto ">
         <!-- Modal content -->
         <div class="bg-white rounded-lg shadow relative dark:bg-gray-700 ">

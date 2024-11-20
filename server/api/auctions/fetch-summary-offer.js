@@ -30,7 +30,6 @@ export default defineEventHandler(async (event) => {
         SELECT 
             o.offer_time,
             o.review_status,
-            a.cashbond_amount,
             a.name AS auction_name,
             CONCAT(u.firstname, ' ', u.lastname) AS bidder_name
         FROM 

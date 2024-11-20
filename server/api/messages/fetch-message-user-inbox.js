@@ -37,14 +37,19 @@ export default defineEventHandler(async (event) => {
                 m.subject,
                 m.message,
                 mp.is_read,
-                m.created_at
+                m.created_at,
+                (SELECT upi.profile_image_url FROM UserProfileImages upi LEFT JOIN Users u ON upi.user_id = u.user_id WHERE upi.is_current_profile_image = true LIMIT 1) AS user_profile_image
             FROM Messages m
             JOIN MessageParticipants mp ON m.message_id = mp.message_id
             JOIN Users u ON m.sender_id = u.user_id 
-            WHERE mp.user_id = ? AND mp.role = 'recipient' AND mp.status = 'Received'
+                WHERE mp.user_id = ? AND mp.role = 'recipient' AND mp.status = 'Received'
             ORDER BY m.created_at DESC
         `, [userId]);
 
+
+        messages.forEach(row => {
+            row.user_profile_image = row.user_profile_image ? row.user_profile_image.split(',') : [];
+        });
 
         // Return messages
         return { messages };

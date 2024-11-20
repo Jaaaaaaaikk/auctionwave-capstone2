@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
             JOIN 
                 Users u ON mp.user_id = u.user_id 
             WHERE 
-                m.sender_id = 12 AND mp.role = 'recipient'
+                m.sender_id = ? AND mp.role = 'recipient'
             ORDER BY m.created_at DESC
             `,
             [senderId]

@@ -86,40 +86,6 @@
                     </NuxtLink>
                 </li>
                 <li>
-                    <NuxtLink to="/bidder/transaction-history">
-
-                        <div
-                            class="flex items-center pl-2 py-4  text-gray-900 rounded-lg dark:text-white hover:bg-custom-bluegreen hover:bg-opacity-25 dark:hover:bg-gray-700 group">
-                            <svg viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg"
-                                fill="#000000" width="24" height="24">
-                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                                <g id="SVGRepo_iconCarrier">
-                                    <path
-                                        d="M860.48 259.52a22.72 22.72 0 0 0 22.656-22.656V152c0-17.6-14.4-32-32-32h-640c-17.6 0-32 14.4-32 32v768c0 17.6 14.4 32 32 32h640c17.6 0 32-14.4 32-32v-250.432h-0.064l0.064-0.448a22.656 22.656 0 0 0-45.312 0l0.064 0.448h-0.064V501.12a22.656 22.656 0 0 0 45.312 0V323.52h-0.064a22.592 22.592 0 0 0-45.248 0h-0.064V236.864a22.784 22.784 0 0 0 22.72 22.656z"
-                                        fill=""></path>
-                                    <path
-                                        d="M837.824 903.616a6.4 6.4 0 0 1-6.4 6.4H230.848a6.4 6.4 0 0 1-6.4-6.4V170.432a6.4 6.4 0 0 1 6.4-6.4h600.576a6.4 6.4 0 0 1 6.4 6.4v733.184z"
-                                        fill="#FFFF00"></path>
-                                    <path
-                                        d="M285.248 520.576a16 16 0 0 1-32 0V249.152a16 16 0 0 1 32 0v271.424zM285.248 655.552a16 16 0 0 1-32 0v-62.976a16 16 0 0 1 32 0v62.976z"
-                                        fill="#FFFFFF"></path>
-                                    <path
-                                        d="M328.704 357.44c0 8.832 7.168 16 16 16h283.968a16 16 0 0 0 0-32H344.704a16.064 16.064 0 0 0-16 16zM690.688 341.44a16 16 0 0 0 0 32h36.032a16 16 0 0 0 0-32h-36.032z"
-                                        fill="#BABA00"></path>
-                                    <path
-                                        d="M328.704 485.12c0 8.832 7.168 16 16 16h381.952a16 16 0 0 0 0-32H344.704a16 16 0 0 0-16 16zM328.704 612.736c0 8.768 7.168 16 16 16h381.952a16 16 0 1 0 0-32H344.704a16 16 0 0 0-16 16z"
-                                        fill="#BABA00"></path>
-                                    <path
-                                        d="M392.448 141.568c0 12.288-10.112 22.4-22.4 22.4h-0.512a22.528 22.528 0 0 1-22.4-22.4V74.752c0-12.288 10.112-22.4 22.4-22.4h0.512c12.288 0 22.4 10.112 22.4 22.4v66.816zM715.136 141.568c0 12.288-10.112 22.4-22.4 22.4h-0.512a22.528 22.528 0 0 1-22.464-22.4V74.752c0-12.288 10.048-22.4 22.464-22.4h0.512c12.224 0 22.4 10.112 22.4 22.4v66.816z"
-                                        fill=""></path>
-                                </g>
-                            </svg>
-                            <span class="flex-1 ms-3 whitespace-nowrap">Transaction History</span>
-                        </div>
-                    </NuxtLink>
-                </li>
-                <li>
                     <NuxtLink to="/bidder/payment-history">
 
                         <div
@@ -203,6 +169,40 @@
                                 </g>
                             </svg>
                             <span class="flex-1 ms-3 whitespace-nowrap">Payment History</span>
+                        </div>
+                    </NuxtLink>
+                </li>
+                <li>
+                    <NuxtLink to="/bidder/transaction-history">
+
+                        <div
+                            class="flex items-center pl-2 py-4  text-gray-900 rounded-lg dark:text-white hover:bg-custom-bluegreen hover:bg-opacity-25 dark:hover:bg-gray-700 group">
+                            <svg viewBox="0 0 1024 1024" class="icon" version="1.1" xmlns="http://www.w3.org/2000/svg"
+                                fill="#000000" width="24" height="24">
+                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                <g id="SVGRepo_iconCarrier">
+                                    <path
+                                        d="M860.48 259.52a22.72 22.72 0 0 0 22.656-22.656V152c0-17.6-14.4-32-32-32h-640c-17.6 0-32 14.4-32 32v768c0 17.6 14.4 32 32 32h640c17.6 0 32-14.4 32-32v-250.432h-0.064l0.064-0.448a22.656 22.656 0 0 0-45.312 0l0.064 0.448h-0.064V501.12a22.656 22.656 0 0 0 45.312 0V323.52h-0.064a22.592 22.592 0 0 0-45.248 0h-0.064V236.864a22.784 22.784 0 0 0 22.72 22.656z"
+                                        fill=""></path>
+                                    <path
+                                        d="M837.824 903.616a6.4 6.4 0 0 1-6.4 6.4H230.848a6.4 6.4 0 0 1-6.4-6.4V170.432a6.4 6.4 0 0 1 6.4-6.4h600.576a6.4 6.4 0 0 1 6.4 6.4v733.184z"
+                                        fill="#FFFF00"></path>
+                                    <path
+                                        d="M285.248 520.576a16 16 0 0 1-32 0V249.152a16 16 0 0 1 32 0v271.424zM285.248 655.552a16 16 0 0 1-32 0v-62.976a16 16 0 0 1 32 0v62.976z"
+                                        fill="#FFFFFF"></path>
+                                    <path
+                                        d="M328.704 357.44c0 8.832 7.168 16 16 16h283.968a16 16 0 0 0 0-32H344.704a16.064 16.064 0 0 0-16 16zM690.688 341.44a16 16 0 0 0 0 32h36.032a16 16 0 0 0 0-32h-36.032z"
+                                        fill="#BABA00"></path>
+                                    <path
+                                        d="M328.704 485.12c0 8.832 7.168 16 16 16h381.952a16 16 0 0 0 0-32H344.704a16 16 0 0 0-16 16zM328.704 612.736c0 8.768 7.168 16 16 16h381.952a16 16 0 1 0 0-32H344.704a16 16 0 0 0-16 16z"
+                                        fill="#BABA00"></path>
+                                    <path
+                                        d="M392.448 141.568c0 12.288-10.112 22.4-22.4 22.4h-0.512a22.528 22.528 0 0 1-22.4-22.4V74.752c0-12.288 10.112-22.4 22.4-22.4h0.512c12.288 0 22.4 10.112 22.4 22.4v66.816zM715.136 141.568c0 12.288-10.112 22.4-22.4 22.4h-0.512a22.528 22.528 0 0 1-22.464-22.4V74.752c0-12.288 10.048-22.4 22.464-22.4h0.512c12.224 0 22.4 10.112 22.4 22.4v66.816z"
+                                        fill=""></path>
+                                </g>
+                            </svg>
+                            <span class="flex-1 ms-3 whitespace-nowrap">Transaction History</span>
                         </div>
                     </NuxtLink>
                 </li>

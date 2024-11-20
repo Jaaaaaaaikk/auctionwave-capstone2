@@ -10,9 +10,6 @@
                     class="mr-2">Date:</strong> {{ formatDate(winnerDetails.offer_time)
                 }}</span>
             <span v-if="winnerDetails.review_status === 'Offer Accepted'" class="flex w-full p-2 rounded"><strong
-                    class="mr-2">Cash Bond Amount Required:</strong>
-                {{ formatNumber(winnerDetails.cashbond_amount) }}</span>
-            <span v-if="winnerDetails.review_status === 'Offer Accepted'" class="flex w-full p-2 rounded"><strong
                     class="mr-2">Status:</strong> {{ winnerDetails.review_status
                 }}</span>
 
@@ -95,7 +92,7 @@
             <div class="flex justify-end mt-4 space-x-2">
                 <button v-if="winnerDetails.review_status === 'Offer Accepted'" @click="proceedPaymentFunction"
                     class="bg-custom-bluegreen hover:bg-opacity-40 hover:text-black text-white py-0.5 px-4 rounded">
-                    Top-up
+                    Pay Usage Fee
                 </button>
                 <button @click="$emit('closeAddMessageModal')"
                     class="bg-gray-300 hover:bg-custom-bluegreen hover:bg-opacity-40 hover:text-black text-white py-2 px-4 rounded">Close</button>
@@ -120,7 +117,7 @@
                                 </button>
                             </div>
                             <div class="px-6 lg:px-8 pb-4 sm:pb-6 xl:pb-8 text-center">
-                                <h3 class="text-xl font-medium text-gray-900 dark:text-white mb-5">Cash-Bond Top up
+                                <h3 class="text-xl font-medium text-gray-900 dark:text-white mb-5">Usage Fee Payment
                                 </h3>
                                 <p class="text-gray-600 mb-5">Choose Your Payment Method.</p>
                                 <div id="paypal-button-container"></div>
@@ -203,7 +200,7 @@ const loadPaypalSdkAndRenderButton = async () => {
 
     // Load PayPal SDK if it hasn't been loaded yet
     if (!paypalStore.isPaypalLoaded) {
-        await paypalStore.loadPaypalCashbondSdk(); // Load PayPal SDK if not already loaded
+        await paypalStore.loadPaypalUsageFeeSdk(); // Load PayPal SDK if not already loaded
     }
 
     // Ensure modal content is fully rendered
@@ -221,13 +218,8 @@ const renderPaypalButtons = () => {
                 try {
                     // Create an order on the server
                     const usageFee = 20.00;
-                    const orderResponse = await axios.post('/api/paypal/create-payment-cashbond', {
+                    const orderResponse = await axios.post('/api/paypal/create-payment-usage', {
                         items: [
-                            {
-                                name: `Cash Bond for Auction ${winnerDetails.value.auction_name}`,
-                                description: `Cash bond required for winning bid of ${formatNumber(winnerDetails.value.bid_amount)}`,
-                                amount: winnerDetails.value.cashbond_amount
-                            },
                             {
                                 name: `Usage Fee for Auction ${winnerDetails.value.auction_name}`,
                                 description: `Usage fee for winning bid of ${formatNumber(winnerDetails.value.bid_amount)}`,
@@ -247,7 +239,7 @@ const renderPaypalButtons = () => {
             onApprove: async (data) => {
                 try {
                     // Capture the order on the server using the approved orderID
-                    const captureResponse = await axios.post('/api/paypal/capture-payment-cashbond', {
+                    const captureResponse = await axios.post('/api/paypal/capture-payment-usage', {
                         orderID: data.orderID
                     }, {
                         headers: { 'Content-Type': 'application/json' },
@@ -257,7 +249,6 @@ const renderPaypalButtons = () => {
 
                         // Update Bids Table with status 'Won' and 'Accepted'
                         await axios.post('/api/payments/update-status', {
-                            cashbond_amount: winnerDetails.value.cashbond_amount,
                             listing_id: props.listing_id,
                             orderID: data.orderID
                         });
@@ -311,7 +302,7 @@ onMounted(async () => {
     fetchOfferWinnerDetails({ id: props.listing_id });
     fetchOfferBidders({ id: props.listing_id });
     if (!paypalStore.isPaypalLoaded) {
-        await paypalStore.loadPaypalCashbondSdk(); // Load PayPal SDK if not already loaded
+        await paypalStore.loadPaypalUsageFeeSdk(); // Load PayPal SDK if not already loaded
     }
 });
 </script>

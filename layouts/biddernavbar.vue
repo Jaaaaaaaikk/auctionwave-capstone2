@@ -10,7 +10,7 @@
       <div class="">
         <!-- Button to toggle the drawer -->
         <div
-          class="flex lg:hidden justify-start space-x-3 rtl:space-x-reverse lg:mr-8 lg:ml-7 ml-2 flex-shrink-0 py-3 lg:py-0">
+          class="flex xl:hidden justify-start space-x-3 rtl:space-x-reverse lg:mr-8 lg:ml-7 ml-2 flex-shrink-0 py-3 lg:py-0">
           <button @click="toggleDrawer" type="button">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M20 7L4 7" stroke="#000000" stroke-width="1.5" stroke-linecap="round"></path>
@@ -22,7 +22,7 @@
 
         <!-- Drawer component -->
         <div id="drawer-navigation" :class="{ '-translate-x-full': !drawerOpen }"
-          class="fixed top-0 left-0 z-40 w-64 h-screen p-4 overflow-y-auto transition-transform bg-white dark:bg-gray-800 lg:hidden">
+          class="fixed top-0 left-0 z-40 w-64 h-screen p-4 overflow-y-auto transition-transform bg-white dark:bg-gray-800 xl:hidden">
           <h5 id="drawer-navigation-label"
             class="flex items-center space-x-3 text-base font-semibold text-gray-500 uppercase dark:text-gray-400 mb-8">
             <img src="/public/images/logo-no-text123.jpg" class="h-16" alt="Logo" />
@@ -349,53 +349,62 @@
                   inboxStore.unreadCount }}</span>
             </button>
 
+            <div>
+              <!-- Inbox Dropdown -->
+              <div v-if="inboxDropdownOpen"
+                class="absolute right-0 mt-2 w-96 bg-white divide-y divide-gray-100 rounded-md shadow-md drop-shadow-lg dark:bg-gray-700 z-0">
+                <!-- Message List -->
+                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 max-h-48 overflow-y-auto no-scrollbar">
+                  <li v-for="message in inboxStore.messages" :key="message.message_id" :class="{
+                    'bg-yellow-100': !message.is_read,
+                    'bg-gray-100': message.is_read,
+                    'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
+                  }" role="button" tabindex="0">
+                    <img v-if="message.user_profile_image.length > 0" :src="message.user_profile_image[0]"
+                      alt="Auction Image" class="w-11 h-11 rounded-full object-cover flex-shrink-0 ml-4 mr-8"
+                      loading="lazy" />
+                    <img v-else src="/public/images/no-image.jpg" alt="No Image Available"
+                      class="object-cover w-full h-32 rounded-t-lg" loading="lazy" />
+                    From: {{ message.sender_name }} - {{ message.message }} - {{ formatDate(message.created_at) }}
+                  </li>
 
-            <div v-if="inboxDropdownOpen"
-              class="absolute right-0 mt-2 w-96 bg-white divide-y  divide-gray-100 rounded-md shadow-md drop-shadow-lg dark:bg-gray-700 z-0">
-
-              <!-- Message List -->
-              <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 max-h-48 overflow-y-auto no-scrollbar">
-                <li v-for="message in inboxStore.messages" :key="message.message_id" :class="{
-                  'bg-yellow-100': !message.is_read,
-                  'bg-gray-100': message.is_read,
-                  'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
-                }" role="button" tabindex="0">
-                  From: {{ message.sender_name }} - {{ message.message }} - {{ formatDate(message.created_at) }}
-                </li>
-                <li v-if="inboxStore.messages.length === 0">
-                  <p class="block px-4 py-2 text-gray-500">No Messages.</p>
-                </li>
-              </ul>
-              <!-- Fixed buttons for 'See All' and 'Mark All as Read' -->
-              <div class="flex flex-col px-4 py-2 border-t space-y-2">
-                <div class="flex justify-between">
-                  <NuxtLink :to="{ path: '/inbox', query: { userType: userType } }"
-                    class="flex items-center text-gray-700 hover:text-red-500">
-                    <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                      stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 6h16M4 12h16m-7 6h7" />
-                    </svg>
-                    <span class="text-xs">See All</span>
-                  </NuxtLink>
-                  <button @click="addMessage = true" class="flex items-center text-gray-700 hover:text-green-500">
+                  <li v-if="inboxStore.messages.length === 0">
+                    <p class="block px-4 py-2 text-gray-500">No Messages.</p>
+                  </li>
+                </ul>
+                <!-- Fixed buttons for 'See All' and 'Mark All as Read' -->
+                <div class="flex flex-col px-4 py-2 border-t space-y-2">
+                  <div class="flex justify-between">
+                    <NuxtLink :to="{ path: '/inbox', query: { userType: userType } }"
+                      class="flex items-center text-gray-700 hover:text-red-500">
+                      <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 6h16M4 12h16m-7 6h7" />
+                      </svg>
+                      <span class="text-xs hover:underline">See All</span>
+                    </NuxtLink>
+                    <button @click="addMessage = true" class="flex items-center text-gray-700 hover:text-green-500">
+                      <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span class="text-xs hover:underline">Compose Message</span>
+                    </button>
+                  </div>
+                  <button @click="markAllMessagesAsRead"
+                    class="flex items-center w-full text-gray-700 hover:text-green-500">
                     <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                       stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    <span class="text-xs">Compose Message</span>
+                    <span class="text-xs hover:underline">Mark All as Read</span>
                   </button>
                 </div>
-                <button @click="markAllMessagesAsRead"
-                  class="flex items-center w-full text-gray-700 hover:text-green-500">
-                  <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span class="text-xs">Mark All as Read</span>
-                </button>
-                <AddMessageModal v-if="addMessage" @closeAddMessageModal="addMessage = false" />
               </div>
+
+              <!-- Add Message Modal - Place it outside the dropdown -->
+              <AddMessageModal v-if="addMessage" @closeAddMessageModal="addMessage = false" />
             </div>
           </div>
 
@@ -423,15 +432,15 @@
                 </g>
               </svg>
 
-              <span v-if="notificationsStore.unreadCount > 0"
+              <span v-if="unreadCount > 0"
                 class="absolute top-0 right-0 w-4 h-4 bg-red-600 rounded-full text-xs text-white"> {{
-                  notificationsStore.unreadCount }}</span>
+                  unreadCount }}</span>
             </button>
             <div v-if="notificationDropdownOpen"
               class="absolute right-0  mt-13 sm:w-96 w-80 bg-white divide-y  divide-gray-100 rounded-md shadow-md drop-shadow-lg dark:bg-gray-700 z-0">
               <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 max-h-48 overflow-y-auto no-scrollbar">
 
-                <li v-for="notification in notificationsStore.notifications" :key="notification.notification_id" :class="{
+                <li v-for="notification in notifications" :key="notification.notification_id" :class="{
                   'bg-yellow-100': !notification.is_read,
                   'bg-gray-100': notification.is_read,
                   'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
@@ -442,7 +451,7 @@
                     formatDate(notification.created_at)
                   }}
                 </li>
-                <li v-if="notificationsStore.notifications.length === 0">
+                <li v-if="notifications.length === 0">
                   <p class="block px-4 py-2 text-gray-500">No notifications</p>
                 </li>
               </ul>
@@ -522,6 +531,16 @@
 
     <div class="pt-16">
       <slot />
+      <ViewNotificationModalLowest v-if="viewNotificationLowest" @closeAddMessageModal="viewNotificationLowest = false"
+        :message="currentNotification.message" :date="currentNotification.date" :sender="currentNotification.sender"
+        :listing_id="currentNotification.listing_id" />
+
+      <ViewNotificationModalOffer v-if="viewNotificationOffer" @closeAddMessageModal="viewNotificationOffer = false"
+        :message="currentNotification.message" :date="currentNotification.date" :sender="currentNotification.sender"
+        :listing_id="currentNotification.listing_id" />
+
+      <BidderRatingModal v-if="bidderRatingModal" @closeRatingModal="bidderRatingModal = false"
+        :listing_id="passDataInRatingModal.listing_id" :auctioneer_id="passDataInRatingModal.auctioneer_id" />
     </div>
   </div>
 </template>
@@ -537,8 +556,12 @@ import { useNotificationStore } from "@/stores/notification-store";
 import AddMessageModal from "~/components/add-message-modal.vue";
 import { useInboxStore } from '@/stores/inbox-store';
 import { useInboxSocketStore } from '@/stores/socketStore';
+import BidderRatingModal from "~/components/bidder-rating.vue";
 import { toast } from 'vue3-toastify';
 
+const bidderRatingModal = ref(false);
+const viewNotificationLowest = ref(false);
+const viewNotificationOffer = ref(false);
 const socketStore = useInboxSocketStore();
 const inboxStore = useInboxStore();
 const addMessage = ref(false);
@@ -560,7 +583,19 @@ const rarities = ref(['Common', 'Uncommon', 'Rare']);
 const biddingTypes = ref(["Lowest-Type", "Offer-Type"]);
 const clearAuctionType = () => auctionStore.clearBiddingType();
 const clearAuctionRarity = () => auctionStore.clearRarity();
+const notifications = computed(() => notificationsStore.notifications);
+const unreadCount = computed(() => notificationsStore.unreadCount);
 const drawerOpen = ref(false);
+const currentNotification = ref({
+  sender: '',
+  date: '',
+  message: ''
+});
+
+const passDataInRatingModal = ref({
+  listing_id: null,
+  auctioneer_id: null
+});
 
 // Toggle drawer visibility
 const toggleDrawer = () => {
@@ -585,16 +620,68 @@ const handleClickInbox = () => {
   toggleInbox();
 };
 
-const getClickHandler = (notification) => {
-  if (notification.sender_full_name.includes("AuctionWave System")) {
-    openNotificationModal(notification);
+const getClickHandler = async (notification) => {
+  const isMessage = notification.message?.includes("Congratulations");
+  if (isMessage) {
     currentNotification.value = {
       sender: notification.sender_full_name || "AuctionWave System",
       date: notification.created_at,
       message: notification.message,
+      listing_id: notification.listing_id
     };
-  } else {
+    if (notification.bidding_type === 'Lowest-type') {
+      openNotificationModalLowest(notification);
+    } else if (notification.bidding_type === 'Offer-type') {
+      openNotificationModalOffer(notification);
+    }
+  } else if (notification.message?.includes('marked your transaction as completed for auction')) {
+    passDataInRatingModal.value = {
+      listing_id: notification.listing_id,
+      auctioneer_id: notification.auctioneer_id
+    };
+
+    // Check if the auction is already rated before opening the rating modal
+    const canRate = await checkIfAuctionRated(notification.listing_id, notification.auctioneer_id);
+
+    if (canRate) {
+      bidderRatingModal.value = true; // Open the rating modal if the auction hasn't been rated yet
+      notificationDropdownOpen.value = false;
+    } else {
+      // Optionally, show a message that the auction has already been rated
+      toast.error('You have already rated this auction.');
+      return;
+    }
+  }
+  else {
     viewAuction(notification);
+  }
+};
+
+const openNotificationModalLowest = (notification) => {
+  viewNotificationLowest.value = true;
+
+};
+
+const openNotificationModalOffer = (notification) => {
+  viewNotificationOffer.value = true;
+
+};
+
+const checkIfAuctionRated = async (listing_id, auctioneer_id) => {
+  try {
+    const response = await axios.post('/api/ratings/check-rating', {
+      listing_id,
+      auctioneer_id
+    });
+
+    if (response.status === 200) {
+      return true; // Auction can be rated
+    } else {
+      return false; // Auction already rated
+    }
+  } catch (error) {
+    console.error('Error checking auction rating:', error);
+    return false; // Error occurred, assume the auction cannot be rated
   }
 };
 
@@ -695,10 +782,10 @@ const handleIncomingMessage = (newMessage) => {
 };
 
 const handleIncomingNotification = (newNotificationMessage) => {
-  notificationsStore.notifications.unshift(newNotificationMessage.notification);
+  notifications.unshift(newNotificationMessage.notification);
 
   // Update unread count if necessary
-  notificationsStore.unreadCount = newNotificationMessage.notification.unreadCount;
+  unreadCount = newNotificationMessage.notification.unreadCount;
 
   // Display a toast notification
   toast(`From ${newNotificationMessage.notification.sender_full_name}: ${newNotificationMessage.notification.message}`, {
@@ -720,9 +807,9 @@ const handleIncomingSystemNotification = (systemNotification) => {
 
 // Function to handle response notifications from the auctioneer
 const handleIncomingResponseNotification = (responseNotification) => {
-  notificationsStore.notifications.unshift(responseNotification.notification);
+  notifications.unshift(responseNotification.notification);
 
-  notificationsStore.unreadCount = responseNotification.notification.unreadCount;
+  unreadCount = responseNotification.notification.unreadCount;
 
   toast(`From: ${responseNotification.notification.sender_full_name}: ${responseNotification.notification.message}.`, {
     type: 'info',

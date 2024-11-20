@@ -93,18 +93,6 @@
                   class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 focus:ring-custom-bluegreen focus:border-custom-bluegreen dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                   placeholder="Duration in hours" required />
               </div>
-
-              <div v-if="auctionData.biddingType && auctionData.rarity" class=" w-66 flex flex-col">
-                <label for="rarity" class=" block mb-2 text-sm font-medium text-gray-900 dark:text-white">Cashbond
-                  Amount</label>
-                <select v-model="auctionData.cashbondAmount" id="rarity"
-                  class=" focus:ring-custom-bluegreen focus:border-custom-bluegreen bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
-                  <option value="" disabled>Select Amount</option>
-                  <option v-for="amount in presetAmounts" :key="amount" :value="amount">
-                    {{ amount.replace(/\B(?=(\d{3})+(?!\d))/g, ',') }}
-                  </option>
-                </select>
-              </div>
             </div>
 
 
@@ -202,11 +190,8 @@ const auctionData = ref({
   duration_hours: null,
   categories: [], // Stores selected category IDs
   rarity: "",
-  cashbondAmount: 0,
   image: null,
 });
-auctionData.cashbondAmount
-const isLoading = ref(false);
 const emit = defineEmits();
 const selectedCategory = ref("");
 const categoryMap = ref({
@@ -233,7 +218,6 @@ const errorMessage = ref("");
 const router = useRouter();
 const formattedStartingBid = ref("")
 
-
 const formatStartingBid = (event) => {
   let value = event.target.value.replace(/[^0-9.]/g, ''); // Remove any non-numeric characters
   if (value) {
@@ -241,59 +225,6 @@ const formatStartingBid = (event) => {
   }
   formattedStartingBid.value = value;
 };
-
-// Define preset amounts based on rarity for cashbond 
-const presetAmounts = computed(() => {
-  const rarity = auctionData.value.rarity;
-  let minCashbond = 0;
-  let maxCashbond = 0;
-  let increment = 10; // Default increment for common items
-  let startCashbond = 0;
-
-  if (rarity === 'Rare') {
-    minCashbond = 2501;
-    maxCashbond = 5000;
-    increment = 90; // First increment for rare items
-    startCashbond = 2510; // Start from 2510 for rare items
-  } else if (rarity === 'Uncommon') {
-    minCashbond = 501;
-    maxCashbond = 2500;
-    increment = 90; // First increment for uncommon items
-    startCashbond = 510; // Start from 510 for uncommon items
-  } else {
-    minCashbond = 250;
-    maxCashbond = 500;
-    increment = 10; // Increment for common items
-    startCashbond = 250; // Start from 250 for common items
-  }
-
-  let amounts = [];
-  let isFirstIncrement = true;
-
-  for (let i = startCashbond; i <= maxCashbond;) {
-    amounts.push(i);
-
-    if (isFirstIncrement) {
-      i += increment;
-      isFirstIncrement = false;
-    } else {
-      i += 100;
-    }
-  }
-
-  // Convert all numbers to strings for template rendering
-  return amounts.map(amount => amount.toString());
-});
-
-
-
-
-
-// Watch for changes in the rarity selection and update cashbondAmount options
-watch(() => auctionData.value.rarity, () => {
-  // Optionally clear the selected amount when rarity changes
-  auctionData.value.cashbondAmount = null;
-});
 
 const onImageChange = async (event) => {
   const file = event.target.files[0];
@@ -343,10 +274,7 @@ const fetchLocation = async () => {
   }
 };
 
-
-
 const createAuction = async () => {
-  isLoading.value = true; // Start loading
   const rawStartingBid = formattedStartingBid.value.replace(/,/g, '');
   auctionData.value.startingBid = parseFloat(rawStartingBid);
   try {
@@ -360,7 +288,6 @@ const createAuction = async () => {
       bidding_type: auctionData.value.biddingType,
       duration_hours: auctionData.value.biddingType === 'Lowest-type' ? auctionData.value.duration_hours : null,
       rarity: auctionData.value.rarity,
-      cashbond_amount: auctionData.value.cashbondAmount,
       categories: auctionData.value.categories, // Ensure this is an array of IDs
       image: auctionData.value.image // Ensure the image URL is included
     });
@@ -376,7 +303,6 @@ const createAuction = async () => {
         bidding_type: auctionData.value.biddingType,
         duration_hours: auctionData.value.biddingType === 'Lowest-type' ? auctionData.value.duration_hours : null,
         rarity: auctionData.value.rarity,
-        cashbond_amount: auctionData.value.cashbondAmount,
         categories: auctionData.value.categories, // Send category IDs to the backend
         image: auctionData.value.image // Include the image URL
       }
@@ -397,9 +323,6 @@ const createAuction = async () => {
     } else {
       toast.error("An error occurred. Please try again.");
     }
-  }
-  finally {
-    isLoading.value = false; // Stop loading
   }
 };
 

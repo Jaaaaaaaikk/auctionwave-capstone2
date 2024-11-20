@@ -27,6 +27,7 @@ export default defineEventHandler(async (event) => {
                     a.uuid AS auction_uuid,
                     a.listing_id,
                     a.bidding_type, 
+                    a.auctioneer_id,
                     COALESCE(CONCAT(sender.firstname, IFNULL(CONCAT(' ', sender.middlename), ''), ' ', sender.lastname), 'AuctionWave System') AS sender_full_name,
                     CONCAT(receiver.firstname, IFNULL(CONCAT(' ', receiver.middlename), ''), ' ', receiver.lastname) AS receiver_full_name
                 FROM 

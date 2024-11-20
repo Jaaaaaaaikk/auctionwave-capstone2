@@ -31,7 +31,6 @@ export default defineEventHandler(async (event) => {
           b.bid_amount,
           b.bid_time,
           b.status,
-          a.cashbond_amount,
           a.name AS auction_name,
           CONCAT(u.firstname, ' ', u.lastname) AS bidder_name,
           b.response_deadline
@@ -47,7 +46,7 @@ export default defineEventHandler(async (event) => {
           n.auction_id = ? 
           AND n.receiver_id = ? 
           AND n.notification_type = 'AuctionWinner' 
-          AND b.status = 'CashBond Pending'
+          AND b.status = 'Usage Fee Payment Pending'
       LIMIT 1;
     `, [listingId, userId]);
 

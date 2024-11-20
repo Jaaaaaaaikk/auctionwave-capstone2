@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
     const { bidder_id, listing_id, sender_full_name, auction_name } = offer[0];
 
     // Notification message for accepted offer
-    const notificationMessage = `Auctioneer ${sender_full_name} has accepted your offer. You are the new winner of the auction "${auction_name}". Please proceed with the cash bond payment.`;
+    const notificationMessage = `Auctioneer ${sender_full_name} has accepted your offer. You are the new winner of the auction "${auction_name}". Please proceed with the usage fee payment.`;
 
     // Update offer status and auction status
     try {
@@ -82,7 +82,7 @@ export default defineEventHandler(async (event) => {
 
         // End the auction
         await pool.query(
-            `UPDATE AuctionListings SET status = 'Auction Ended' WHERE listing_id = ?`,
+            `UPDATE AuctionListings SET status = 'Awaiting Bidder Payment' WHERE listing_id = ?`,
             [listing_id]
         );
 
@@ -108,7 +108,7 @@ export default defineEventHandler(async (event) => {
             notification: winnerNotification
         });
 
-        return { message: "Offer accepted, auction ended, and notification sent." };
+        return { message: "Offer accepted, Awaiting Bidder Payment, and notification sent." };
     } catch (error) {
         console.error("Error processing request:", error);
         throw createError({ statusCode: 500, statusMessage: "Internal Server Error" });

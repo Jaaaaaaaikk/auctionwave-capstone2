@@ -1,11 +1,11 @@
 <template>
   <NuxtLayout name="biddernavbar">
-    <section class="bg-white md:pb-16 dark:bg-gray-900 antialiased w-3/5 mx-auto px-10 rounded-b-md">
-      <NuxtLayout name="biddersidebar"></NuxtLayout>
+    <section class="bg-white lg:pb-16 dark:bg-gray-900 antialiased w-full lg:w-3/5 mx-auto md:px-10   rounded-b-md">
+      <NuxtLayout name="biddersidebar" class="hidden xl:block"></NuxtLayout>
       <nav v-if="auction"
-        class="flex  pt-10 pb-10 text-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700"
+        class="flex  pt-10 pb-10 text-gray-700 rounded-lg mx-2 bg-white dark:bg-gray-800 dark:border-gray-700"
         aria-label="Breadcrumb">
-        <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+        <ol class="inline-flex items-center space-x-1 lg:space-x-2 rtl:space-x-reverse">
           <li class="inline-flex items-center">
             <NuxtLink to="/bidder/bidderdashboard"
               class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
@@ -30,15 +30,43 @@
         </ol>
       </nav>
 
-      <div v-if="auction" class="max-w-screen-xl px-4 mx-auto 2xl:px-0 pt-10">
+      <div v-if="auction" class="lg:max-w-screen-xl lg:px-4 px-2 mx-auto 2xl:px-0 lg:pt-10">
         <div class="lg:grid lg:grid-cols-2 lg:gap-8 xl:gap-16">
-          <div class="shrink-0 max-w-md lg:max-w-lg mx-auto">
+          <div class="shrink-0  lg:max-w-lg mx-auto">
             <div class="p-4 border  rounded-lg">
               <img v-if="auction.image_url" :src="auction.image_url" alt="Auction Image Preview" class="w-full h-auto"
                 @error="auction.image_url = '/images/no-image.jpg'" />
               <img v-else src="/images/no-image.jpg" class="w-full h-auto" alt="No Image Available" />
+
             </div>
-            <hr class="my-6 md:my-8 border-gray-200 dark:border-gray-800" />
+            <button v-if="auction.bidding_type === 'Lowest-type'"
+              class=" lg:hidden flex text-white mt-4 sm:mt-0 bg-custom-bluegreen hover:bg-green-500 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800  items-center justify-center w-full"
+              @click="checkAuctionStatusBeforePlacingBid">
+              <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white" stroke-width="1.5"
+                class="w-5 h-5 -ms-2 me-2">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g id="SVGRepo_iconCarrier">
+                  <g fill="none" fill-rule="evenodd" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round"
+                    transform="translate(1 3)"> <!-- Set stroke to white -->
+                    <path
+                      d="m17.5 8.5v3c0 1.2994935-3.1340068 3-7 3-3.86599325 0-7-1.7005065-7-3 0-.4275221 0-1.2608554 0-2.5">
+                    </path>
+                    <path
+                      d="m3.79385803 9.25873308c.86480173 1.14823502 3.53999333 2.22489962 6.70614197 2.22489962 3.8659932 0 7-1.60524016 7-2.98595204 0-.77476061-.9867994-1.62391104-2.5360034-2.22001882">
+                    </path>
+                    <path
+                      d="m14.5 3.5v3c0 1.29949353-3.1340068 3-7 3-3.86599325 0-7-1.70050647-7-3 0-.64128315 0-2.35871685 0-3">
+                    </path>
+                    <path
+                      d="m7.5 6.48363266c3.8659932 0 7-1.60524012 7-2.985952 0-1.38071187-3.1340068-2.99768066-7-2.99768066-3.86599325 0-7 1.61696879-7 2.99768066 0 1.38071188 3.13400675 2.985952 7 2.985952z">
+                    </path>
+                  </g>
+                </g>
+              </svg>
+              PLACE BID
+            </button>
+            <hr class="my-6 lg:my-8 border-gray-200 dark:border-gray-800" />
             <p class="font-medium">Auction Request Caption</p>
             <p class="font-medium text-gray-900 dark:text-gray-400">{{ auction.caption }}</p>
             <p v-if="!auction.caption" class="text-gray-500">No Request Caption Provided.</p>
@@ -79,7 +107,7 @@
 
 
 
-          <div class="mt-6 sm:mt-8 lg:mt-0 px-4">
+          <div class="mt-6 sm:mt-8 lg:mt-0 px-1 lg:px-4">
             <div class="flex items-center mb-2">
               <img v-if="auction?.auctioneer_profile_image && auction.auctioneer_profile_image.length > 0"
                 :src="auction.auctioneer_profile_image" class="w-6 h-6 rounded-full mr-2" loading="lazy" />
@@ -98,17 +126,6 @@
                 <p class="text-2xl font-extrabold text-gray-900 sm:text-3xl dark:text-white">
                   {{ formatNumber(auction.starting_bid) }}
                 </p>
-              </div>
-            </div>
-
-            <div class="mt-3 mb-3 sm:gap-4 sm:items-center sm:flex ">
-              <div class="mb-2">
-                <p class="text-gray-500 mt-2">Cash Bond</p>
-                <div class="flex flex-wrap mt-2">
-                  <p class="text-xs font-semibold text-gray-900 sm:text-lg dark:text-white">
-                    {{ formatNumber(auction.cashbond_amount) }}
-                  </p>
-                </div>
               </div>
             </div>
 
@@ -135,7 +152,7 @@
               <span class="flex text-red-300"> {{ auction.status }}</span>
             </div>
             <button v-if="auction.bidding_type === 'Lowest-type'"
-              class="text-white mt-4 sm:mt-0 bg-custom-bluegreen hover:bg-green-500 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800 flex items-center justify-center w-full"
+              class="hidden  text-white mt-4 sm:mt-0 bg-custom-bluegreen hover:bg-green-500 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800 lg:flex items-center justify-center w-full"
               @click="checkAuctionStatusBeforePlacingBid">
               <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white" stroke-width="1.5"
                 class="w-5 h-5 -ms-2 me-2">
@@ -201,7 +218,7 @@
               {{ biddersCount }} bidders are currently participating in this auction.
             </span>
 
-            <hr class="my-6 md:my-8 border-gray-200 dark:border-gray-800" />
+            <hr class="my-6 lg:my-8 border-gray-200 dark:border-gray-800" />
 
 
             <section class="my-4">
@@ -241,13 +258,72 @@
                 </div>
               </div>
 
-              <NuxtLink to="#"
-                class=" text-custom-bluegreen py-2 px-4 mt-3 rounded hover:underline transition duration-200">View
+
+
+              <NuxtLink @click="showAuctionGuide = true"
+                class=" text-custom-bluegreen py-2 px-4 mt-3 rounded hover:underline transition duration-200 cursor-pointer">
+                View
                 Auction Policy for Details</NuxtLink>
 
+
+              <transition name="fade">
+                <div v-if="showAuctionGuide"
+                  class="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
+                  <div class="bg-white p-6 rounded-lg shadow-lg max-w-lg mx-auto">
+                    <h2 class="text-xl font-semibold mb-4">Auction Participating Guide</h2>
+                    <div class="overflow-y-auto max-h-60 text-sm text-gray-700">
+                      <span class="text-lg"><strong>Lowest-Type Auctions</strong></span>
+                      <p>
+                        1. Each bidder can only place one bid at a time.
+                      </p>
+                      <br>
+                      <p>
+                        2. A bidder may bid again only if outbid by another participant.
+                      </p>
+                      <br>
+                      <p>
+                        3. If the auction timer expires, the system selects the lowest bid automatically as the winner.
+                      </p>
+                      <br>
+                      <p>
+                        4. Winning bidders are required to pay usage fee.
+                      </p>
+                      <br>
+                      <span class="text-lg"><strong>Offer-Type Auctions</strong></span>
+                      <p>
+                        1. Bidders may submit offers via the comment box with optional file attachments.
+                      </p>
+                      <br>
+                      <p>
+                        2. Each offer is marked as Pending, Provide More, or Discarded by the auctioneer.
+                      </p>
+                      <br>
+                      <p>
+                        3. Bidders cannot place a new offer until the auctioneer requests additional details.
+                      </p>
+                      <br>
+                      <p>
+                        4. There is no timer for offer-type auctions; the auctioneer selects the winning offer.
+                      </p>
+                      <br>
+                      <p>
+                        4. Selected winner bidder are required to pay usage fee.
+                      </p>
+                    </div>
+                    <div class="flex justify-end mt-4">
+                      <button @click="showAuctionGuide = false"
+                        class="w-full text-white bg-custom-bluegreen hover:bg-green-500 focus:ring-4 focus:ring-custom-bluegreen font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </transition>
             </section>
           </div>
         </div>
+
+
         <div class="flex flex-col items-end mt-6 w-full">
           <section class="w-full rounded-lg  p-4 my-8 mx-auto " v-if="auction.bidding_type === 'Offer-type'">
             <h3 class="font-os text-lg font-bold">Recent Offers</h3>
@@ -361,13 +437,110 @@
           </section>
         </div>
       </div>
+
+      <!-- Add Loading Spinner here -->
+      <div v-else-if="isLoading" class="fixed inset-0 flex items-center justify-center z-50">
+
+        <!--Backdrop of Loading Spinner-->
+        <div class="absolute inset-0 bg-gray-900 bg-opacity-50"></div>
+
+        <div class="flex items-center space-x-4">
+          <svg class="animate-spin" width="80" height="80" viewBox="0 0 20 20" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#clip0_2592_7101)">
+              <path opacity="0.33" fill-rule="evenodd" clip-rule="evenodd"
+                d="M12.6066 0.345176L12.1759 1.95287C11.9417 1.88993 11.7052 1.83929 11.4632 1.79612C11.2212 1.75296 10.9818 1.71873 10.7403 1.6968L10.892 0.0393588C11.1794 0.065229 11.4687 0.104137 11.7559 0.15535C12.043 0.206563 12.3279 0.270083 12.6066 0.345176Z"
+                fill="#3758F9" />
+              <path opacity="0.38" fill-rule="evenodd" clip-rule="evenodd"
+                d="M15.0182 1.34671L14.1811 2.78881C13.7674 2.54571 13.3299 2.34072 12.8687 2.17381L13.44 0.60813C13.9926 0.808271 14.5193 1.05881 15.0182 1.34671Z"
+                fill="#3758F9" />
+              <path opacity="0.42" fill-rule="evenodd" clip-rule="evenodd"
+                d="M17.0867 2.94304L15.904 4.1161C15.5633 3.77177 15.1915 3.45996 14.7933 3.17731L15.7554 1.81679C16.2325 2.15582 16.6776 2.53148 17.0867 2.94304Z"
+                fill="#3758F9" />
+              <path opacity="0.5" fill-rule="evenodd" clip-rule="evenodd"
+                d="M18.6682 5.01543L17.225 5.84575C16.9824 5.4258 16.7068 5.02535 16.3966 4.65259L17.6747 3.58543C18.0477 4.03288 18.3814 4.51141 18.6682 5.01543Z"
+                fill="#3758F9" />
+              <path opacity="0.55" fill-rule="evenodd" clip-rule="evenodd"
+                d="M19.6684 7.42856L18.0557 7.85621C17.9323 7.38556 17.7642 6.92809 17.5622 6.49423L19.0718 5.79002C19.3166 6.31617 19.5152 6.86372 19.6684 7.42856Z"
+                fill="#3758F9" />
+              <path opacity="0.6" fill-rule="evenodd" clip-rule="evenodd"
+                d="M20.002 10.019L18.3354 10.0138C18.3382 9.52335 18.293 9.04126 18.2128 8.56561L19.8546 8.28284C19.953 8.84638 20.0053 9.43131 20.002 10.019Z"
+                fill="#3758F9" />
+              <path opacity="0.65" fill-rule="evenodd" clip-rule="evenodd"
+                d="M19.8447 11.7559C19.7934 12.043 19.7299 12.328 19.6548 12.6066L18.0438 12.1711C18.106 11.941 18.1607 11.7053 18.2039 11.4633C18.247 11.2212 18.2779 10.977 18.2991 10.7396L19.9606 10.892C19.9355 11.1753 19.8966 11.4647 19.8447 11.7559Z"
+                fill="#3758F9" />
+              <path opacity="0.7" fill-rule="evenodd" clip-rule="evenodd"
+                d="M19.3926 13.436C19.1917 13.9927 18.9412 14.5194 18.6533 15.0182L17.2112 14.1812C17.4502 13.7667 17.66 13.3259 17.8269 12.8647L19.3926 13.436Z"
+                fill="#3758F9" />
+              <path opacity="0.75" fill-rule="evenodd" clip-rule="evenodd"
+                d="M18.184 15.7514C17.8442 16.2325 17.4685 16.6776 17.0577 17.0826L15.8839 15.904C16.2241 15.5626 16.54 15.1915 16.8186 14.7926L18.184 15.7514Z"
+                fill="#3758F9" />
+              <path opacity="0.8" fill-rule="evenodd" clip-rule="evenodd"
+                d="M16.4112 17.6699C15.9678 18.0437 15.4893 18.3774 14.9846 18.6682L14.1543 17.225C14.5742 16.9825 14.9713 16.702 15.344 16.3918L16.4112 17.6699Z"
+                fill="#3758F9" />
+              <path opacity="0.95" fill-rule="evenodd" clip-rule="evenodd"
+                d="M14.21 19.0718C13.6838 19.3166 13.1363 19.5152 12.5721 19.6643L12.1397 18.055C12.6111 17.9275 13.0678 17.7635 13.5065 17.5581L14.21 19.0718Z"
+                fill="#3758F9" />
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                d="M11.7179 19.8505C11.1495 19.9523 10.5694 20.0012 9.98093 20.0021L9.98616 18.3354C10.4773 18.3341 10.9587 18.293 11.4303 18.2121L11.7179 19.8505Z"
+                fill="#3758F9" />
+              <path opacity="0.05" fill-rule="evenodd" clip-rule="evenodd"
+                d="M9.10799 19.9606C8.82057 19.9347 8.53124 19.8958 8.24411 19.8446C7.95697 19.7934 7.67203 19.7299 7.39339 19.6548L7.82477 18.043C8.05902 18.1059 8.29474 18.1607 8.53675 18.2039C8.77877 18.247 9.01887 18.2771 9.26044 18.2991L9.10799 19.9606Z"
+                fill="#3758F9" />
+              <path opacity="0.07" fill-rule="evenodd" clip-rule="evenodd"
+                d="M7.1312 17.8262L6.55991 19.3919C6.00803 19.1876 5.48061 18.9412 4.98248 18.6492L5.8188 17.2112C6.23328 17.4502 6.67074 17.6552 7.1312 17.8262Z"
+                fill="#3758F9" />
+              <path opacity="0.09" fill-rule="evenodd" clip-rule="evenodd"
+                d="M5.20739 16.8186L4.24522 18.1791C3.76744 17.8442 3.32232 17.4685 2.91323 17.057L4.09664 15.8798C4.43731 16.2241 4.80917 16.5359 5.20739 16.8186Z"
+                fill="#3758F9" />
+              <path opacity="0.11" fill-rule="evenodd" clip-rule="evenodd"
+                d="M3.60406 15.3433L2.32599 16.4105C1.95293 15.963 1.61927 15.4845 1.33248 14.9805L2.7757 14.1501C3.01823 14.5701 3.29386 14.9705 3.60406 15.3433Z"
+                fill="#3758F9" />
+              <path opacity="0.13" fill-rule="evenodd" clip-rule="evenodd"
+                d="M2.43772 13.5058L0.928848 14.2059C0.683367 13.6838 0.484757 13.1363 0.332289 12.5673L1.94493 12.1397C2.06838 12.6103 2.2365 13.0678 2.43772 13.5058Z"
+                fill="#3758F9" />
+              <path opacity="0.15" fill-rule="evenodd" clip-rule="evenodd"
+                d="M1.78797 11.4303L0.145415 11.7171C0.0477348 11.1495 -0.00526797 10.5687 -0.0012875 9.97685L1.66536 9.98208C1.66253 10.4725 1.70701 10.9587 1.78797 11.4303Z"
+                fill="#3758F9" />
+              <path opacity="0.17" fill-rule="evenodd" clip-rule="evenodd"
+                d="M1.79609 8.53676C1.75293 8.77878 1.7228 9.01888 1.70161 9.25635L0.0393276 9.108C0.0651979 8.82058 0.104105 8.53125 0.155319 8.24411C0.206532 7.95698 0.270783 7.66794 0.345145 7.39339L1.95694 7.82478C1.89473 8.05493 1.83926 8.29475 1.79609 8.53676Z"
+                fill="#3758F9" />
+              <path opacity="0.19" fill-rule="evenodd" clip-rule="evenodd"
+                d="M2.78952 5.81474C2.5498 6.23332 2.3407 6.67005 2.17379 7.13124L0.608112 6.55995C0.808254 6.00734 1.05953 5.47655 1.3467 4.98179L2.78952 5.81474Z"
+                fill="#3758F9" />
+              <path opacity="0.21" fill-rule="evenodd" clip-rule="evenodd"
+                d="M4.11613 4.09597C3.77663 4.43326 3.46072 4.80439 3.18218 5.20335L1.81682 4.24454C2.15585 3.7675 2.53151 3.32237 2.94307 2.91328L4.11613 4.09597Z"
+                fill="#3758F9" />
+              <path opacity="0.25" fill-rule="evenodd" clip-rule="evenodd"
+                d="M5.84654 2.77086C5.4266 3.01339 5.02952 3.29386 4.65676 3.60406L3.58959 2.32599C4.03295 1.9522 4.51147 1.61853 5.01622 1.32764L5.84654 2.77086Z"
+                fill="#3758F9" />
+              <path opacity="0.28" fill-rule="evenodd" clip-rule="evenodd"
+                d="M7.86098 1.94089C7.3896 2.06844 6.93287 2.23246 6.49417 2.43778L5.78996 0.928178C6.31611 0.683428 6.86366 0.484819 7.4285 0.331619L7.86098 1.94089Z"
+                fill="#3758F9" />
+              <path opacity="0.3" fill-rule="evenodd" clip-rule="evenodd"
+                d="M10.0138 1.66458C9.52332 1.66175 9.04195 1.70287 8.56968 1.78793L8.2828 0.145371C8.85044 0.0476906 9.43127 -0.00531221 10.019 -0.00206337L10.0138 1.66458Z"
+                fill="#3758F9" />
+            </g>
+            <defs>
+              <clipPath id="clip0_2592_7101">
+                <rect width="20" height="20" fill="white" />
+              </clipPath>
+            </defs>
+          </svg>
+          <span class="text-lg font-medium text-gray-700">PLEASE WAIT...</span>
+        </div>
+      </div>
+
+
       <PlaceBidModal v-if="showPlaceBidModal" @close="showPlaceBidModal = false" :auctionUuid="auctionId"
         :auctionStartingBid="auction.starting_bid" @displayTheBid="fetchAuction" />
     </section>
 
-    <section class="bg-custom-blue2 md:pb-16 dark:bg-gray-900 antialiased w-2/3 mx-auto px-10 rounded-b-md mt-10">
+    <section
+      class="bg-custom-blue2 md:pb-16 dark:bg-gray-900 antialiased lg:w-3/4 xl:w-2/3 md:w-3/4 md:mx-auto lg:px-20 xl:px-20 2xl:px-16    rounded-b-md mt-10">
       <h1 class="text-2xl font-semibold mb-3">Recommended Auctions</h1>
-      <div class="flex flex-wrap mx-auto justify-center">
+      <div
+        class=" lg:flex-wrap mx-auto xl:mx-auto  justify-center grid grid-cols-2   xl:grid xl:grid-cols-3 lg:grid lg:grid-cols-3  2xl:grid 2xl:grid-cols-4">
         <!-- No recommended auctions message -->
         <div v-if="recommendedAuctions.length === 0" class="text-gray-500 dark:text-white mt-4">
           No recommended auctions found.
@@ -375,27 +548,34 @@
         <!-- Render each auction -->
         <div v-else v-for="auction in recommendedAuctions" :key="auction.listing_id"
           @click="openViewAuctionModal(auction)"
-          class="cursor-pointer bg-white border relative border-gray-200 rounded-lg shadow m-2 transition-transform hover:scale-105 w-64">
+          class="cursor-pointer bg-white border relative border-gray-200 rounded-lg shadow-md mx-auto lg:m-2  2xl:mx-auto my-1 lg:transition-transform lg:hover:scale-105 w-39 md:w-64 md:h-72 lg:h-90 h-60 lg:w-48 xl:w-64 2xl:w-64 2xl:h-90">
           <!-- Auction Image -->
           <img
             :src="(auction.image_urls && auction.image_urls.length > 0) ? auction.image_urls[0] : '/public/images/no-image.jpg'"
-            alt="Auction Image" class="object-cover w-full h-32 rounded-t-lg" loading="lazy" />
+            alt="Auction Image" class="object-cover lg:w-full w-full lg:h-52 h-36 md:h-44 rounded-t-lg "
+            loading="lazy" />
           <div class="p-2 pb-12">
             <!-- Auction Name -->
-            <h5 class="mb-1 text-base font-bold tracking-tight text-gray-900 dark:text-white">{{ auction.name }}</h5>
+            <h5
+              class="mb-1 lg:text-base text-sm lg:font-bold font-medium tracking-tight text-gray-900 dark:text-white truncate">
+              {{ auction.name }}</h5>
             <!-- Categories -->
-            <div class="mt-1 flex flex-wrap">
+            <div class="mt-1  flex-wrap hidden lg:block">
               <span v-for="category in auction.categories" :key="category"
                 class="bg-gray-200 text-gray-700 text-xs font-semibold mr-1 mb-1 px-1 py-0.5 rounded">
                 {{ category }}
               </span>
             </div>
             <!-- Starting Bid and Other Details -->
-            <p class="text-gray-500 dark:text-white mt-1 text-xs">Bidding Type: <span class="font-bold text-black">{{
-              auction.bidding_type }}</span></p>
-            <p v-if="auction.bidding_type === 'Lowest-type'" class="text-gray-500 dark:text-white mt-1 text-xs">Starting
-              Bid: <span class="font-bold text-black">${{
-                auction.starting_bid }}</span></p>
+            <p class="text-gray-500 dark:text-white mt-1 text-xs hidden md:block">Bidding Type: <span
+                class="font-bold text-black">{{
+                  auction.bidding_type }}</span></p>
+            <p v-if="auction.bidding_type === 'Lowest-type'" class="text-gray-500 dark:text-white mt-1 text-xs">
+              <span class="hidden lg:inline">Starting Bid: </span>
+              <span class="font-bold text-custom-bluegreen lg:text-black">₱ {{
+                formatNumber(auction.starting_bid) || 'N/A' }}
+              </span>
+            </p>
             <p class="text-gray-500 dark:text-white mt-1 text-xs">Rarity: <span class="font-bold text-black">{{
               auction.rarity }}</span></p>
           </div>
@@ -440,6 +620,8 @@ const modalImageSrc = ref('');
 const offersToShow = ref(3);
 const bidderToShow = ref(3);
 const selectedAuction = ref(null);
+const showAuctionGuide = ref(false);
+const isLoading = ref(true);
 
 const formatNumber = (value) => {
   return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
@@ -546,6 +728,7 @@ const fetchComments = async (listingId) => {
 };
 
 const fetchAuction = async () => {
+  const isLoading = ref(true);
   try {
     auction.value = null; // Reset auction data
     remainingTime.value = 0;
@@ -556,7 +739,7 @@ const fetchAuction = async () => {
 
     const response = await axios.get(`/api/auctions/${route.query.id}`);
     if (response.data) {
-      auction.value = response.data;
+      auction.value = response.data
       auction.value.categories = auction.value.categories
         ? auction.value.categories.split(', ').map(category => category.trim())
         : [];
@@ -573,6 +756,8 @@ const fetchAuction = async () => {
     }
   } catch (err) {
     console.error("Failed to fetch auction details:", err);
+  } finally {
+    isLoading.value = false;
   }
 };
 

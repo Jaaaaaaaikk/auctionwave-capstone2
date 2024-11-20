@@ -5,12 +5,11 @@ import axios from 'axios';
 export const useInboxStore = defineStore('inbox', () => {
     const messages = ref([]);
     const unreadCount = ref(0);
-    const isLoading = ref(false);
+    const isLoading = ref(true);
 
     const fetchInbox = async () => {
-        if (isLoading.value) return; // Prevent further calls if already loading
+        isLoading.value = true;
 
-        isLoading.value = true; // Set loading state
         console.log("Fetching inbox...");
         try {
             await new Promise(resolve => setTimeout(resolve, 1200));
@@ -123,5 +122,5 @@ export const useInboxStore = defineStore('inbox', () => {
 
 
 
-    return { messages, unreadCount, fetchInbox, markAsRead, markAllAsRead, spamMessage, trashMessage, deleteMessage, markAsUnread };
+    return { messages, unreadCount, isLoading, fetchInbox, markAsRead, markAllAsRead, spamMessage, trashMessage, deleteMessage, markAsUnread };
 });

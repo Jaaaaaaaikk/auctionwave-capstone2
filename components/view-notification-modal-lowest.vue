@@ -5,21 +5,18 @@
             <h2 class="text-xl font-semibold mb-4">Notification From: {{ sender }}</h2>
             <div class="relative"></div>
             <div class="w-full p-4 border border-gray-300 rounded my-4" disabled><span
-                    v-if="winnerDetails.status === 'CashBond Pending'">🎉</span>{{ message }}</div>
-            <span v-if="winnerDetails.status === 'CashBond Pending'" class="w-full p-2 rounded"><strong
+                    v-if="winnerDetails.status === 'Usage Fee Payment Pending'">🎉</span>{{ message }}</div>
+            <span v-if="winnerDetails.status === 'Usage Fee Payment Pending'" class="w-full p-2 rounded"><strong
                     class="mr-2">Date:</strong> {{ formatDate(winnerDetails.bid_time)
                 }}</span>
-            <span v-if="winnerDetails.status === 'CashBond Pending'" class="flex w-full p-2 rounded"><strong
+            <span v-if="winnerDetails.status === 'Usage Fee Payment Pending'" class="flex w-full p-2 rounded"><strong
                     class="mr-2">Winning Bid:</strong>{{
                         formatNumber(winnerDetails.bid_amount)
                     }}</span>
-            <span v-if="winnerDetails.status === 'CashBond Pending'" class="flex w-full p-2 rounded"><strong
-                    class="mr-2">Cash Bond Amount Required:</strong>
-                {{ formatNumber(winnerDetails.cashbond_amount) }}</span>
-            <span v-if="winnerDetails.status === 'CashBond Pending'" class="flex w-full p-2 rounded"><strong
+            <span v-if="winnerDetails.status === 'Usage Fee Payment Pending'" class="flex w-full p-2 rounded"><strong
                     class="mr-2">Status:</strong> {{ winnerDetails.status
                 }}</span>
-            <span v-if="winnerDetails.status === 'CashBond Pending'" class="flex w-full p-2 rounded"><strong
+            <span v-if="winnerDetails.status === 'Usage Fee Payment Pending'" class="flex w-full p-2 rounded"><strong
                     class="mr-2">Response Deadline:</strong> {{
                         formatDate(winnerDetails.response_deadline) }}</span>
 
@@ -56,8 +53,8 @@
                         <dt class="text-base font-medium text-gray-500">Status</dt>
                         <dd :class="{
                             'bg-yellow-200 text-yellow-800': bidder.status === 'Active',
-                            'bg-green-200 text-green-800': bidder.status === 'CashBond Pending',
-                            'bg-red-200 text-red-800': bidder.status === 'CashBond Response Failed',
+                            'bg-green-200 text-green-800': bidder.status === 'Usage Fee Payment Pending',
+                            'bg-red-200 text-red-800': bidder.status === 'Payment Response Failed',
                             'bg-purple-200 text-purple-800': bidder.status === 'Outbid',
                             'bg-purple-200 text-yellow-950': bidder.status === 'Won',
                             'bg-purple-200 text-lime-700': bidder.status === 'Transaction Pending'
@@ -69,9 +66,9 @@
             </div>
 
             <div class="flex justify-end mt-4 space-x-2">
-                <button v-if="winnerDetails.status === 'CashBond Pending'" @click="proceedPaymentFunction"
+                <button v-if="winnerDetails.status === 'Usage Fee Payment Pending'" @click="proceedPaymentFunction"
                     class="bg-custom-bluegreen hover:bg-opacity-40 hover:text-black text-white py-0.5 px-4 rounded">
-                    Top-up
+                    Pay Usage Fee
                 </button>
                 <button @click="$emit('closeAddMessageModal')"
                     class="bg-gray-300 hover:bg-custom-bluegreen hover:bg-opacity-40 hover:text-black text-white py-2 px-4 rounded">Close</button>
@@ -96,7 +93,7 @@
                                 </button>
                             </div>
                             <div class="px-6 lg:px-8 pb-4 sm:pb-6 xl:pb-8 text-center">
-                                <h3 class="text-xl font-medium text-gray-900 dark:text-white mb-5">Cash-Bond Top up
+                                <h3 class="text-xl font-medium text-gray-900 dark:text-white mb-5">Usage Fee Payment
                                 </h3>
                                 <p class="text-gray-600 mb-5">Choose Your Payment Method.</p>
                                 <div id="paypal-button-container"></div>
@@ -160,7 +157,7 @@ const loadPaypalSdkAndRenderButton = async () => {
 
     // Load PayPal SDK if it hasn't been loaded yet
     if (!paypalStore.isPaypalLoaded) {
-        await paypalStore.loadPaypalCashbondSdk(); // Load PayPal SDK if not already loaded
+        await paypalStore.loadPaypalUsageFeeSdk(); // Load PayPal SDK if not already loaded
     }
 
     // Ensure modal content is fully rendered
@@ -178,13 +175,8 @@ const renderPaypalButtons = () => {
                 try {
                     // Create an order on the server
                     const usageFee = 20.00;
-                    const orderResponse = await axios.post('/api/paypal/create-payment-cashbond', {
+                    const orderResponse = await axios.post('/api/paypal/create-payment-usage', {
                         items: [
-                            {
-                                name: `Cash Bond for Auction ${winnerDetails.value.auction_name}`,
-                                description: `Cash bond required for winning bid of ${formatNumber(winnerDetails.value.bid_amount)}`,
-                                amount: winnerDetails.value.cashbond_amount
-                            },
                             {
                                 name: `Usage Fee for Auction ${winnerDetails.value.auction_name}`,
                                 description: `Usage fee for winning bid of ${formatNumber(winnerDetails.value.bid_amount)}`,
@@ -204,7 +196,7 @@ const renderPaypalButtons = () => {
             onApprove: async (data) => {
                 try {
                     // Capture the order on the server using the approved orderID
-                    const captureResponse = await axios.post('/api/paypal/capture-payment-cashbond', {
+                    const captureResponse = await axios.post('/api/paypal/capture-payment-usage', {
                         orderID: data.orderID
                     }, {
                         headers: { 'Content-Type': 'application/json' },
@@ -214,7 +206,6 @@ const renderPaypalButtons = () => {
 
                         // Update Bids Table with status 'Won' and 'Accepted'
                         await axios.post('/api/payments/update-status', {
-                            cashbond_amount: winnerDetails.value.cashbond_amount,
                             listing_id: props.listing_id,
                             orderID: data.orderID
                         });
@@ -255,7 +246,7 @@ onMounted(async () => {
     fetchBidWinnerDetails({ id: props.listing_id });
     auctionStore.fetchBidders({ id: props.listing_id });
     if (!paypalStore.isPaypalLoaded) {
-        await paypalStore.loadPaypalCashbondSdk(); // Load PayPal SDK if not already loaded
+        await paypalStore.loadPaypalUsageFeeSdk(); // Load PayPal SDK if not already loaded
     }
 });
 </script>

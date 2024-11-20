@@ -19,19 +19,19 @@
 
               <!-- OTP Input Fields (separate inputs for each digit) -->
               <div class="flex justify-center gap-4 my-6">
-                <input v-model="otp[0]" type="text" maxlength="1" pattern="[0-9]" inputmode="numeric"
+                <input v-model="otp[0]" type="text" maxlength="1" @input="validateOtpInput(0)"
                   autocomplete="one-time-code"
                   class="w-12 h-12 text-center border-2 rounded-md shadow-sm focus:border-teal-500 focus:ring-teal-500"
                   required />
-                <input v-model="otp[1]" type="text" maxlength="1" pattern="[0-9]" inputmode="numeric"
+                <input v-model="otp[1]" type="text" maxlength="1" @input="validateOtpInput(1)"
                   autocomplete="one-time-code"
                   class="w-12 h-12 text-center border-2 rounded-md shadow-sm focus:border-teal-500 focus:ring-teal-500"
                   required />
-                <input v-model="otp[2]" type="text" maxlength="1" pattern="[0-9]" inputmode="numeric"
+                <input v-model="otp[2]" type="text" maxlength="1" @input="validateOtpInput(2)"
                   autocomplete="one-time-code"
                   class="w-12 h-12 text-center border-2 rounded-md shadow-sm focus:border-teal-500 focus:ring-teal-500"
                   required />
-                <input v-model="otp[3]" type="text" maxlength="1" pattern="[0-9]" inputmode="numeric"
+                <input v-model="otp[3]" type="text" maxlength="1" @input="validateOtpInput(3)"
                   autocomplete="one-time-code"
                   class="w-12 h-12 text-center border-2 rounded-md shadow-sm focus:border-teal-500 focus:ring-teal-500"
                   required />
@@ -89,6 +89,13 @@ const props = defineProps({ // Receive email from parent component
   form: Object
 });
 
+// Validate OTP input fields
+const validateOtpInput = (index) => {
+  if (!/^\d$/.test(otp.value[index])) {
+    otp.value[index] = '';  // Reset if it's not a valid number
+  }
+};
+
 const startTimer = () => {
   timer.value = 10; // Set timer duration
   const interval = setInterval(() => {
@@ -119,6 +126,11 @@ const resendOtp = async () => {
 
 const submitOtp = async () => {
   const otpCode = otp.value.join('');
+  if (otpCode.length !== 4) {
+    toast.error('Please enter a valid 4-digit OTP.');
+    return;
+  }
+
   try {
     // Validate OTP
     const response = await axios.post('/api/validate-otp', {

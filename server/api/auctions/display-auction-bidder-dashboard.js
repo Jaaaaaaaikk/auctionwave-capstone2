@@ -6,6 +6,9 @@ export default defineEventHandler(async (event) => {
   // Extract pagination and filters from query parameters
   const { biddingType = null, rarity = null, search = null, page = 1, pageSize = 12 } = getQuery(event);
 
+  // Create a new variable to handle the corrected page value
+  let adjustedPage = page;
+
   // Retrieve the access token from cookies
   const token = getCookie(event, "accessToken");
 
@@ -115,8 +118,8 @@ export default defineEventHandler(async (event) => {
   // Group by listing_id to aggregate categories and images
   query += ` GROUP BY al.listing_id`;
 
-  // Add limit and offset for pagination
-  const offset = (page - 1) * pageSize;
+  // Calculate offset for pagination
+  const offset = (adjustedPage - 1) * pageSize;
   query += ` LIMIT ? OFFSET ?`;
   queryParams.push(Number(pageSize), Number(offset));
 
@@ -135,18 +138,35 @@ export default defineEventHandler(async (event) => {
       SELECT COUNT(DISTINCT al.listing_id) AS total
       FROM AuctionListings al
       INNER JOIN AuctionListingCategories alc ON al.listing_id = alc.listing_id
+      INNER JOIN Locations l ON al.location_id = l.location_id
       WHERE al.status = 'Auction Pending'
       AND alc.category_id IN (?)
-    `, [bidderCategories]);
+      AND (? IS NULL OR l.location_id = ?)
+      AND (? IS NULL OR al.rarity = ?)
+      AND (? IS NULL OR al.bidding_type = ?)
+      AND (? IS NULL OR al.name LIKE ?)
+    `, [
+      bidderCategories,
+      userLocation, userLocation,
+      rarity, rarity,
+      biddingType, biddingType,
+      search, `%${search}%`
+    ]);
 
     const totalListings = totalCountResult[0]?.total || 0;
+    const totalPages = Math.ceil(totalListings / pageSize);
+
+    // Adjust page if it exceeds total pages
+    if (adjustedPage > totalPages) {
+      adjustedPage = 1; // Reset to the first page if the requested page exceeds the total pages
+    }
 
     // Return the data along with pagination info
     return {
       listings: rows,
       totalListings,
-      totalPages: Math.ceil(totalListings / pageSize),
-      currentPage: Number(page),
+      totalPages,
+      currentPage: Number(adjustedPage), // Return the corrected page number
     };
   } catch (error) {
     console.error('Database query failed:', error);

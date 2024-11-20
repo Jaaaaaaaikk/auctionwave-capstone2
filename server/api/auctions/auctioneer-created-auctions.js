@@ -3,7 +3,7 @@ import { getPool } from "../../db";
 import jwt from "jsonwebtoken";
 
 export default defineEventHandler(async (event) => {
-  const { page = 1, pageSize = 6, search = "", auctionStatus = "", paymentStatus = "", transactionStatus = "" } = getQuery(event);
+  const { page = 1, pageSize = 6, search = "", auctionStatus = "", transactionStatus = "" } = getQuery(event);
 
   try {
     const token = getCookie(event, "accessToken");
@@ -18,24 +18,31 @@ export default defineEventHandler(async (event) => {
 
     // Start the query with the AuctionListings table
     let query = `
-      SELECT al.listing_id, 
-            al.name, 
-            l.location_name, 
-            al.description, 
-            al.bidding_type, 
-            al.rarity, 
-            al.uuid, 
-            al.status, 
-            al.created_at, 
-            MAX(p.payment_status) AS payment_status, 
-            MAX(t.transaction_status) AS transaction_status
+      SELECT 
+        al.listing_id, 
+        al.name, 
+        l.location_name, 
+        al.description, 
+        al.bidding_type, 
+        al.rarity, 
+        al.uuid, 
+        al.status, 
+        al.created_at,
+        t.transaction_id,
+        t.bidder_id,
+        MAX(t.transaction_status) AS transaction_status,
+        (CASE WHEN COUNT(p.payment_id) > 0 THEN 1 ELSE 0 END) AS email_blast_paid, 
+        (CASE WHEN br.rating_id IS NOT NULL THEN 1 ELSE 0 END) AS is_rated
       FROM AuctionListings al
       JOIN Locations l ON al.location_id = l.location_id
-      LEFT JOIN Payments p ON al.listing_id = p.listing_id
       LEFT JOIN Transactions t ON al.listing_id = t.listing_id
+      LEFT JOIN Payments p ON al.listing_id = p.listing_id 
+        AND p.payment_type = 'Emailblast Fee' 
+        AND p.payment_status = 'Payment Completed'
+      LEFT JOIN BidderRatings br ON al.listing_id = br.listing_id -- Check for ratings
       WHERE al.auctioneer_id = ?
       GROUP BY al.listing_id, al.name, l.location_name, al.description, al.bidding_type, 
-              al.rarity, al.uuid, al.status, al.created_at
+               al.rarity, al.uuid, al.status, al.created_at
     `;
 
     const queryParams = [auctioneerId];
@@ -44,11 +51,6 @@ export default defineEventHandler(async (event) => {
     if (auctionStatus) {
       query += " AND al.status = ?";
       queryParams.push(auctionStatus);
-    }
-    // Add payment status filter if specified
-    if (paymentStatus) {
-      query += " AND p.payment_status = ?";
-      queryParams.push(paymentStatus);
     }
 
     // Add transaction status filter if specified
@@ -77,18 +79,7 @@ export default defineEventHandler(async (event) => {
       search ? [auctioneerId, `%${search}%`] : [auctioneerId]
     );
 
-    // Get the total count of Pending Cashbonds
-    const [totalCashbondPendingCountResult] = await pool.query(
-      `SELECT COUNT(*) AS total 
-       FROM AuctionListings al 
-       LEFT JOIN Payments p ON al.listing_id = p.listing_id
-       WHERE al.auctioneer_id = ? AND p.payment_status = 'Payment Completed'
-         ${search ? " AND al.name LIKE ?" : ""}`,
-      search ? [auctioneerId, `%${search}%`] : [auctioneerId]
-    );
-
-
-    // Get the total count of Pending Cashbonds
+    // Get the total count of Pending Transactions
     const [totalTransactionPendingCountResult] = await pool.query(
       `SELECT COUNT(*) AS total 
            FROM AuctionListings al 
@@ -103,7 +94,6 @@ export default defineEventHandler(async (event) => {
       SELECT COUNT(*) AS total
       FROM AuctionListings al
       JOIN Locations l ON al.location_id = l.location_id
-      LEFT JOIN Payments p ON al.listing_id = p.listing_id
       LEFT JOIN Transactions t ON al.listing_id = t.listing_id
       WHERE al.auctioneer_id = ?
     `;
@@ -115,10 +105,7 @@ export default defineEventHandler(async (event) => {
       totalCountQuery += " AND al.status = ?";
       totalCountParams.push(auctionStatus);
     }
-    if (paymentStatus) {
-      totalCountQuery += " AND p.payment_status = ?";
-      totalCountParams.push(paymentStatus);
-    }
+
     if (transactionStatus) {
       totalCountQuery += " AND t.transaction_status = ?";
       totalCountParams.push(transactionStatus);
@@ -131,13 +118,11 @@ export default defineEventHandler(async (event) => {
     const totalCount = totalResult[0]?.total || 0;
     const totalPages = Math.ceil(totalCount / pageSize);
     const totalAuctionPending = totalPendingCountResult[0]?.total || 0;
-    const totalCashbondPending = totalCashbondPendingCountResult[0]?.total || 0;
     const totalTransactionPending = totalTransactionPendingCountResult[0]?.total || 0;
 
     return {
       auctions: rows,
       totalAuctionPending,
-      totalCashbondPending,
       totalTransactionPending,
       totalPages,
       currentPage: Number(page),

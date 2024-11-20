@@ -33,12 +33,14 @@ export default defineEventHandler(async (event) => {
         };
     }
 
+    console.log('messageId', messageId);
+
     const pool = getPool();
 
     try {
         // Update the MessageParticipants to mark it as read only if it belongs to the current user
         const [result] = await pool.query(
-            "UPDATE MessageParticipants SET is_read = TRUE WHERE message_id = ? AND user_id = ?",
+            "UPDATE MessageParticipants SET is_read = TRUE WHERE message_id = ? AND user_id = ? AND role = 'recipient'",
             [messageId, userId]
         );
 
@@ -49,6 +51,7 @@ export default defineEventHandler(async (event) => {
             };
         }
 
+        console.log('result', result);
         return {
             statusCode: 200,
             body: { message: "Message marked as read" },

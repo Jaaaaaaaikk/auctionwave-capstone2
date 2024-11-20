@@ -154,7 +154,7 @@
                             </g>
                         </svg>
                     </span>
-                    <p class="">Nofitication</p>
+                    <p class="">Notification</p>
                 </NuxtLink>
             </li>
 

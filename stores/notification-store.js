@@ -5,6 +5,7 @@ import axios from 'axios';
 export const useNotificationStore = defineStore('notification', () => {
     const notifications = ref([]);
     const unreadCount = ref(0);
+    const isLoading = ref(true);
     const pagination = ref({
         total: 0,
         page: 1,
@@ -12,6 +13,7 @@ export const useNotificationStore = defineStore('notification', () => {
         totalPages: 1
     });
     const fetchNotifications = async (page = 1) => {
+        isLoading.value = true;
         try {
             // Introduce a delay of 1.5 seconds (1500 milliseconds)
             await new Promise(resolve => setTimeout(resolve, 1200));
@@ -32,11 +34,14 @@ export const useNotificationStore = defineStore('notification', () => {
             };
         } catch (error) {
             console.error("Failed to fetch notifications:", error);
+        } finally {
+            isLoading.value = false;
         }
     };
 
     // Mark a notification as read
     const markAsRead = async (notificationId) => {
+        isLoading.value = true;
         const notificationIndex = notifications.value.findIndex(notification => notification.notification_id === notificationId);
         if (notificationIndex !== -1) {
             notifications.value[notificationIndex].is_read = 1; // Optimistic update
@@ -48,11 +53,14 @@ export const useNotificationStore = defineStore('notification', () => {
             console.error("Failed to mark notification as read:", error);
             // Rollback the optimistic update if the request fails
             notifications.value[notificationIndex].is_read = 0; // Rollback
+        } finally {
+            isLoading.value = false;
         }
     };
 
     // Mark all notifications as read
     const markAllAsRead = async () => {
+        isLoading.value = true;
         try {
             await axios.post('/api/notifications/mark-all-as-read'); // Call the new API endpoint
             notifications.value.forEach(notification => {
@@ -61,11 +69,14 @@ export const useNotificationStore = defineStore('notification', () => {
             unreadCount.value = 0; // Reset unread count
         } catch (error) {
             console.error("Failed to mark all notifications as read:", error);
+        } finally {
+            isLoading.value = false;
         }
     };
 
     // Delete a notification
     const deleteNotification = async (notificationId) => {
+        isLoading.value = true;
         try {
             const response = await axios.post('/api/notifications/delete-notification-inbox', { id: notificationId });
             if (response.data.status === 200) {
@@ -78,11 +89,14 @@ export const useNotificationStore = defineStore('notification', () => {
             }
         } catch (error) {
             console.error("Failed to delete notification:", error);
+        } finally {
+            isLoading.value = false;
         }
     };
 
     // Mark as unread a notification
     const markAsUnread = async (notificationId) => {
+        isLoading.value = true;
         const notificationIndex = notifications.value.findIndex(notification => notification.notification_id === notificationId);
         if (notificationIndex !== -1) {
             notifications.value[notificationIndex].is_read = 0; // Optimistic update
@@ -94,9 +108,11 @@ export const useNotificationStore = defineStore('notification', () => {
             console.error("Failed to mark notification as unread:", error);
             // Rollback the optimistic update if the request fails
             notifications.value[notificationIndex].is_read = 1; // Rollback
+        } finally {
+            isLoading.value = false;
         }
     };
 
 
-    return { notifications, unreadCount, pagination, fetchNotifications, markAsRead, markAllAsRead, deleteNotification, markAsUnread };
+    return { notifications, unreadCount, pagination, isLoading, fetchNotifications, markAsRead, markAllAsRead, deleteNotification, markAsUnread };
 });

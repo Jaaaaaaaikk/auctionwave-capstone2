@@ -1,8 +1,7 @@
   <template>
-    <div class="p-6 bg-custom-blue2 dark:bg-gray-900 min-h-screen">
+    <div class="p-2 bg-custom-blue2 dark:bg-gray-900 min-h-screen">
       <!-- Header Section -->
-      <nav
-        class="fixed top-0 left-0 right-0  flex items-center justify-between  bg-white shadow py-3 -md mb-6 ml-16 z-10">
+      <nav class="fixed top-0 left-0 right-0 flex items-center justify-between bg-white shadow-md mb-6 z-20 py-3">
         <!-- Logo and Company Name -->
         <NuxtLink v-if="!isAuctioneerDashboard" to="/auctioneer/auctioneerdashboard"
           class="flex justify-start space-x-3 rtl:space-x-reverse mr-8">
@@ -39,8 +38,7 @@
 
 
               <div v-if="inboxDropdownOpen"
-                class="absolute right-0 mt-2 w-96 bg-white divide-y  divide-gray-100 rounded-md shadow-md drop-shadow-lg dark:bg-gray-700 z-0">
-
+                class="absolute right-0 mt-2 w-96 bg-white divide-y divide-gray-100 rounded-md shadow-md drop-shadow-lg dark:bg-gray-700 z-0">
                 <!-- Message List -->
                 <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 max-h-48 overflow-y-auto no-scrollbar">
                   <li v-for="message in inboxStore.messages" :key="message.message_id" :class="{
@@ -48,8 +46,14 @@
                     'bg-gray-100': message.is_read,
                     'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
                   }" role="button" tabindex="0">
+                    <img v-if="message.user_profile_image.length > 0" :src="message.user_profile_image[0]"
+                      alt="Auction Image" class="w-11 h-11 rounded-full object-cover flex-shrink-0 ml-4 mr-8"
+                      loading="lazy" />
+                    <img v-else src="/public/images/no-image.jpg" alt="No Image Available"
+                      class="object-cover w-full h-32 rounded-t-lg" loading="lazy" />
                     From: {{ message.sender_name }} - {{ message.message }} - {{ formatDate(message.created_at) }}
                   </li>
+
                   <li v-if="inboxStore.messages.length === 0">
                     <p class="block px-4 py-2 text-gray-500">No Messages.</p>
                   </li>
@@ -64,14 +68,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 6h16M4 12h16m-7 6h7" />
                       </svg>
-                      <span class="text-xs">See All</span>
+                      <span class="text-xs hover:underline">See All</span>
                     </NuxtLink>
                     <button @click="addMessage = true" class="flex items-center text-gray-700 hover:text-green-500">
                       <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                       </svg>
-                      <span class="text-xs">Compose Message</span>
+                      <span class="text-xs hover:underline">Compose Message</span>
                     </button>
                   </div>
                   <button @click="markAllMessagesAsRead"
@@ -80,11 +84,13 @@
                       stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    <span class="text-xs">Mark All as Read</span>
+                    <span class="text-xs hover:underline">Mark All as Read</span>
                   </button>
-                  <AddMessageModal v-if="addMessage" @closeAddMessageModal="addMessage = false" />
                 </div>
               </div>
+
+              <!-- Add Message Modal - Place it outside the dropdown -->
+              <AddMessageModal v-if="addMessage" @closeAddMessageModal="addMessage = false" />
             </div>
 
             <!--Notification Bell-->
@@ -112,27 +118,26 @@
                   </g>
                 </svg>
 
-                <span v-if="notificationsStore.unreadCount > 0"
+                <span v-if="unreadCount > 0"
                   class="absolute top-0 right-0 w-4 h-4 bg-red-600 rounded-full text-xs text-white"> {{
-                    notificationsStore.unreadCount }}</span>
+                    unreadCount }}</span>
               </button>
               <div v-if="notificationDropdownOpen"
                 class="absolute right-0  mt-13 sm:w-96 w-80 bg-white divide-y  divide-gray-100 rounded-md shadow-md drop-shadow-lg dark:bg-gray-700 z-0">
                 <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 max-h-48 overflow-y-auto no-scrollbar">
 
-                  <li v-for="notification in notificationsStore.notifications" :key="notification.notification_id"
-                    :class="{
-                      'bg-yellow-100': !notification.is_read,
-                      'bg-gray-100': notification.is_read,
-                      'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
-                    }" @click="getClickHandler(notification)" role="button" tabindex="0">
+                  <li v-for="notification in notifications" :key="notification.notification_id" :class="{
+                    'bg-yellow-100': !notification.is_read,
+                    'bg-gray-100': notification.is_read,
+                    'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
+                  }" @click="getClickHandler(notification)" role="button" tabindex="0">
                     <img src="/images/logo-no-text.jpg"
                       class="w-11 h-11 rounded-full object-cover flex-shrink-0 ml-4 mr-8" alt="Profile Icon" />
                     From: {{ notification.sender_full_name }} - {{ notification.message }} - {{
                       formatDate(notification.created_at)
                     }}
                   </li>
-                  <li v-if="notificationsStore.notifications.length === 0">
+                  <li v-if="notifications.length === 0">
                     <p class="block px-4 py-2 text-gray-500">No notifications</p>
                   </li>
                 </ul>
@@ -202,6 +207,8 @@
       <!-- Content Section -->
       <div class="pt-16">
         <slot />
+        <!-- Add Message Modal - Place it outside the dropdown -->
+        <AddMessageModal v-if="addMessage" @closeAddMessageModal="addMessage = false" />
       </div>
     </div>
   </template>
@@ -229,9 +236,26 @@ const addMessage = ref(false);
 const userType = ref("");
 const userName = ref("");
 const socketStore = useInboxSocketStore();
+const notifications = computed(() => notificationsStore.notifications);
+const unreadCount = computed(() => notificationsStore.unreadCount);
 const isAuctioneerDashboard = ref(true);
 const isActiveInbox = ref(false);
 const isActiveNotification = ref(false);
+
+const getClickHandler = async (notification) => {
+
+  if (notification.message?.includes('marked your transaction as completed for auction')) {
+    return;
+  }
+  else {
+    viewAuction(notification);
+  }
+};
+
+
+
+
+
 
 const toggleNotification = () => {
   isActiveNotification.value = !isActiveNotification.value;
@@ -333,10 +357,10 @@ const handleIncomingMessage = (newMessage) => {
 
 const handleIncomingBidNotification = (newBidNotificationMessage) => {
   console.log('Received new notification message in BidderNavbar:', newBidNotificationMessage);
-  notificationsStore.notifications.unshift(newBidNotificationMessage.notification);
+  notifications.unshift(newBidNotificationMessage.notification);
 
   // Update unread count if necessary
-  notificationsStore.unreadCount = newBidNotificationMessage.notification.unreadCount;
+  unreadCount = newBidNotificationMessage.notification.unreadCount;
 
   // Display a toast notification
   toast(`From AuctionWave System: ${newBidNotificationMessage.notification.message}`, {
@@ -348,11 +372,11 @@ const handleIncomingBidNotification = (newBidNotificationMessage) => {
 
 const handleIncomingOfferNotification = (newOfferNotificationMessage) => {
   console.log('Received new notification message in BidderNavbar:', newOfferNotificationMessage);
-  notificationsStore.notifications.unshift(newOfferNotificationMessage.notification);
+  notifications.unshift(newOfferNotificationMessage.notification);
 
 
   // Update unread count if necessary
-  notificationsStore.unreadCount = newOfferNotificationMessage.notification.unreadCount;
+  unreadCount = newOfferNotificationMessage.notification.unreadCount;
 
   // Display a toast notification
   toast(`From AuctionWave System: ${newOfferNotificationMessage.notification.message}`, {

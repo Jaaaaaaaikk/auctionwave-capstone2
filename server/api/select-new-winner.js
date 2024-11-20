@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
         for (const bidder of bidders) {
             const { listing_id, bid_id, bidder_id, bid_status, auction_name } = bidder;
 
-            // Step 3: Find the next bidder to be promoted to "CashBond Pending" (the next outbid bidder)
+            // Step 3: Find the next bidder to be promoted to "Usage Fee Payment Pending" (the next outbid bidder)
             if (bid_status === 'Expired') {
                 // Step 4: Find the next bidder (outbid) who will be promoted
                 const [nextBidder] = await pool.query(
@@ -38,9 +38,9 @@ export default defineEventHandler(async (event) => {
                     const responseDeadline = new Date();
                     responseDeadline.setHours(responseDeadline.getHours() + 24);  // Add 24 hours
                     const remainingTime = formatTimeRemaining(responseDeadline);
-                    // Step 5: Update the next bidder to "CashBond Pending"
+                    // Step 5: Update the next bidder to "Usage Fee Payment Pending"
                     await pool.query(
-                        `UPDATE Bids SET status = 'CashBond Pending', response_deadline = ? WHERE bid_id = ?`,
+                        `UPDATE Bids SET status = 'Usage Fee Payment Pending', response_deadline = ? WHERE bid_id = ?`,
                         [responseDeadline, nextBidId]
                     );
 
@@ -74,7 +74,7 @@ export default defineEventHandler(async (event) => {
 
                 // Step 7: Mark the expired bidder as "Failed to Respond"
                 await pool.query(
-                    `UPDATE Bids SET status = 'CashBond Response Failed' AND respond_status = 'Expired' WHERE bid_id = ?`,
+                    `UPDATE Bids SET status = 'Payment Response Failed' AND respond_status = 'Expired' WHERE bid_id = ?`,
                     [bid_id]
                 );
 

@@ -18,6 +18,9 @@ export default defineEventHandler(async (event) => {
     }
 
     const bidderId = decodedToken.userId;
+    const bidderLocation = decodedToken.user_Location;
+
+
     const db = getPool();
 
     console.log('BIDDER ID in Recommend auction:', bidderId);
@@ -89,6 +92,8 @@ export default defineEventHandler(async (event) => {
                     al.status = 'Auction Pending'
                 AND 
                     al.uuid != ?
+                AND
+                    l.location_id = ?
                 GROUP BY 
                     al.listing_id
                 ORDER BY 
@@ -97,7 +102,7 @@ export default defineEventHandler(async (event) => {
             `;
 
             // Combine the category IDs with the auction ID to exclude
-            const parameters = [...categoryIds, auctionIdToExclude];
+            const parameters = [...categoryIds, auctionIdToExclude, bidderLocation];
             const [auctions] = await db.query(query, parameters);
 
             recommendedAuctions = auctions.map(row => ({

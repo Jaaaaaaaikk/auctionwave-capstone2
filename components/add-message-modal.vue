@@ -56,6 +56,7 @@
 import { ref } from 'vue';
 import axios from 'axios';
 import { useInboxSocketStore } from '@/stores/socketStore';
+import { toast } from 'vue3-toastify';
 
 const to = ref('');
 const emit = defineEmits();
@@ -79,7 +80,7 @@ const handleImageUpload = (event) => {
 
         // Validate file type
         if (!validTypes.includes(file.type)) {
-            alert("Please upload an image in PNG, JPG, JPEG, or GIF format.");
+            toast.warn("Please upload an image in PNG, JPG, JPEG, or GIF format.");
             return;
         }
 
@@ -128,17 +129,17 @@ const selectUser = (user) => {
 // Function to send the message
 const sendMessage = async () => {
     if (!selectedUser.value) {
-        alert('Please select a valid recipient from the suggestions.');
+        toast.warn('Please select a valid recipient from the suggestions.');
         return;
     }
 
     if (!subject.value.trim()) {
-        alert('Subject cannot be empty.');
+        toast.warn('Subject cannot be empty.');
         return;
     }
 
     if (!message.value.trim()) {
-        alert('Message cannot be empty.');
+        toast.warn('Message cannot be empty.');
         return;
     }
 
@@ -164,7 +165,7 @@ const sendMessage = async () => {
             }
         });
 
-        console.log('Message sent:', response.data);
+        toast.success('Message sent successfully!');
 
         to.value = '';
         subject.value = '';
@@ -174,7 +175,7 @@ const sendMessage = async () => {
         emit('closeAddMessageModal')
     } catch (error) {
         console.error('Error sending message:', error);
-        alert('Failed to send message. Please try again.');
+        toast.error('Failed to send message. Please try again.');
     }
 };
 </script>

@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
 
     // Query to get user profile from the Users table
     const [user] = await pool.query(
-      `SELECT u.user_id, u.firstname, u.middlename, u.lastname, u.email, u.about, u.location_id
+      `SELECT u.user_id, u.firstname, u.middlename, u.lastname, u.email, u.about, u.location_id, u.user_type
        FROM Users u 
        WHERE u.user_id = ?`,
       [userId],
@@ -58,7 +58,8 @@ export default defineEventHandler(async (event) => {
         email: user[0].email,
         location: location.length ? location[0].location_name : "Unknown", // Handle case if location is not found
         categories: categories.map((c) => c.category_name),
-        about: user[0].about
+        about: user[0].about,
+        user_type: user[0].user_type
       },
     };
 

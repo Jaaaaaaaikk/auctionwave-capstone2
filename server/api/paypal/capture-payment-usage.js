@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
     try {
         // Capture the payment using the PayPal API
         const response = await axios.post(
-            `https://api.sandbox.paypal.com/v2/checkout/orders/${orderID}/authorize`,
+            `https://api.sandbox.paypal.com/v2/checkout/orders/${orderID}/capture`,
             {},
             {
                 headers: {

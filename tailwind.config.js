@@ -9,6 +9,7 @@ export default {
     "./error.vue",
     "./node_modules/flowbite/**/*.{js,ts}",
   ],
+  darkMode: 'class', // Enable class-based dark mode
   theme: {
     extend: {
       colors: {
@@ -25,7 +26,6 @@ export default {
         'custom-blue2': '#e6eeef',
       },
       fontSize: {
-
         'custom-size': '1.4rem', // Custom size, e.g., 40px
       },
       height: {
@@ -106,8 +106,6 @@ export default {
         '22': '88px',
         '23': '92px',
       }
-
-
     },
   },
   plugins: [require("flowbite/plugin")],

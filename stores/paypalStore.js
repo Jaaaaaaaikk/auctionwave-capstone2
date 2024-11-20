@@ -30,12 +30,12 @@ export const usePaypalStore = defineStore('paypal', () => {
     };
 
     // Action to load the PayPal SDK script
-    const loadPaypalCashbondSdk = () => {
+    const loadPaypalUsageFeeSdk = () => {
         if (!window.paypal && clientId.value) {  // Ensure client ID is defined
             const script = document.createElement('script');
-            script.src = `https://www.sandbox.paypal.com/sdk/js?client-id=${clientId.value}&components=buttons&currency=PHP&buyer-country=PH&intent=authorize`;
+            script.src = `https://www.sandbox.paypal.com/sdk/js?client-id=${clientId.value}&components=buttons&currency=PHP&buyer-country=PH`;
             script.onload = () => {
-                console.log('PayPal Cashbond SDK loaded');
+                console.log('PayPal Usage Fee SDK loaded');
                 isPaypalLoaded.value = true;
             };
             script.onerror = (error) => {
@@ -47,6 +47,6 @@ export const usePaypalStore = defineStore('paypal', () => {
         }
     };
 
-    return { isPaypalLoaded, loadPaypalEmailblastSdk, loadPaypalCashbondSdk, setClientId };
+    return { isPaypalLoaded, loadPaypalEmailblastSdk, loadPaypalUsageFeeSdk, setClientId };
 });
 

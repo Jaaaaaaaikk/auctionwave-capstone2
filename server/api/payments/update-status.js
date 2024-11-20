@@ -21,10 +21,10 @@ export default defineEventHandler(async (event) => {
 
     // Step 2: Get the listing ID and cash bond amount from the request body
     const body = await readBody(event);
-    const { listing_id, cashbond_amount, orderID } = body;
+    const { listing_id, orderID } = body;
 
     // Validate required fields
-    if (!listing_id || !cashbond_amount || !orderID) {
+    if (!listing_id || !orderID) {
         throw createError({ statusCode: 400, message: "Listing ID, Cash Bond Amount, and Order ID are required." });
     }
 
@@ -40,9 +40,9 @@ export default defineEventHandler(async (event) => {
 
     const { auctioneer_id } = auctionListing[0];
 
-    // Step 4: Find the winning bid for the given listing (only 'CashBond Pending' status)
+    // Step 4: Find the winning bid for the given listing (only 'Usage Fee Payment Pending' status)
     const [winningBid] = await pool.query(
-        "SELECT * FROM Bids WHERE listing_id = ? AND status = 'CashBond Pending' LIMIT 1",
+        "SELECT * FROM Bids WHERE listing_id = ? AND status = 'Usage Fee Payment Pending' LIMIT 1",
         [listing_id]
     );
 
@@ -52,20 +52,14 @@ export default defineEventHandler(async (event) => {
 
     const { bid_id, bidder_id, bid_amount } = winningBid[0];
 
-    // Step 5: Update the winning bid's status to 'CashBond Top-up Completed' and response_status to 'Accepted'
+    // Step 5: Update the winning bid's status to 'Usage Fee Payment Completed' and response_status to 'Accepted'
     await pool.query(
-        "UPDATE Bids SET status = 'CashBond Top-up Completed', response_status = 'Accepted' WHERE bid_id = ?",
+        "UPDATE Bids SET status = 'Usage Fee Payment Completed', response_status = 'Accepted' WHERE bid_id = ?",
         [bid_id]
     );
 
     // Step 6: Add rows to the Payments table for cash bond and usage fee
     const usageFee = 20.00; // Fixed usage fee for the auction
-
-    // Insert payment row for cash bond
-    await pool.query(
-        "INSERT INTO Payments (listing_id, user_id, amount, payment_type, payment_status, order_id) VALUES (?, ?, ?, 'Cashbond', 'On Hold', ?)",
-        [listing_id, bidder_id, cashbond_amount, orderID]
-    );
 
     // Insert payment row for usage fee
     await pool.query(
@@ -79,10 +73,16 @@ export default defineEventHandler(async (event) => {
         [listing_id, bidder_id, auctioneer_id]
     );
 
+    // Step 8: Update Status of Auction to ended
+    await pool.query(
+        `UPDATE AuctionListings SET status = 'Auction Ended' WHERE listing_id = ?`,
+        [listing_id]
+    );
+
+
     return {
-        message: "Bid status updated to 'CashBond Top-up Completed', payments recorded, and transaction initialized.",
+        message: "Bid status updated to 'Usage Fee Payment Completed', payments recorded, and transaction initialized.",
         paymentDetails: {
-            cashbond: { amount: cashbond_amount, status: "On Hold" },
             usageFee: { amount: usageFee, status: "Payment Completed" },
         },
     };

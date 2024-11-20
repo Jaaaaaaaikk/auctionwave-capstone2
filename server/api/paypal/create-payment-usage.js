@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
         const response = await axios.post(
             process.env.PAYPAL_BASE_URL + `/v2/checkout/orders`,
             {
-                intent: 'AUTHORIZE',
+                intent: 'CAPTURE',
                 purchase_units: [purchaseUnit],
                 application_context: {
                     shipping_preference: 'NO_SHIPPING',
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
             }
         );
 
-        console.log('The response in Create-payment-cashbond', response.data);
+        console.log('The response in Create-payment-usage', response.data);
         // Return order ID to client
         return response.data;
     } catch (error) {

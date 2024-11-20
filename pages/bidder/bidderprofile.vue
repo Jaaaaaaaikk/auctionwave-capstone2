@@ -1,133 +1,294 @@
 <template>
   <NuxtLayout name="biddernavbar">
     <client-only>
-      <div class="min-h-screen bg-custom-white w-full mt-16">
-        <NuxtLayout name="biddersidebar"></NuxtLayout>
-        <div class="bg-white w-3/5 mx-auto px-12 py-12 rounded-lg flex items-start relative">
 
-          <!-- Breadcrumbs Section -->
-          <nav
-            class="absolute top-4 left-4 pt-2 pb-2 text-gray-700 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700">
-            <ol class="flex space-x-2">
-              <li class="inline-flex items-center">
-                <NuxtLink to="/bidder/bidderdashboard"
-                  class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
-                  <svg class="w-3 h-3 me-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
-                    viewBox="0 0 20 20">
-                    <path
-                      d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z" />
+      <!-- new profile -->
+      <NuxtLayout name="biddersidebar" class="hidden xl:block"></NuxtLayout>
+
+      <!-- Add Loading Spinner here -->
+      <div v-if="isLoading" class="fixed inset-0 flex items-center justify-center z-50">
+
+        <!--Backdrop of Loading Spinner-->
+        <div class="absolute inset-0 bg-gray-900 bg-opacity-50"></div>
+
+        <div class="flex items-center space-x-4">
+          <svg class="animate-spin" width="80" height="80" viewBox="0 0 20 20" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#clip0_2592_7101)">
+              <path opacity="0.33" fill-rule="evenodd" clip-rule="evenodd"
+                d="M12.6066 0.345176L12.1759 1.95287C11.9417 1.88993 11.7052 1.83929 11.4632 1.79612C11.2212 1.75296 10.9818 1.71873 10.7403 1.6968L10.892 0.0393588C11.1794 0.065229 11.4687 0.104137 11.7559 0.15535C12.043 0.206563 12.3279 0.270083 12.6066 0.345176Z"
+                fill="#3758F9" />
+              <path opacity="0.38" fill-rule="evenodd" clip-rule="evenodd"
+                d="M15.0182 1.34671L14.1811 2.78881C13.7674 2.54571 13.3299 2.34072 12.8687 2.17381L13.44 0.60813C13.9926 0.808271 14.5193 1.05881 15.0182 1.34671Z"
+                fill="#3758F9" />
+              <path opacity="0.42" fill-rule="evenodd" clip-rule="evenodd"
+                d="M17.0867 2.94304L15.904 4.1161C15.5633 3.77177 15.1915 3.45996 14.7933 3.17731L15.7554 1.81679C16.2325 2.15582 16.6776 2.53148 17.0867 2.94304Z"
+                fill="#3758F9" />
+              <path opacity="0.5" fill-rule="evenodd" clip-rule="evenodd"
+                d="M18.6682 5.01543L17.225 5.84575C16.9824 5.4258 16.7068 5.02535 16.3966 4.65259L17.6747 3.58543C18.0477 4.03288 18.3814 4.51141 18.6682 5.01543Z"
+                fill="#3758F9" />
+              <path opacity="0.55" fill-rule="evenodd" clip-rule="evenodd"
+                d="M19.6684 7.42856L18.0557 7.85621C17.9323 7.38556 17.7642 6.92809 17.5622 6.49423L19.0718 5.79002C19.3166 6.31617 19.5152 6.86372 19.6684 7.42856Z"
+                fill="#3758F9" />
+              <path opacity="0.6" fill-rule="evenodd" clip-rule="evenodd"
+                d="M20.002 10.019L18.3354 10.0138C18.3382 9.52335 18.293 9.04126 18.2128 8.56561L19.8546 8.28284C19.953 8.84638 20.0053 9.43131 20.002 10.019Z"
+                fill="#3758F9" />
+              <path opacity="0.65" fill-rule="evenodd" clip-rule="evenodd"
+                d="M19.8447 11.7559C19.7934 12.043 19.7299 12.328 19.6548 12.6066L18.0438 12.1711C18.106 11.941 18.1607 11.7053 18.2039 11.4633C18.247 11.2212 18.2779 10.977 18.2991 10.7396L19.9606 10.892C19.9355 11.1753 19.8966 11.4647 19.8447 11.7559Z"
+                fill="#3758F9" />
+              <path opacity="0.7" fill-rule="evenodd" clip-rule="evenodd"
+                d="M19.3926 13.436C19.1917 13.9927 18.9412 14.5194 18.6533 15.0182L17.2112 14.1812C17.4502 13.7667 17.66 13.3259 17.8269 12.8647L19.3926 13.436Z"
+                fill="#3758F9" />
+              <path opacity="0.75" fill-rule="evenodd" clip-rule="evenodd"
+                d="M18.184 15.7514C17.8442 16.2325 17.4685 16.6776 17.0577 17.0826L15.8839 15.904C16.2241 15.5626 16.54 15.1915 16.8186 14.7926L18.184 15.7514Z"
+                fill="#3758F9" />
+              <path opacity="0.8" fill-rule="evenodd" clip-rule="evenodd"
+                d="M16.4112 17.6699C15.9678 18.0437 15.4893 18.3774 14.9846 18.6682L14.1543 17.225C14.5742 16.9825 14.9713 16.702 15.344 16.3918L16.4112 17.6699Z"
+                fill="#3758F9" />
+              <path opacity="0.95" fill-rule="evenodd" clip-rule="evenodd"
+                d="M14.21 19.0718C13.6838 19.3166 13.1363 19.5152 12.5721 19.6643L12.1397 18.055C12.6111 17.9275 13.0678 17.7635 13.5065 17.5581L14.21 19.0718Z"
+                fill="#3758F9" />
+              <path fill-rule="evenodd" clip-rule="evenodd"
+                d="M11.7179 19.8505C11.1495 19.9523 10.5694 20.0012 9.98093 20.0021L9.98616 18.3354C10.4773 18.3341 10.9587 18.293 11.4303 18.2121L11.7179 19.8505Z"
+                fill="#3758F9" />
+              <path opacity="0.05" fill-rule="evenodd" clip-rule="evenodd"
+                d="M9.10799 19.9606C8.82057 19.9347 8.53124 19.8958 8.24411 19.8446C7.95697 19.7934 7.67203 19.7299 7.39339 19.6548L7.82477 18.043C8.05902 18.1059 8.29474 18.1607 8.53675 18.2039C8.77877 18.247 9.01887 18.2771 9.26044 18.2991L9.10799 19.9606Z"
+                fill="#3758F9" />
+              <path opacity="0.07" fill-rule="evenodd" clip-rule="evenodd"
+                d="M7.1312 17.8262L6.55991 19.3919C6.00803 19.1876 5.48061 18.9412 4.98248 18.6492L5.8188 17.2112C6.23328 17.4502 6.67074 17.6552 7.1312 17.8262Z"
+                fill="#3758F9" />
+              <path opacity="0.09" fill-rule="evenodd" clip-rule="evenodd"
+                d="M5.20739 16.8186L4.24522 18.1791C3.76744 17.8442 3.32232 17.4685 2.91323 17.057L4.09664 15.8798C4.43731 16.2241 4.80917 16.5359 5.20739 16.8186Z"
+                fill="#3758F9" />
+              <path opacity="0.11" fill-rule="evenodd" clip-rule="evenodd"
+                d="M3.60406 15.3433L2.32599 16.4105C1.95293 15.963 1.61927 15.4845 1.33248 14.9805L2.7757 14.1501C3.01823 14.5701 3.29386 14.9705 3.60406 15.3433Z"
+                fill="#3758F9" />
+              <path opacity="0.13" fill-rule="evenodd" clip-rule="evenodd"
+                d="M2.43772 13.5058L0.928848 14.2059C0.683367 13.6838 0.484757 13.1363 0.332289 12.5673L1.94493 12.1397C2.06838 12.6103 2.2365 13.0678 2.43772 13.5058Z"
+                fill="#3758F9" />
+              <path opacity="0.15" fill-rule="evenodd" clip-rule="evenodd"
+                d="M1.78797 11.4303L0.145415 11.7171C0.0477348 11.1495 -0.00526797 10.5687 -0.0012875 9.97685L1.66536 9.98208C1.66253 10.4725 1.70701 10.9587 1.78797 11.4303Z"
+                fill="#3758F9" />
+              <path opacity="0.17" fill-rule="evenodd" clip-rule="evenodd"
+                d="M1.79609 8.53676C1.75293 8.77878 1.7228 9.01888 1.70161 9.25635L0.0393276 9.108C0.0651979 8.82058 0.104105 8.53125 0.155319 8.24411C0.206532 7.95698 0.270783 7.66794 0.345145 7.39339L1.95694 7.82478C1.89473 8.05493 1.83926 8.29475 1.79609 8.53676Z"
+                fill="#3758F9" />
+              <path opacity="0.19" fill-rule="evenodd" clip-rule="evenodd"
+                d="M2.78952 5.81474C2.5498 6.23332 2.3407 6.67005 2.17379 7.13124L0.608112 6.55995C0.808254 6.00734 1.05953 5.47655 1.3467 4.98179L2.78952 5.81474Z"
+                fill="#3758F9" />
+              <path opacity="0.21" fill-rule="evenodd" clip-rule="evenodd"
+                d="M4.11613 4.09597C3.77663 4.43326 3.46072 4.80439 3.18218 5.20335L1.81682 4.24454C2.15585 3.7675 2.53151 3.32237 2.94307 2.91328L4.11613 4.09597Z"
+                fill="#3758F9" />
+              <path opacity="0.25" fill-rule="evenodd" clip-rule="evenodd"
+                d="M5.84654 2.77086C5.4266 3.01339 5.02952 3.29386 4.65676 3.60406L3.58959 2.32599C4.03295 1.9522 4.51147 1.61853 5.01622 1.32764L5.84654 2.77086Z"
+                fill="#3758F9" />
+              <path opacity="0.28" fill-rule="evenodd" clip-rule="evenodd"
+                d="M7.86098 1.94089C7.3896 2.06844 6.93287 2.23246 6.49417 2.43778L5.78996 0.928178C6.31611 0.683428 6.86366 0.484819 7.4285 0.331619L7.86098 1.94089Z"
+                fill="#3758F9" />
+              <path opacity="0.3" fill-rule="evenodd" clip-rule="evenodd"
+                d="M10.0138 1.66458C9.52332 1.66175 9.04195 1.70287 8.56968 1.78793L8.2828 0.145371C8.85044 0.0476906 9.43127 -0.00531221 10.019 -0.00206337L10.0138 1.66458Z"
+                fill="#3758F9" />
+            </g>
+            <defs>
+              <clipPath id="clip0_2592_7101">
+                <rect width="20" height="20" fill="white" />
+              </clipPath>
+            </defs>
+          </svg>
+          <span class="text-lg font-medium text-gray-700">PLEASE WAIT...</span>
+        </div>
+      </div>
+
+
+      <div v-if="!isLoading" class="bg-custom-blue2   flex items-center justify-center p-4">
+
+
+        <div
+          class="bg-white dark:bg-gray-800 rounded-xl shadow-md max-w-6xl w-full xl:w-3/5 2xl:w-full p-8 transition-all duration-300 animate-fade-in">
+
+          <div class="flex flex-col ">
+
+            <div class="md:w-1/3 text-center mb-8 md:mb-0 mx-auto">
+              <div class="relative w-48 sm:mx-auto mx-auto">
+                <img :src="userStore.userProfileImage || '/images/default-profile-image.png'" alt="Profile Picture"
+                  class="rounded-full w-48 h-48 mx-auto mb-4 border-4 border-custom-bluegreen dark:border-blue-900 transition-transform duration-300 hover:scale-105" />
+                <div title="Change Picture"
+                  class="absolute bottom-2 right-2 bg-custom-blue2 border rounded-full p-2 cursor-pointe hover:bg-white  hover:shadow hover:cursor-pointer   transition z-10">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-custom-bluegreen" fill="none"
+                    viewBox="0 0 24 24" stroke="currentColor" @click="profile_modal = true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 8h4l1-2h8l1 2h4a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V10a2 2 0 012-2zm7 3a3 3 0 106 0 3 3 0 00-6 0z" />
                   </svg>
-                  Dashboard
-                </NuxtLink>
-              </li>
-              <li aria-current="page">
-                <div class="flex items-center">
-                  <svg class="rtl:rotate-180  w-3 h-3 mx-1 text-gray-400" aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="m1 9 4-4-4-4" />
-                  </svg>
-                  <span class="ms-1 text-sm font-medium text-gray-500 md:ms-2 dark:text-gray-400">My Profile</span>
+                  <profileModal v-if="profile_modal" @close="handleModalClose" @image-uploaded="fetchProfile" />
                 </div>
-              </li>
-            </ol>
-          </nav>
-
-          <!-- Profile Image Section -->
-          <div class="mr-6 mt-10 relative">
-            <img class="w-48 rounded-full ring-4 ring-blue-500"
-              :src="userStore.userProfileImage || '/images/default-profile-image.png'" alt="Profile Picture"
-              loading="lazy" />
-            <div class="absolute top-0 right-0 bg-white rounded-full p-1 cursor-pointer hover:bg-gray-200 transition">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor" @click="profile_modal = true">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M3 8h4l1-2h8l1 2h4a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V10a2 2 0 012-2zm7 3a3 3 0 106 0 3 3 0 00-6 0z" />
-              </svg>
-              <profileModal v-if="profile_modal" @close="handleModalClose" @image-uploaded="fetchProfile" />
-            </div>
-          </div>
-
-          <!-- Profile Info Section -->
-          <div class="w-full">
-            <div class="flex justify-end mb-4">
-              <div>
-                <button @click="toggleModal" class="bg-blue-500 px-3 py-1 rounded-3xl text-white focus:outline-none">
-                  Edit
-                </button>
               </div>
-            </div>
+              <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">{{ profile.firstName }} {{
+                profile.middleName }} {{ profile.lastName }}</h1>
+              <p class="text-gray-800 dark:text-gray-300">{{ profile.user_type }}</p>
+              <div class="flex items-center justify-center">
+                <svg class="w-4 h-4 text-yellow-300 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor" viewBox="0 0 22 20">
+                  <path
+                    d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                </svg>
+                <svg class="w-4 h-4 text-yellow-300 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor" viewBox="0 0 22 20">
+                  <path
+                    d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                </svg>
+                <svg class="w-4 h-4 text-yellow-300 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor" viewBox="0 0 22 20">
+                  <path
+                    d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                </svg>
+                <svg class="w-4 h-4 text-yellow-300 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                  fill="currentColor" viewBox="0 0 22 20">
+                  <path
+                    d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                </svg>
+                <svg class="w-4 h-4 text-gray-300 me-1 dark:text-gray-500" aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                  <path
+                    d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                </svg>
+                <p class="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">4.95</p>
+                <p class="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">out of</p>
+                <p class="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">5</p>
+              </div>
+              <button @click="toggleModal"
+                class="mt-4 bg-custom-bluegreen text-gray-300 px-4 py-2 rounded-lg hover:bg-green-500 transition-colors duration-300">
+                Edit Profile
+              </button>
 
-            <!-- Display Profile Fields -->
-            <div class="grid grid-cols-2 gap-2 mb-4">
-              <div class="font-medium">Full Name:</div>
-              <div>{{ profile.firstName }} {{ profile.middleName }} {{ profile.lastName }}</div>
+              <NotificationAlert v-if="showNotificationAlert" @close="showNotificationAlert = false" />
             </div>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <div class="font-medium">Email:</div>
-              <div>{{ profile.email }}</div>
-            </div>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <div class="font-medium">Location:</div>
-              <div>{{ profile.location }}</div>
-            </div>
-            <div class="grid grid-cols-2 gap-4 mb-4">
-              <div class="font-medium">Categories:</div>
-              <div>
+            <div class="md:w-full lg:w-full md:pl-8">
+              <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">About Me</h2>
+              <p class="text-sm text-gray-800 dark:text-gray-300 mb-6 w-full break-words">
+                {{ profile.about }}
+              </p>
+              <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Interested Categories</h2>
+              <div class="flex flex-wrap gap-2 mb-6">
                 <span v-for="(category, index) in profile.categories" :key="index"
-                  class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+                  class="bg-indigo-100 text-gray-700 px-3 py-1 rounded-full text-sm">
                   {{ category }}
                 </span>
               </div>
-            </div>
-            <div class="mb-4 p-10">
-              <div class="font-medium">About:</div>
-              <div class="font-normal my-4 p-4 h-full w-full border-2 rounded-xl" readonly>{{ profile.about }}</div>
+              <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">Contact Information</h2>
+              <ul class="space-y-2 text-gray-800 dark:text-gray-300">
+                <li class="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-custom-bluegreen dark:text-blue-900"
+                    viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
+                  {{ profile.email }}
+                </li>
+                <li class="flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-custom-bluegreen dark:text-blue-900"
+                    viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                      d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
+                      clip-rule="evenodd" />
+                  </svg>
+                  {{ profile.location }}
+                </li>
+              </ul>
+              <section class="bg-white dark:bg-gray-900 py-8 lg:py-16 antialiased">
+                <div class="lg:max-w-6xl mx-auto px-4">
+                  <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white">User comments</h2>
+                  </div>
+                  <form class="mb-6 ">
+                    <div
+                      class="py-2 px-4 mb-4 bg-white rounded-lg rounded-t-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                      <label for="comment" class="sr-only">Your comment</label>
+                      <textarea id="comment" rows="6"
+                        class="px-0 w-full text-sm text-gray-900 border-0 focus:ring-0 focus:outline-none dark:text-white dark:placeholder-gray-400 dark:bg-gray-800"
+                        placeholder="Write a comment..." required></textarea>
+                    </div>
+                    <button type="submit"
+                      class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-custom-bluegreen hover:bg-green-500 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
+                      Post comment
+                    </button>
+                  </form>
+                  <article class="p-6 text-base bg-white rounded-lg dark:bg-gray-900">
+                    <footer class="flex justify-between items-center mb-2">
+                      <div class="flex items-center">
+                        <p class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold">
+                          <img class="mr-2 w-6 h-6 rounded-full"
+                            src="https://flowbite.com/docs/images/people/profile-picture-2.jpg"
+                            alt="Michael Gough">Michael Gough
+                        </p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400"><time pubdate datetime="2022-02-08"
+                            title="February 8th, 2022">Feb. 8, 2022</time></p>
+                      </div>
+                    </footer>
+                    <p class="text-gray-500 dark:text-gray-400">Way buot na bidder, sumbagay nlang ta yawa</p>
+                  </article>
+                  <article class="p-6 text-base bg-white rounded-lg dark:bg-gray-900">
+                    <footer class="flex justify-between items-center mb-2">
+                      <div class="flex items-center">
+                        <p class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold">
+                          <img class="mr-2 w-6 h-6 rounded-full"
+                            src="https://flowbite.com/docs/images/people/profile-picture-4.jpg"
+                            alt="Helene Engels">Helene Engels
+                        </p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400"><time pubdate datetime="2022-06-23"
+                            title="June 23rd, 2022">Jun. 23, 2022</time></p>
+                      </div>
+                    </footer>
+                    <p class="text-gray-500 dark:text-gray-400">儿勒屁艾 艾艾西艾 艾艾 西吉艾艾伊娜伊</p>
+                  </article>
+                </div>
+              </section>
             </div>
           </div>
         </div>
 
-        <!-- Edit Profile Modal -->
         <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center">
-          <!-- Modal Backdrop -->
+
           <div @click="closeModalOnOutsideClick" class="fixed inset-0 bg-gray-500 opacity-75"></div>
 
-          <!-- Modal Content -->
+
           <div ref="modalContent" class="bg-white rounded-lg shadow-xl z-50 w-full max-w-lg px-6 py-8 mx-4 relative">
-            <h3 class="text-lg text-center leading-6 font-medium text-gray-900 mb-4">Edit Profile</h3>
+            <h3 class="text-lg text-center leading-6 font-medium text-gray-800 mb-4">Edit Profile</h3>
 
-            <!-- First Name Field -->
+
             <div class="mb-4">
-              <label class="block font-medium">First Name:</label>
-              <input v-model="editProfile.firstName" type="text" class="w-full border border-gray-300 p-2 rounded-lg"
+              <label class="block font-medium text-gray-800">First Name:</label>
+              <input v-model="editProfile.firstName" type="text"
+                class="w-full border bg-gray-100  border-gray-300 p-2 rounded-lg focus:ring-custom-bluegreen focus:border-custom-bluegreen"
                 required />
             </div>
 
-            <!-- Middle Name Field (Optional) -->
+
             <div class="mb-4">
-              <label class="block font-medium">Middle Name (optional):</label>
-              <input v-model="editProfile.middleName" type="text" class="w-full border border-gray-300 p-2 rounded-lg"
-                placeholder="No middle name provided" />
+              <label class="block font-medium text-gray-800">Middle Name (optional):</label>
+              <input v-model="editProfile.middleName" type="text"
+                class="w-full border bg-gray-100  border-gray-300 p-2 rounded-lg"
+                placeholder="No middle name provided focus:ring-custom-bluegreen focus:border-custom-bluegreen" />
             </div>
 
-            <!-- Last Name Field -->
+
             <div class="mb-4">
-              <label class="block font-medium">Last Name:</label>
-              <input v-model="editProfile.lastName" type="text" class="w-full border border-gray-300 p-2 rounded-lg"
+              <label class="block font-medium text-gray-800">Last Name:</label>
+              <input v-model="editProfile.lastName" type="text"
+                class="w-full border bg-gray-100  border-gray-300 p-2 rounded-lg focus:ring-custom-bluegreen focus:border-custom-bluegreen"
                 required />
             </div>
 
-            <!-- Email Field (read-only) -->
+
             <div class="mb-4">
-              <label class="block font-medium">Email:</label>
+              <label class="block font-medium text-gray-800">Email:</label>
               <input v-model="editProfile.email" type="email"
-                class="w-full border border-gray-300 p-2 rounded-lg bg-gray-200 cursor-not-allowed" readonly />
+                class="w-full border border-gray-300 p-2 rounded-lg bg-gray-100 cursor-not-allowed focus:ring-custom-bluegreen focus:border-custom-bluegreen"
+                readonly />
             </div>
 
-            <!-- Location Field -->
+
             <div class="mb-4 relative">
               <input type="text" v-model="editProfile.location" placeholder="City Location"
-                class="bg-gray-50 border-2 appearance-none text-gray-900 sm:text-sm rounded-md focus:ring-custom-bluegreen focus:border-custom-bluegreen block w-full p-2 pr-10"
+                class="bg-gray-100 border-2 appearance-none text-gray-900 sm:text-sm rounded-md focus:ring-custom-bluegreen focus:border-custom-bluegreen block w-full p-2 pr-10"
                 readonly required />
               <span class="absolute inset-y-0 right-3 flex items-center">
                 <svg class="w-8 h-10 text-custom-bluegreen cursor-pointer hover:text-green-500" fill="currentColor"
@@ -136,13 +297,13 @@
                     d="M12 2a7 7 0 00-7 7c0 4.418 7 13 7 13s7-8.582 7-13a7 7 0 00-7-7zm0 9a2 2 0 110-4 2 2 0 010 4z"
                     clip-rule="evenodd"></path>
                 </svg>
-                <!-- Leaflet Map Modal -->
+
                 <CityMap v-if="showMap" @citySelected="setCity" />
               </span>
             </div>
             <div class="mb-4">
               <select v-model="selectedCategory" @change="addCategory"
-                class="bg-gray-50 border-2 text-gray-900 sm:text-sm rounded-lg focus:ring-custom-bluegreen focus:border-custom-bluegreen block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
+                class="bg-gray-100 border-2 text-gray-900 sm:text-sm rounded-lg focus:ring-custom-bluegreen focus:border-custom-bluegreen block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
                 placeholder="Select Category" required>
                 <option value="" disabled>Select Category</option>
                 <option v-for="category in availableCategories" :key="category" :value="category">
@@ -151,10 +312,10 @@
               </select>
             </div>
 
-            <!-- Selected Categories Display -->
+
             <div class="mb-5">
               <span v-for="category in editProfile.categories" :key="category"
-                class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+                class="inline-block bg-custom-blue2 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
                 {{ category }}
                 <button type="button" @click="removeCategory(category)" class="text-red-500 ml-1">
                   x
@@ -162,19 +323,21 @@
               </span>
             </div>
             <div class="mb-4">
-              <label class="block font-medium">About:</label>
+              <label class="block font-medium text-gray-800">About:</label>
               <textarea v-model="editProfile.about" rows="4"
-                class="w-full border border-gray-300 p-2 rounded-lg"></textarea>
+                class="w-full border bg-gray-100 border-gray-300 p-2 rounded-lg"></textarea>
             </div>
 
-            <!-- Save and Cancel Buttons -->
+
             <div class="flex justify-end mt-6">
               <button @click="saveProfileChanges" :disabled="!hasChanges()"
-                class="bg-blue-500 text-white px-4 py-2 rounded-lg mr-2">Save Changes</button>
+                class="bg-custom-bluegreen hover:bg-green-500 text-white px-4 py-2 rounded-lg mr-2 hover:cursor-pointer">Save
+                Changes</button>
               <button @click="toggleModal" class="bg-gray-500 text-white px-4 py-2 rounded-lg">Cancel</button>
             </div>
           </div>
         </div>
+
       </div>
     </client-only>
   </NuxtLayout>
@@ -241,7 +404,7 @@ const showModal = ref(false);
 const userStore = useUserStore();
 const modalContent = ref(null);
 const selectedCategory = ref("");
-
+const isLoading = ref(true);
 
 const setCity = (city) => {
   editProfile.value.location = city.name;
@@ -259,6 +422,7 @@ const toggleMap = () => {
 
 // Fetch user's profile data
 const fetchProfile = async () => {
+  isLoading.value = true;
   try {
     const response = await axios.get("/api/bidderprofile");
     profile.value = response.data.profile;
@@ -266,6 +430,8 @@ const fetchProfile = async () => {
     filterAvailableCategories();
   } catch (error) {
     console.error("Error fetching profile:", error.message);
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -303,6 +469,7 @@ const validateProfileChanges = () => {
 
 // Save changes to the profile
 const saveProfileChanges = async () => {
+  isLoading.value = true;
   if (!hasChanges()) {
     toast.warn("No changes detected.");
     return;
@@ -345,6 +512,8 @@ const saveProfileChanges = async () => {
     showModal.value = false; // Close modal
   } catch (error) {
     console.error("Error saving profile:", error.message);
+  } finally {
+    isLoading.value = false;
   }
 };
 

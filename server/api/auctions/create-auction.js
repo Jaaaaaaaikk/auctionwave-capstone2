@@ -38,7 +38,6 @@ export default defineEventHandler(async (event) => {
       duration_hours,
       categories,
       rarity,
-      cashbond_amount,
       image,
     } = body;
 
@@ -51,7 +50,6 @@ export default defineEventHandler(async (event) => {
       !bidding_type ||
       !categories ||
       !rarity ||
-      !cashbond_amount ||
       !image
     ) {
       return {
@@ -108,18 +106,17 @@ export default defineEventHandler(async (event) => {
 
     // Insert the new auction listing
     const [result] = await connection.execute(
-      'INSERT INTO AuctionListings (auctioneer_id, name, location_id, caption, description, starting_bid, bidding_type, duration_hours, rarity, cashbond_amount, status, uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "Auction Pending", ?)', // Use location_id in the query
+      'INSERT INTO AuctionListings (auctioneer_id, name, location_id, caption, description, starting_bid, bidding_type, duration_hours, rarity, status, uuid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, "Auction Pending", ?)', // Use location_id in the query
       [
         auctioneer_id,
         name,
         location_id,
         caption,
         description,
-        starting_bid,
+        starting_bid || 0.00,
         bidding_type,
         duration_hours,
         rarity,
-        cashbond_amount,
         auctionUuid,
       ]
     );

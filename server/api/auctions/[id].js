@@ -47,7 +47,6 @@ export default defineEventHandler(async (event) => {
           al.starting_bid, 
           al.bidding_type, 
           al.rarity,
-          al.cashbond_amount,
           al.status,
           al.duration_hours,
           ai.image_url AS image_url,
@@ -72,8 +71,6 @@ export default defineEventHandler(async (event) => {
           UserProfileImages upi ON u.user_id = upi.user_id AND upi.is_current_profile_image = TRUE
       LEFT JOIN 
           Payments p ON al.listing_id = p.listing_id 
-              AND p.payment_type = 'Emailblast Fee' 
-              AND p.payment_status = 'Payment Completed' -- Check for completed email blast fee
       WHERE 
           al.uuid = ?
       GROUP BY 

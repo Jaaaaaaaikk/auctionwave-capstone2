@@ -22,11 +22,11 @@ export default defineEventHandler(async (event) => {
 
             // Mark auction as 'Auction Ended'
             await pool.query(
-                `UPDATE AuctionListings SET status = 'Auction Ended' WHERE listing_id = ?`,
+                `UPDATE AuctionListings SET status = 'Awaiting Bidder Payment' WHERE listing_id = ?`,
                 [listingId]
             );
 
-            // Find the lowest bid and mark it as 'CashBond Top-up Completed'
+            // Find the lowest bid and mark it as 'Usage Fee Payment Pending'
             const [lowestBid] = await pool.query(
                 `SELECT bid_id, bidder_id FROM Bids WHERE listing_id = ? AND status = 'Active' ORDER BY bid_amount ASC LIMIT 1`,
                 [listingId]
@@ -37,8 +37,8 @@ export default defineEventHandler(async (event) => {
                 winnerId = lowestBid[0].bidder_id;
                 const winnerBidId = lowestBid[0].bid_id;
 
-                // Mark the winning bid as 'Cashbond Pending'
-                await pool.query(`UPDATE Bids SET status = 'Cashbond Pending' WHERE bid_id = ?`, [winnerBidId]);
+                // Mark the winning bid as 'Usage Fee Payment Pending'
+                await pool.query(`UPDATE Bids SET status = 'Usage Fee Payment Pending' WHERE bid_id = ?`, [winnerBidId]);
 
                 // Set the response deadline (e.g., 24 hours from auction end)
                 const responseDeadline = new Date(auctionEndTime);
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
                 const remainingTime = formatTimeRemaining(responseDeadline);
 
                 // Send winning message to the winner only
-                const winnerMessage = `Congratulations! You are the winning bidder for auction "${auctionName}". Please complete the cash bond within the next ${remainingTime}. If you fail to respond within the given time, a new winner will be selected.`;
+                const winnerMessage = `Congratulations! You are the winning bidder for auction "${auctionName}". Please complete the usage fee payment within the next ${remainingTime}. If you fail to respond within the given time, a new winner will be selected.`;
 
                 // Query unread notifications count for the winner
                 const [unreadCountResult] = await pool.query(

@@ -28,6 +28,7 @@ export default defineEventHandler(async (event) => {
                 al.name AS auction_name,
                 al.uuid AS auction_uuid,
                 al.bidding_type,
+                al.listing_id,
                 t.transaction_status,
                 t.created_at AS transaction_time,
                 t.auctioneer_id,
@@ -41,8 +42,11 @@ export default defineEventHandler(async (event) => {
             td.auction_name,
             td.auction_uuid,
             td.bidding_type,
+            td.listing_id,
             td.transaction_status,
-            td.transaction_time
+            td.transaction_time,
+            td.auctioneer_id,
+            td.bidder_id
         FROM TransactionDetails td
         ${selectedTransactionStatus ? "WHERE td.transaction_status = ?" : ""}
         ORDER BY td.transaction_time DESC
