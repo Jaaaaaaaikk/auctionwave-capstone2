@@ -125,41 +125,28 @@
                 profile.middleName }} {{ profile.lastName }}</h1>
               <p class="text-gray-800 dark:text-gray-300">{{ profile.user_type }}</p>
               <div class="flex items-center justify-center">
-                <svg class="w-4 h-4 text-yellow-300 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor" viewBox="0 0 22 20">
-                  <path
-                    d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
-                </svg>
-                <svg class="w-4 h-4 text-yellow-300 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor" viewBox="0 0 22 20">
-                  <path
-                    d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
-                </svg>
-                <svg class="w-4 h-4 text-yellow-300 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor" viewBox="0 0 22 20">
-                  <path
-                    d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
-                </svg>
-                <svg class="w-4 h-4 text-yellow-300 me-1" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor" viewBox="0 0 22 20">
-                  <path
-                    d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
-                </svg>
-                <svg class="w-4 h-4 text-gray-300 me-1 dark:text-gray-500" aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
-                  <path
-                    d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
-                </svg>
-                <p class="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">4.95</p>
-                <p class="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">out of</p>
-                <p class="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">5</p>
+                <div class="flex items-center justify-center">
+                  <template v-for="star in 5" :key="star">
+                    <svg v-if="star <= Math.floor(profile.bidder_rating)" class="w-4 h-4 text-yellow-300 me-1"
+                      aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                      <path
+                        d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                    </svg>
+                    <svg v-else class="w-4 h-4 text-gray-300 me-1 dark:text-gray-500" aria-hidden="true"
+                      xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 22 20">
+                      <path
+                        d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z" />
+                    </svg>
+                  </template>
+                  <p class="ms-1 text-sm font-medium text-gray-500 dark:text-gray-400">
+                    {{ profile.bidder_rating ? profile.bidder_rating.toFixed(1) : 0.0 }} out of 5
+                  </p>
+                </div>
               </div>
               <button @click="toggleModal"
                 class="mt-4 bg-custom-bluegreen text-gray-300 px-4 py-2 rounded-lg hover:bg-green-500 transition-colors duration-300">
                 Edit Profile
               </button>
-
-              <NotificationAlert v-if="showNotificationAlert" @close="showNotificationAlert = false" />
             </div>
             <div class="md:w-full lg:w-full md:pl-8">
               <h2 class="text-xl font-semibold text-gray-800 dark:text-white mb-4">About Me</h2>
@@ -198,47 +185,33 @@
                   <div class="flex justify-between items-center mb-6">
                     <h2 class="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white">User comments</h2>
                   </div>
-                  <form class="mb-6 ">
-                    <div
-                      class="py-2 px-4 mb-4 bg-white rounded-lg rounded-t-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                      <label for="comment" class="sr-only">Your comment</label>
-                      <textarea id="comment" rows="6"
-                        class="px-0 w-full text-sm text-gray-900 border-0 focus:ring-0 focus:outline-none dark:text-white dark:placeholder-gray-400 dark:bg-gray-800"
-                        placeholder="Write a comment..." required></textarea>
+                  <div v-if="comments.length === 0" class="text-gray-500 dark:text-white mt-4 text-center">
+                    No comments posted.
+                  </div>
+                  <div v-else>
+                    <article v-for="comment in comments.slice(0, commentsToShow)" :key="comment.comment_id"
+                      class="p-6 text-base bg-white rounded-lg dark:bg-gray-900">
+                      <footer class="flex justify-between items-center mb-2">
+                        <div class="flex items-center">
+                          <p class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold">
+                            <img class="mr-2 w-6 h-6 rounded-full"
+                              :src="comment.profile_image_url || '/images/default-profile-image.png'"
+                              alt="User Image">{{
+                                comment.firstname }} {{
+                              comment.lastname }}
+                          </p>
+                          <div class="text-sm text-gray-600 dark:text-gray-400">Posted on {{
+                            formatDate(comment.created_at) }}</div>
+                        </div>
+                      </footer>
+                      <p class="text-gray-500 dark:text-gray-400">{{ comment.comment_text }}</p>
+                    </article>
+                    <div v-if="comments.length > commentsToShow" class="text-center mt-4">
+                      <button @click="loadMoreComments"
+                        class="text-blue-500 hover:text-blue-700 text-sm font-medium">See
+                        More</button>
                     </div>
-                    <button type="submit"
-                      class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-custom-bluegreen hover:bg-green-500 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
-                      Post comment
-                    </button>
-                  </form>
-                  <article class="p-6 text-base bg-white rounded-lg dark:bg-gray-900">
-                    <footer class="flex justify-between items-center mb-2">
-                      <div class="flex items-center">
-                        <p class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold">
-                          <img class="mr-2 w-6 h-6 rounded-full"
-                            src="https://flowbite.com/docs/images/people/profile-picture-2.jpg"
-                            alt="Michael Gough">Michael Gough
-                        </p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400"><time pubdate datetime="2022-02-08"
-                            title="February 8th, 2022">Feb. 8, 2022</time></p>
-                      </div>
-                    </footer>
-                    <p class="text-gray-500 dark:text-gray-400">Way buot na bidder, sumbagay nlang ta yawa</p>
-                  </article>
-                  <article class="p-6 text-base bg-white rounded-lg dark:bg-gray-900">
-                    <footer class="flex justify-between items-center mb-2">
-                      <div class="flex items-center">
-                        <p class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold">
-                          <img class="mr-2 w-6 h-6 rounded-full"
-                            src="https://flowbite.com/docs/images/people/profile-picture-4.jpg"
-                            alt="Helene Engels">Helene Engels
-                        </p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400"><time pubdate datetime="2022-06-23"
-                            title="June 23rd, 2022">Jun. 23, 2022</time></p>
-                      </div>
-                    </footer>
-                    <p class="text-gray-500 dark:text-gray-400">儿勒屁艾 艾艾西艾 艾艾 西吉艾艾伊娜伊</p>
-                  </article>
+                  </div>
                 </div>
               </section>
             </div>
@@ -405,6 +378,40 @@ const userStore = useUserStore();
 const modalContent = ref(null);
 const selectedCategory = ref("");
 const isLoading = ref(true);
+const comments = ref([]);
+const commentsToShow = ref(3);
+
+// Fetch user's comments data
+const fetchUserComments = async () => {
+  try {
+    const response = await axios.get("/api/get-my-profile-comments");
+    if (response.data.success) {
+      comments.value = response.data.comments;
+      console.log('comments.value', comments.value);
+    } else {
+      toast.error('Failed to load comments');
+    }
+  } catch (error) {
+    toast.error('Failed to load comments');
+  }
+};
+
+// Fetch more comments on 'See More' click
+const loadMoreComments = () => {
+  commentsToShow.value += 3; // Load 3 more comments
+};
+
+const formatDate = (dateString) => {
+  const options = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true // 12-hour format with AM/PM
+  };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
 
 const setCity = (city) => {
   editProfile.value.location = city.name;
@@ -576,7 +583,7 @@ const handleModalClose = () => {
 // Fetch profile on component mount
 onMounted(async () => {
   userStore.initializeProfileImage(); // Initialize from localStorage
-  await Promise.all([fetchProfile()]);
+  await Promise.all([fetchProfile(), fetchUserComments()]);
 });
 </script>
 

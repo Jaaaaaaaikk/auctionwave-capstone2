@@ -109,7 +109,7 @@
 
 
 
-        <div class="flex gap-2.5 my-7">
+        <div class="flex gap-2.5 my-7 relative"> <!-- Add relative positioning here -->
           <button @click="confirmEmailBlast" :disabled="isEmailBlastSent"
             class="inline-block flex-1 rounded-lg bg-custom-bluegreen px-8 py-3 text-center text-sm font-semibold text-white outline-none  transition duration-100 hover:bg-green-500 focus-visible:ring  sm:flex-none md:text-base"
             :class="{ 'opacity-50 cursor-not-allowed': isEmailBlastSent }">
@@ -130,8 +130,8 @@
             <p class="text-sm">Click the "Email Blast" button to notify all participants about the auction. Ensure
               that you've completed the payment process first.</p>
           </div>
-
         </div>
+
         <div v-if="isPaymentModalOpen">
           <div
             class="fixed inset-0 flex items-center justify-center z-50 overflow-x-hidden overflow-y-auto bg-gray-900 bg-opacity-50">
@@ -269,7 +269,8 @@
         <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
           <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Bidder Name</dt>
           <dd class="mt-1.5 text-base font-semibold text-gray-900 dark:text-white">
-            <a href="#" class="hover:underline">{{ bidder.bidder_name }}</a>
+            <NuxtLink :to="{ path: '/view-profile', query: { id: encodeId(bidder.user_id) } }"
+              class="cursor-pointer hover:underline">{{ bidder.bidder_name }}</NuxtLink>
           </dd>
         </dl>
         <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
@@ -299,14 +300,16 @@
         <div v-else v-for="pendingOffer in pendingComments.slice(0, offersToShow)" :key="pendingOffer.offer_id"
           class="flex mt-4 ">
           <!-- User's Profile Image -->
-          <div class="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center">
+          <NuxtLink :to="{ path: '/view-profile', query: { id: encodeId(pendingOffer.user_id) } }"
+            class="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center">
             <img class="h-12 w-12 rounded-full object-cover"
               :src="pendingOffer.userImageUrl || '/images/default-profile-image.png'" alt="User Image" />
-          </div>
+          </NuxtLink>
 
           <!-- Comment Details -->
           <div class="ml-3">
-            <div class="font-medium text-gray-900">{{ pendingOffer.full_name }}</div>
+            <NuxtLink :to="{ path: '/view-profile', query: { id: encodeId(pendingOffer.user_id) } }"
+              class="font-medium text-gray-900 cursor-pointer hover:underline">{{ pendingOffer.full_name }}</NuxtLink>
             <div class="text-gray-600 text-sm">Posted on {{ formatDate(pendingOffer.offer_time) }}</div>
             <div class="mt-2 text-gray-900 max-w-3xl break-words bg-gray-200 p-4 rounded-lg">{{ pendingOffer.comment }}
             </div>
@@ -416,14 +419,16 @@
         <!-- Offer Block 1 -->
         <div v-for="offer in topComments.slice(0, offersToShow)" :key="offer.offer_id" class="flex mt-4">
           <!-- User's Profile Image -->
-          <div class="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center">
+          <NuxtLink :to="{ path: '/view-profile', query: { id: encodeId(offer.user_id) } }"
+            class="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center">
             <img class="h-12 w-12 rounded-full object-cover"
               :src="offer.userImageUrl || '/images/default-profile-image.png'" alt="User Image" />
-          </div>
+          </NuxtLink>
 
           <!-- Comment Details -->
           <div class="ml-3">
-            <div class="font-medium text-gray-900">{{ offer.full_name }}</div>
+            <NuxtLink :to="{ path: '/view-profile', query: { id: encodeId(offer.user_id) } }"
+              class="font-medium text-gray-900 cursor-pointer hover:underline">{{ offer.full_name }}</NuxtLink>
             <div class="text-gray-600 text-sm">Posted on {{ formatDate(offer.offer_time) }}</div>
             <div class="mt-2 text-gray-900 max-w-3xl bg-gray-200 rounded-lg p-4 break-words">{{ offer.comment }}</div>
             <div v-if="offer.commentImages && offer.commentImages.length > 0" class="text-center">
@@ -514,6 +519,10 @@ const remainingTime = ref(0);
 let timerInterval = null;
 const isLoading = ref(true);
 
+const encodeId = (id) => {
+  return btoa(id);  // Base64 encode the ID
+};
+
 const formattedTime = computed(() => {
   return formatTime(remainingTime.value);
 });
@@ -563,8 +572,9 @@ const formatNumber = (value) => {
   return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
 };
 
-// Toggle tooltip visibility
 const toggleTooltip = () => {
+
+  // Toggle tooltip visibility
   isTooltipVisible.value = !isTooltipVisible.value;
 };
 
@@ -682,7 +692,11 @@ const sendEmailBlast = async (orderID) => {
       });
     });
 
-    toast.success("Payment success. Email blast sent successfully!");
+    toast(`Payment success. Email blast sent successfully!`, {
+      type: 'success',
+      autoClose: 10000,
+      position: 'top-right',
+    });
     fetchAuctionDetails();
     return { success: true };
   } catch (error) {
@@ -805,16 +819,28 @@ const renderPaypalButtons = () => {
                 });
                 isEmailBlastSent.value = true;
                 closePaymentModal();
-                toast.success('Email blast sent and payment captured!');
+                toast(`Email blast sent and payment captured!`, {
+                  type: 'success',
+                  autoClose: 10000,
+                  position: 'top-right',
+                });
               } else {
                 // Email blast was successful, so capture the authorized payment
                 await axios.post('/api/paypal/capture-authorization-fail', {
                   authorizationID: authorizationID,
                 });
-                toast.error('Email blast failed. Payment cancelled.');
+                toast(`Email blast failed. Payment cancelled.`, {
+                  type: 'error',
+                  autoClose: 10000,
+                  position: 'top-right',
+                });
               }
             } else {
-              toast.warn('Payment failed or was not completed.');
+              toast(`Payment failed or was not completed.`, {
+                type: 'warn',
+                autoClose: 10000,
+                position: 'top-right',
+              });
             }
           } catch (error) {
             console.error('Error during PayPal payment capture or email blast:', error);

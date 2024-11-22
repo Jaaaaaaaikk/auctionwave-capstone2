@@ -2,7 +2,7 @@
   <transition name="modal-fade">
     <div
       class="fixed inset-0 flex items-center justify-center z-50 overflow-x-hidden overflow-y-auto bg-gray-900 bg-opacity-50">
-      <div class="relative w-full max-w-md px-4 h-full md:h-auto">
+      <div class="relative w-full max-w-md px-4 h-full sm:h-auto md:h-auto sm:max-w-sm md:max-w-md lg:max-w-lg">
         <!-- Modal content -->
         <div class="bg-white rounded-lg shadow relative dark:bg-gray-700">
           <div class="flex justify-end p-2">
@@ -178,8 +178,13 @@ const placeBid = async (amount) => {
     closeModal();
 
   } catch (error) {
-    console.error("Failed to place bid:", error.response ? error.response.data : error.message);
-    toast.error(`Failed to place bid: ${error.response?.data?.message || error.message}`);
+    // Extract message based on error source
+    const errorMessage = error.response?.data?.message || error.message || "An unknown error occurred.";
+    console.error("Failed to place bid:", errorMessage);
+
+    // Display toast with error message
+    toast.error(`Failed to place bid: ${errorMessage}`);
+
   }
 };
 

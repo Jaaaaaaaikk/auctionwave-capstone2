@@ -1,30 +1,31 @@
 <template>
   <transition name="modal-width">
-    <div class="bg-white rounded-lg shadow relative dark:bg-gray-700 justify-center">
-      <form class="space-y-6 px-6 lg:px-8 pb-4 sm:pb-6 xl:pb-8 pt-8">
-        <h3 class="text-xl font-medium text-gray-900 dark:text-white">Create your <p
+    <div class="bg-white rounded-lg shadow relative dark:bg-gray-700 justify-center w-full ">
+      <form
+        class="space-y-4 sm:space-y-2 lg:space-y-2 px-8 sm:px-4 lg:px-10 pb-4 sm:pb-8 xl:pb-8 pt-8 sm:pt-4 sm:w-96 xl:w-full lg:w-full md:w-auto">
+        <h3 class="text-xl font-medium text-gray-900 dark:text-white sm:text-lg sm:px-2">Create your <p
             class="text-custom-bluegreen2 font-bold">AuctionWave</p> account</h3>
 
         <!-- Firstname, Middlename, Lastname -->
-        <div class="grid grid-cols-3 gap-4">
-          <div class="w-full px-2 mb-4 sm:mb-0">
+        <div class="flex flex-col sm:flex-col lg:flex-row md:flex-col gap-4 sm:gap-2 md:gap-2 lg:gap-0">
+          <div class="w-full px-2 mb-4 sm:px-2 sm:max-w-full sm:mb-0">
             <div class="relative z-0 w-full group">
               <input v-model="form.firstname" id="firstname" type="text"
                 class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                 placeholder=" " required />
               <label for="firstname"
-                class="peer-focus:font-medium pl-2 left-1 bg-white absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                class="peer-focus:font-medium pl-2 left-1 bg-white absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6 sm:text-sm">
                 First Name</label>
             </div>
           </div>
-          <div class="w-full px-2 mb-4 sm:mb-0">
+          <div class="w-full px-2 mb-4 sm:px-2 sm:max-w-full sm:mb-0">
             <div class="relative z-0 w-full group">
               <input v-model="form.middlename" id="middlename" type="text"
                 class="block py-2.5 px-3 w-full text-sm text-gray-900 bg-transparent rounded-md border-2 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                 placeholder=" " />
               <label for="middlename"
                 class="peer-focus:font-medium pl-2 left-1 bg-white absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 z-10 origin-[0] peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                Middle Name (optional)</label>
+                Middle Name </label>
             </div>
           </div>
           <div class="w-full px-2">
@@ -69,7 +70,7 @@
         </div>
 
         <!-- Password and Confirm Password -->
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid sm:grid-cols-2 gap-4 sm:gap-0">
           <div class="w-full px-2 mb-4 sm:mb-0">
             <div class="relative z-0 w-full group">
               <input v-model="form.password" id="password" type="password"
@@ -106,7 +107,7 @@
         </div>
 
         <!-- Categories (Combobox) -->
-        <div v-if="form.userType === 'Bidder'" class="w-full px-2 relative">
+        <div v-if="form.userType === 'Bidder'" class="w-full px-2 relative ">
           <select v-model="selectedCategory" @change="addCategory"
             class="bg-gray-50 border-2 text-gray-900 sm:text-sm rounded-lg focus:ring-custom-bluegreen focus:border-custom-bluegreen block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
             placeholder="Select Category" required>

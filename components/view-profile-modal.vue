@@ -1,7 +1,8 @@
 <template>
     <div class="relative pt-12">
         <!-- Card start -->
-        <div class="max-w-sm mx-auto bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-lg relative">
+        <div
+            class="max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl mx-auto bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-lg relative">
             <!-- Close button -->
             <button @click="closeModal" class="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
                 aria-label="Close">
@@ -13,8 +14,12 @@
 
             <div class="border-b px-4 pb-6">
                 <div class="text-center my-4">
-                    <img class="h-32 w-32 rounded-full border-4 border-white dark:border-gray-800 mx-auto my-4"
-                        v-if="auctioneer.profileImage" :src="auctioneer.profileImage" alt="User Avatar" />
+                    <img class="h-32 w-32 sm:h-40 sm:w-40 md:h-48 md:w-48 lg:h-56 lg:w-56 rounded-full border-4 border-white dark:border-gray-800 mx-auto my-4"
+                        v-if="auctioneer.profileImage"
+                        :src="auctioneer.profileImage || '/images/default-profile-image.png'" alt="User Avatar"
+                        loading="lazy" />
+                    <img class="h-32 w-32 sm:h-40 sm:w-40 md:h-48 md:w-48 lg:h-56 lg:w-56 rounded-full border-4 border-white dark:border-gray-800 mx-auto my-4"
+                        v-else src='/images/default-profile-image.png' alt="User Avatar" loading="lazy" />
                     <div class="py-2">
                         <h3 v-if="auctioneer.name" class="font-bold text-2xl text-gray-800 dark:text-white mb-1">{{
                             auctioneer.name }}</h3>
@@ -29,18 +34,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex gap-2 px-2">
-                    <button
-                        class="flex-1 rounded-full bg-blue-600 dark:bg-blue-800 text-white dark:text-white antialiased font-bold hover:bg-blue-800 dark:hover:bg-blue-900 px-4 py-2">
-                        Follow
-                    </button>
-                    <button
-                        class="flex-1 rounded-full border-2 border-gray-400 dark:border-gray-700 font-semibold text-black dark:text-white px-4 py-2">
-                        Message
-                    </button>
+                <div class="flex-1 px-2">
+                    <NuxtLink :to="{ path: '/view-profile', query: { id: encodedId } }"
+                        class="flex text-xs justify-center text-center rounded-full border-2 border-gray-400 dark:border-gray-700 font-semibold text-black dark:text-white px-8 py-2">
+                        View Profile
+                    </NuxtLink>
                 </div>
             </div>
-            <div class="px-4 py-4">
+
+
+            <!-- <div class="px-4 py-4">
                 <div class="flex gap-2 items-center text-gray-800 dark:text-gray-300 mb-4">
                     <svg class="h-6 w-6 text-gray-600 dark:text-gray-400" fill="currentColor"
                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
@@ -63,7 +66,9 @@
                         </span>
                     </div>
                 </div>
-            </div>
+            </div> -->
+
+
         </div>
         <!-- Card end -->
     </div>
@@ -90,6 +95,14 @@ const auctioneer = ref({
 
 const isLoading = ref(false);
 const emit = defineEmits();
+
+// Function to encode the auctioneerId to a random-looking string
+const encodeId = (id) => {
+    return btoa(id);  // Base64 encode the ID
+};
+
+// Generate the encoded ID and pass it as a query param
+const encodedId = encodeId(props.auctioneerId);
 
 const fetchAuctioneerDetails = async () => {
     console.log('Auctioneer ID', props.auctioneerId);

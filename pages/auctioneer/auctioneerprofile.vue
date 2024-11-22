@@ -188,47 +188,32 @@
                   <div class="flex justify-between items-center mb-6">
                     <h2 class="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white">User comments</h2>
                   </div>
-                  <form class="mb-6 ">
-                    <div
-                      class="py-2 px-4 mb-4 bg-white rounded-lg rounded-t-lg border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-                      <label for="comment" class="sr-only">Your comment</label>
-                      <textarea id="comment" rows="6"
-                        class="px-0 w-full text-sm text-gray-900 border-0 focus:ring-0 focus:outline-none dark:text-white dark:placeholder-gray-400 dark:bg-gray-800"
-                        placeholder="Write a comment..." required></textarea>
+                  <div v-if="comments.length === 0" class="text-gray-500 dark:text-white mt-4 text-center">
+                    No comments posted.
+                  </div>
+                  <div v-else>
+                    <article v-for="comment in comments.slice(0, commentsToShow)" :key="comment.comment_id"
+                      class="p-6 text-base bg-white rounded-lg dark:bg-gray-900">
+                      <footer class="flex justify-between items-center mb-2">
+                        <div class="flex items-center">
+                          <p class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold">
+                            <img class="mr-2 w-6 h-6 rounded-full"
+                              :src="comment.profile_image_url || '/images/default-profile-image.png'"
+                              alt="User Image">{{ comment.firstname }} {{
+                                comment.lastname }}
+                          </p>
+                          <div class="text-sm text-gray-600 dark:text-gray-400">Posted on {{
+                            formatDate(comment.created_at) }}</div>
+                        </div>
+                      </footer>
+                      <p class="text-gray-500 dark:text-gray-400">{{ comment.comment_text }}</p>
+                    </article>
+                    <div v-if="comments.length > commentsToShow" class="text-center mt-4">
+                      <button @click="loadMoreComments"
+                        class="text-blue-500 hover:text-blue-700 text-sm font-medium">See
+                        More</button>
                     </div>
-                    <button type="submit"
-                      class="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-custom-bluegreen hover:bg-green-500 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
-                      Post comment
-                    </button>
-                  </form>
-                  <article class="p-6 text-base bg-white rounded-lg dark:bg-gray-900">
-                    <footer class="flex justify-between items-center mb-2">
-                      <div class="flex items-center">
-                        <p class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold">
-                          <img class="mr-2 w-6 h-6 rounded-full"
-                            src="https://flowbite.com/docs/images/people/profile-picture-2.jpg"
-                            alt="Michael Gough">Michael Gough
-                        </p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400"><time pubdate datetime="2022-02-08"
-                            title="February 8th, 2022">Feb. 8, 2022</time></p>
-                      </div>
-                    </footer>
-                    <p class="text-gray-500 dark:text-gray-400">Way buot na bidder, sumbagay nlang ta yawa</p>
-                  </article>
-                  <article class="p-6 text-base bg-white rounded-lg dark:bg-gray-900">
-                    <footer class="flex justify-between items-center mb-2">
-                      <div class="flex items-center">
-                        <p class="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white font-semibold">
-                          <img class="mr-2 w-6 h-6 rounded-full"
-                            src="https://flowbite.com/docs/images/people/profile-picture-4.jpg"
-                            alt="Helene Engels">Helene Engels
-                        </p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400"><time pubdate datetime="2022-06-23"
-                            title="June 23rd, 2022">Jun. 23, 2022</time></p>
-                      </div>
-                    </footer>
-                    <p class="text-gray-500 dark:text-gray-400">儿勒屁艾 艾艾西艾 艾艾 西吉艾艾伊娜伊</p>
-                  </article>
+                  </div>
                 </div>
               </section>
             </div>
@@ -290,16 +275,6 @@
 
                 <CityMap v-if="showMap" @citySelected="setCity" />
               </span>
-            </div>
-            <div class="mb-4">
-              <select v-model="selectedCategory" @change="addCategory"
-                class="bg-gray-100 border-2 text-gray-900 sm:text-sm rounded-lg focus:ring-custom-bluegreen focus:border-custom-bluegreen block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white"
-                placeholder="Select Category" required>
-                <option value="" disabled>Select Category</option>
-                <option v-for="category in availableCategories" :key="category" :value="category">
-                  {{ category }}
-                </option>
-              </select>
             </div>
 
 
@@ -364,6 +339,40 @@ const showModal = ref(false);
 const modalContent = ref(null);
 const userStore = useUserStore(); // Use the store
 const isLoading = ref(true);
+const comments = ref([]);
+const commentsToShow = ref(3);
+
+// Fetch user's comments data
+const fetchUserComments = async () => {
+  try {
+    const response = await axios.get("/api/get-my-profile-comments");
+    if (response.data.success) {
+      comments.value = response.data.comments;
+      console.log('comments.value', comments.value);
+    } else {
+      toast.error('Failed to load comments');
+    }
+  } catch (error) {
+    toast.error('Failed to load comments');
+  }
+};
+
+// Fetch more comments on 'See More' click
+const loadMoreComments = () => {
+  commentsToShow.value += 3; // Load 3 more comments
+};
+
+const formatDate = (dateString) => {
+  const options = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true // 12-hour format with AM/PM
+  };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+};
 
 const fetchProfile = async () => {
   isLoading.value = true;

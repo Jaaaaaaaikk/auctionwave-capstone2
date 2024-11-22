@@ -356,18 +356,30 @@
                 <!-- Message List -->
                 <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 max-h-48 overflow-y-auto no-scrollbar">
                   <li v-for="message in inboxStore.messages" :key="message.message_id" :class="{
-                    'bg-yellow-100': !message.is_read,
-                    'bg-gray-100': message.is_read,
+                    'bg-gray-500 bg-opacity-20 hover:bg-custom-bluegreen hover:bg-opacity-20': !message.is_read,
+                    'bg-white hover:bg-custom-bluegreen hover:bg-opacity-20': message.is_read,
                     'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
-                  }" role="button" tabindex="0">
+                  }" role="button" tabindex="0" class="flex items-center space-x-4">
+                    <!-- User profile image or fallback -->
                     <img v-if="message.user_profile_image.length > 0" :src="message.user_profile_image[0]"
-                      alt="Auction Image" class="w-11 h-11 rounded-full object-cover flex-shrink-0 ml-4 mr-8"
-                      loading="lazy" />
+                      alt="Auction Image" class="w-11 h-11 rounded-full object-cover flex-shrink-0" loading="lazy" />
                     <img v-else src="/public/images/no-image.jpg" alt="No Image Available"
-                      class="object-cover w-full h-32 rounded-t-lg" loading="lazy" />
-                    From: {{ message.sender_name }} - {{ message.message }} - {{ formatDate(message.created_at) }}
+                      class="w-11 h-11 rounded-full object-cover flex-shrink-0" loading="lazy" />
+                    <!-- Message content -->
+                    <div class="flex-1">
+                      <p class="font-medium text-gray-800 dark:text-gray-200">
+                        From: {{ message.sender_name }}
+                      </p>
+                      <p class="text-gray-600 dark:text-gray-400">
+                        {{ message.message }}
+                      </p>
+                      <p class="text-xs text-gray-500 dark:text-gray-500">
+                        {{ formatDate(message.created_at) }}
+                      </p>
+                    </div>
                   </li>
 
+                  <!-- No Messages -->
                   <li v-if="inboxStore.messages.length === 0">
                     <p class="block px-4 py-2 text-gray-500">No Messages.</p>
                   </li>
@@ -377,7 +389,7 @@
                   <div class="flex justify-between">
                     <NuxtLink :to="{ path: '/inbox', query: { userType: userType } }"
                       class="flex items-center text-gray-700 hover:text-red-500">
-                      <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                      <svg class="w-5 h-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 6h16M4 12h16m-7 6h7" />
@@ -385,7 +397,7 @@
                       <span class="text-xs hover:underline">See All</span>
                     </NuxtLink>
                     <button @click="addMessage = true" class="flex items-center text-gray-700 hover:text-green-500">
-                      <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                      <svg class="w-5 h-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                       </svg>
@@ -394,7 +406,7 @@
                   </div>
                   <button @click="markAllMessagesAsRead"
                     class="flex items-center w-full text-gray-700 hover:text-green-500">
-                    <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                    <svg class="w-5 h-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                       stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
@@ -438,40 +450,54 @@
             </button>
             <div v-if="notificationDropdownOpen"
               class="absolute right-0  mt-13 sm:w-96 w-80 bg-white divide-y  divide-gray-100 rounded-md shadow-md drop-shadow-lg dark:bg-gray-700 z-0">
+              <!-- giilisan nko#1 -->
               <ul class="py-2 text-sm text-gray-700 dark:text-gray-200 max-h-48 overflow-y-auto no-scrollbar">
-
                 <li v-for="notification in notifications" :key="notification.notification_id" :class="{
-                  'bg-yellow-100': !notification.is_read,
-                  'bg-gray-100': notification.is_read,
+                  'bg-gray-500 bg-opacity-20 hover:bg-custom-bluegreen hover:bg-opacity-20': !notification.is_read,
+                  'bg-white hover:bg-custom-bluegreen hover:bg-opacity-20': notification.is_read,
                   'block px-4 py-2 hover:bg-blue-100 dark:hover:bg-gray-600 dark:hover:text-white': true
-                }" @click="getClickHandler(notification)" role="button" tabindex="0">
-                  <img src="/images/logo-no-text.jpg"
-                    class="w-11 h-11 rounded-full object-cover flex-shrink-0 ml-4 mr-8" alt="Profile Icon" />
-                  From: {{ notification.sender_full_name }} - {{ notification.message }} - {{
-                    formatDate(notification.created_at)
-                  }}
+                }" @click="getClickHandler(notification)" role="button" tabindex="0"
+                  class="flex items-center space-x-4">
+                  <!-- Image -->
+                  <img src="/images/logo-no-text.jpg" class="w-11 h-11 rounded-full object-cover flex-shrink-0"
+                    alt="Profile Icon" />
+                  <!-- Notification Content -->
+                  <div class="flex-1">
+                    <p class="font-medium text-gray-800 dark:text-gray-200">
+                      From: {{ notification.sender_full_name }}
+                    </p>
+                    <p class="text-gray-600 dark:text-gray-400">
+                      {{ notification.message }}
+                    </p>
+                    <p class="text-xs text-gray-500 dark:text-gray-500">
+                      {{ formatDate(notification.created_at) }}
+                    </p>
+                  </div>
                 </li>
+
+                <!-- No Notifications -->
                 <li v-if="notifications.length === 0">
                   <p class="block px-4 py-2 text-gray-500">No notifications</p>
                 </li>
               </ul>
+              <!-- /giilisan nko#1 -->
               <!-- Fixed buttons for 'See All' and 'Mark All as Read' -->
-              <div class="flex justify-between items-center px-4 py-2 border-t">
+              <div class="flex gap-6 items-center px-4 py-2 border-t">
                 <NuxtLink :to="{ path: '/notification', query: { userType: userType } }"
                   class="flex items-center text-gray-700 hover:text-red-500">
-                  <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                  <svg class="w-5 h-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
                   </svg>
-                  <span class="text-xs">See All</span>
+                  <span class="text-xs hover:underline">See All</span>
                 </NuxtLink>
                 <button @click="markAllNotificationsAsRead"
                   class="flex items-center text-gray-700 hover:text-green-500">
-                  <svg class="w-8 h-8 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                  <svg class="w-5 h-5 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span class="text-xs">Mark All As Read</span>
+                  <span class="text-xs hover:underline">Mark All As Read</span>
                 </button>
               </div>
             </div>
@@ -774,7 +800,7 @@ const handleIncomingMessage = (newMessage) => {
   inboxStore.messages.unshift(newMessage); // Update messages list
   inboxStore.unreadCount = newMessage.unreadCount;
 
-  toast(`New message from ${newMessage.senderId}: ${newMessage.subject}`, {
+  toast(`New message from ${newMessage.sender_name}: ${newMessage.subject}`, {
     type: 'info',
     autoClose: 3000,
     position: 'top-right',

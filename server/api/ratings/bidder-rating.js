@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
         if (decodedToken.userType !== 'Bidder') {
             throw createError({
                 statusCode: 403,
-                statusMessage: "Forbidden: Only Auctioneer can rate Bidder.",
+                statusMessage: "Forbidden: Only Bidder can rate Auctioneer.",
             });
         }
     } catch (error) {

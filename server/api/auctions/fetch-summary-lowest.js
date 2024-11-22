@@ -33,7 +33,9 @@ export default defineEventHandler(async (event) => {
           b.status,
           a.name AS auction_name,
           CONCAT(u.firstname, ' ', u.lastname) AS bidder_name,
-          b.response_deadline
+          b.response_deadline,
+          n.message,
+          n.created_at
       FROM 
           Notifications n
       JOIN 

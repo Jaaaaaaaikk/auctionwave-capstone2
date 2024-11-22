@@ -13,7 +13,6 @@
                         </button>
                     </p>
                 </div>
-
                 <div class="mt-5">
                     <div>
                         <div class="grid gap-y-4">
@@ -233,6 +232,7 @@ const resetPassword = async () => {
 };
 
 
+
 watch([() => password.value, () => confirmPassword.value], ([newPassword, newConfirmPassword]) => {
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -246,6 +246,37 @@ watch([() => password.value, () => confirmPassword.value], ([newPassword, newCon
     }
 });
 
-
-
 </script>
+<style scoped>
+@media (min-width: 640px) {
+
+    /* Small devices (landscape phones, 640px and up) */
+    .max-w-md {
+        max-width: 80%;
+    }
+}
+
+@media (min-width: 768px) {
+
+    /* Medium devices (tablets, 768px and up) */
+    .max-w-md {
+        max-width: 80%;
+    }
+}
+
+@media (min-width: 1024px) {
+
+    /* Large devices (desktops, 1024px and up) */
+    .max-w-md {
+        max-width: 80%;
+    }
+}
+
+@media (min-width: 1280px) {
+
+    /* Extra large devices (large desktops, 1280px and up) */
+    .max-w-md {
+        max-width: 40%;
+    }
+}
+</style>

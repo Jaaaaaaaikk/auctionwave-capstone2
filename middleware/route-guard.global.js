@@ -17,11 +17,11 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
       const { userType } = authData;
 
       // Handle logged-in users and route them based on their userType
-      if (to.path === '/homepage' || to.path === '/bidder') {
-        if (userType === 'Bidder' && to.path !== '/bidder/bidderdashboard') {
-          return navigateTo('/bidder/bidderdashboard', { replace: true }); // Redirect Bidder to their dashboard
-        } else if (userType === 'Auctioneer' && to.path !== '/auctioneer/auctioneerdashboard') {
+      if (to.path === '/homepage' || to.path === '/bidder' || to.path === '/auctioneer') {
+        if (userType === 'Auctioneer' && to.path !== '/auctioneer/auctioneerdashboard') {
           return navigateTo('/auctioneer/auctioneerdashboard', { replace: true }); // Redirect Auctioneer to their dashboard
+        } else if (userType === 'Bidder' && to.path !== '/bidder/bidderdashboard') {
+          return navigateTo('/bidder/bidderdashboard', { replace: true }); // Redirect Bidder to their dashboard
         }
         else if (userType === 'admin' && to.path !== '/admin/admindashboard') {
           return navigateTo('/admin/admindashboard', { replace: true }); // Redirect Admin to their dashboard

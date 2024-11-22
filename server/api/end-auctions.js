@@ -68,7 +68,7 @@ export default defineEventHandler(async (event) => {
                     auction_name: auctionName,
                     listing_id: listingId,
                     winnerMessage: winnerMessage,
-                    message: `Congratulations! You are the new winner of the auction "${auctionName}". Please proceed with the cash bond payment.`,
+                    message: `Congratulations! You are the new winner of the auction "${auctionName}". Please proceed with the Usage Fee payment.`,
                     is_read: false,
                     created_at: new Date(),
                     unreadCount: unreadCount,

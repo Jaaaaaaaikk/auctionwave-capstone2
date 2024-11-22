@@ -1,7 +1,7 @@
 <template>
   <transition name="modal-fade">
-    <div class=" fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden w-11/12 max-w-lg mx-auto p-5">
+    <div class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden w-11/12 max-w-lg mx-auto p-5 md:w-3/4 lg:w-1/2">
         <!-- Modal Header -->
         <header class="p-4 ">
           <h1 class="text-2xl font-bold text-center">Verify OTP</h1>
@@ -18,20 +18,20 @@
 
 
               <!-- OTP Input Fields (separate inputs for each digit) -->
-              <div class="flex justify-center gap-4 my-6">
-                <input v-model="otp[0]" type="text" maxlength="1" @input="validateOtpInput(0)"
+              <div class="flex justify-center gap-2 my-6 flex-wrap">
+                <input v-model="otp[0]" type="text" maxlength="1" pattern="[0-9]" inputmode="numeric"
                   autocomplete="one-time-code"
                   class="w-12 h-12 text-center border-2 rounded-md shadow-sm focus:border-teal-500 focus:ring-teal-500"
                   required />
-                <input v-model="otp[1]" type="text" maxlength="1" @input="validateOtpInput(1)"
+                <input v-model="otp[1]" type="text" maxlength="1" pattern="[0-9]" inputmode="numeric"
                   autocomplete="one-time-code"
                   class="w-12 h-12 text-center border-2 rounded-md shadow-sm focus:border-teal-500 focus:ring-teal-500"
                   required />
-                <input v-model="otp[2]" type="text" maxlength="1" @input="validateOtpInput(2)"
+                <input v-model="otp[2]" type="text" maxlength="1" pattern="[0-9]" inputmode="numeric"
                   autocomplete="one-time-code"
                   class="w-12 h-12 text-center border-2 rounded-md shadow-sm focus:border-teal-500 focus:ring-teal-500"
                   required />
-                <input v-model="otp[3]" type="text" maxlength="1" @input="validateOtpInput(3)"
+                <input v-model="otp[3]" type="text" maxlength="1" pattern="[0-9]" inputmode="numeric"
                   autocomplete="one-time-code"
                   class="w-12 h-12 text-center border-2 rounded-md shadow-sm focus:border-teal-500 focus:ring-teal-500"
                   required />
@@ -89,13 +89,6 @@ const props = defineProps({ // Receive email from parent component
   form: Object
 });
 
-// Validate OTP input fields
-const validateOtpInput = (index) => {
-  if (!/^\d$/.test(otp.value[index])) {
-    otp.value[index] = '';  // Reset if it's not a valid number
-  }
-};
-
 const startTimer = () => {
   timer.value = 10; // Set timer duration
   const interval = setInterval(() => {
@@ -126,11 +119,6 @@ const resendOtp = async () => {
 
 const submitOtp = async () => {
   const otpCode = otp.value.join('');
-  if (otpCode.length !== 4) {
-    toast.error('Please enter a valid 4-digit OTP.');
-    return;
-  }
-
   try {
     // Validate OTP
     const response = await axios.post('/api/validate-otp', {
@@ -190,5 +178,22 @@ onUnmounted(() => {
 .modal-fade-enter,
 .modal-fade-leave-to {
   opacity: 0;
+}
+
+.otp-input {
+  width: 3rem;
+  height: 3rem;
+  text-align: center;
+  border: 2px solid;
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+@media (max-width: 640px) {
+  .otp-input {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
 }
 </style>

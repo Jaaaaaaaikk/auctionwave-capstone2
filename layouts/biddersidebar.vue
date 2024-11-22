@@ -1,6 +1,6 @@
 <template>
     <aside id="default-sidebar"
-        class="fixed top-0 left-0 z-0 w-72  transition-transform -translate-x-full lg:translate-x-0"
+        class="fixed top-0 left-0 z-0 w-72 transition-transform -translate-x-full xl:translate-x-0"
         aria-label="Sidebar">
         <div class="h-full px-6 py-20 overflow-y-auto z-0  bg-custom-blue2 dark:bg-gray-800 ">
             <ul class="space-y-2 font-medium ">

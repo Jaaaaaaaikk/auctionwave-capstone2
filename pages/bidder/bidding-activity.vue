@@ -217,6 +217,8 @@
                     </nav>
                 </div>
             </div>
+            <ViewNotificationModalLowest v-if="viewNotificationLowest"
+                @closeAddMessageModal="viewNotificationLowest = false" :listing_id="currentNotification.listing_id" />
         </section>
     </NuxtLayout>
 </template>
@@ -225,7 +227,9 @@
 import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
+import ViewNotificationModalLowest from "~/components/view-notification-modal-lowest.vue";
 
+const viewNotificationLowest = ref(false);
 const currentPage = ref(1);
 const numberOfAuctions = ref(10);
 const totalPages = ref(0);
@@ -234,6 +238,7 @@ const selectedOfferStatus = ref("");
 const auctions = ref([]);
 const isFiltered = ref(false);
 const isLoading = ref(true);
+const currentNotification = ref({});
 
 const noResultsMessage = computed(() => {
     if (selectedBidStatus.value) {
@@ -361,6 +366,9 @@ const handleAction = (auction) => {
     } else if (['Outbid', 'Provide More', 'Offer Pending', 'Active'].includes(auction.status)) {
         // For these statuses, navigate to auction details or perform another action
         // Router redirection or other actions can be handled here
+    } else if (auction.status === 'Offer Accepted' || auction.status === 'Usage Fee Payment Pending') {
+        currentNotification.value = { ...auction }; // Copy the auction object or specific fields
+        viewNotificationLowest.value = true;
     }
 };
 

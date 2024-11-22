@@ -172,7 +172,8 @@
                                     </dd>
                                 </dl>
 
-                                <dl class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
+                                <dl v-if="auction.transaction_status === 'Transaction Completed'"
+                                    class="w-1/2 sm:w-1/4 lg:w-auto lg:flex-1">
                                     <div
                                         class="w-full grid sm:grid-cols-2 lg:flex lg:w-64 lg:items-center lg:justify-end gap-4">
                                         <button @click="handleAction(auction)"
@@ -301,7 +302,6 @@ const resetTransactionStatus = () => {
     isFiltered.value = true;
     fetchTransactionAuctions();
 };
-
 // Fetch auctions with pagination parameters
 const fetchTransactionAuctions = async () => {
     isLoading.value = true;

@@ -39,7 +39,8 @@
               <img v-else src="/images/no-image.jpg" class="w-full h-auto" alt="No Image Available" />
 
             </div>
-            <button v-if="auction.bidding_type === 'Lowest-type'"
+            <button
+              v-if="auction.bidding_type === 'Lowest-type' && auction.status === 'Awaiting Bidder Payment' || auction.status === 'Auction Ended'"
               class=" lg:hidden flex text-white mt-4 sm:mt-0 bg-custom-bluegreen hover:bg-green-500 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800  items-center justify-center w-full"
               @click="checkAuctionStatusBeforePlacingBid">
               <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white" stroke-width="1.5"
@@ -98,7 +99,7 @@
 
               <!-- See More Button -->
               <div v-if="bidderToShow < auctionStore.bidders.length" class="text-center mt-4">
-                <button @click="loadMoreBids" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+                <button @click="loadMoreBids" class="text-blue-500 hover:text-blue-700 text-sm font-medium">
                   See More
                 </button>
               </div>
@@ -151,7 +152,7 @@
               <strong>Status</strong>
               <span class="flex text-red-300"> {{ auction.status }}</span>
             </div>
-            <button v-if="auction.bidding_type === 'Lowest-type'"
+            <button v-if="auction.bidding_type === 'Lowest-type' && auction.status === 'Auction Pending'"
               class="hidden  text-white mt-4 sm:mt-0 bg-custom-bluegreen hover:bg-green-500 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800 lg:flex items-center justify-center w-full"
               @click="checkAuctionStatusBeforePlacingBid">
               <svg viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="white" stroke-width="1.5"
@@ -330,16 +331,18 @@
 
             <div v-for="(comment, index) in comments.slice(0, offersToShow)" :key="comment.id" class="flex mt-4">
               <!-- Display user's profile image -->
-              <div class="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center">
+              <NuxtLink :to="{ path: '/view-profile', query: { id: encodeId(comment.user_id) } }"
+                class="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center">
                 <img class="h-12 w-12 rounded-full object-cover"
                   :src="comment.userImageUrl || '/images/default-profile-image.png'" alt="User Image">
-              </div>
+              </NuxtLink>
 
               <div class="ml-3">
-                <div class="font-medium text-gray-900 flex">
+                <NuxtLink :to="{ path: '/view-profile', query: { id: encodeId(comment.user_id) } }"
+                  class="font-medium text-gray-900 flex cursor-pointer hover:underline">
                   {{ comment.firstname }} {{ comment.lastname }}
 
-                </div>
+                </NuxtLink>
                 <div class="text-gray-600 text-sm">Posted on {{ formatDate(comment.offer_time) }}</div>
                 <div class="mt-2 text-gray-900 max-w-3xl break-words bg-gray-200 p-4 rounded-lg">{{ comment.comment }}
                 </div>
@@ -356,7 +359,7 @@
               <div class="ml-4 flex items-start space-x-4">
                 <p :class="{
                   'bg-yellow-200 text-yellow-800': comment.review_status === 'Offer Pending',
-                  'bg-green-200 text-green-800': comment.review_status === 'Accepted Offer',
+                  'bg-green-200 text-green-800': comment.review_status === 'Offer Accepted',
                   'bg-red-200 text-red-800': comment.review_status === 'Offer Discarded',
                   'bg-purple-200 text-purple-800': comment.review_status === 'Provide More'
                 }" class="mt-1 text-sm  px-3 rounded-lg">
@@ -390,7 +393,7 @@
             </div>
 
             <!-- Comment Form -->
-            <div class="relative my-4 flex items-start w-full">
+            <div v-if="auction.status === 'Auction Pending'" class="relative my-4 flex items-start w-full">
 
               <!-- Comment Textarea -->
               <div class="flex items-start w-full">
@@ -591,19 +594,21 @@
 
 <script setup>
 import { ref, onMounted, computed, watch, onBeforeUnmount } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import PlaceBidModal from '~/components/placebidmodal.vue'
 import { useAuctionStore } from '@/stores/fetch-bidder-store';
 import { useInboxSocketStore } from '@/stores/socketStore';
 import ViewAuctionModal from "~/components/viewauctionmodal.vue";
 import { toast } from 'vue3-toastify';
+import { comment } from "postcss";
 
 const auctionStore = useAuctionStore();
 const socketStore = useInboxSocketStore();
 const showModal = ref(false);
 const showPlaceBidModal = ref(false)
 const route = useRoute();
+const router = useRouter();
 const auction = ref(null);
 const offerComment = ref('');
 const comments = ref([]); // New state variable for comments
@@ -622,6 +627,11 @@ const bidderToShow = ref(3);
 const selectedAuction = ref(null);
 const showAuctionGuide = ref(false);
 const isLoading = ref(true);
+
+// Function to encode the auctioneerId to a random-looking string
+const encodeId = (id) => {
+  return btoa(id);  // Base64 encode the ID
+};
 
 const formatNumber = (value) => {
   return new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(value);
@@ -847,9 +857,13 @@ const placeOffer = async (comment) => {
     uploadedImages.value = [];
 
     fetchComments(auction.value.id);
-  } catch (err) {
-    console.error("Failed to place offer:", err);
-    toast.error("Failed to place offer.");
+  } catch (error) {
+    // Extract message based on error source
+    const errorMessage = error.response?.data?.message || error.message || "An unknown error occurred.";
+    console.error("Failed to place offer:", errorMessage);
+
+    // Display toast with error message
+    toast.error(`Failed to place offer: ${errorMessage}`);
   }
 };
 
@@ -921,10 +935,10 @@ const closeModal = () => {
 };
 
 const handleIncomingOutbidNotification = (newBidNotificationMessage) => {
-  const { sender_full_name, bid_amount, bid_time } = newBidNotificationMessage.notification;
+  const { user_who_outbid, bid_amount, bid_time } = newBidNotificationMessage.notification;
 
   const newBidder = {
-    bidder_name: sender_full_name,
+    bidder_name: user_who_outbid,
     bid_amount: bid_amount,
     bid_time: bid_time,
   };
@@ -939,6 +953,7 @@ watch(
     }
   }
 );
+
 
 onMounted(() => {
   if (route.query.id) {

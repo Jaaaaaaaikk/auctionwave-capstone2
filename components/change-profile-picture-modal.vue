@@ -1,9 +1,10 @@
 <template>
   <transition name="modal-fade">
     <div class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-      <div class="bg-white shadow-lg rounded-lg overflow-hidden w-11/12 max-w-lg mx-auto p-5">
+      <div
+        class="bg-white shadow-lg rounded-lg overflow-hidden w-11/12 max-w-lg mx-auto p-5 sm:w-6/12 md:w-6/12 lg:w-8/12">
         <!-- Modal Header -->
-        <header class="p-4">
+        <header class="p-4 flex flex-col items-start sm:items-center md:items-center lg:items-start">
           <h1 class="text-2xl font-bold text-start">Upload Profile Picture</h1>
         </header>
 
@@ -27,7 +28,7 @@
         </section>
 
         <!-- Display Previously Uploaded Images -->
-        <section class="p-4">
+        <section class="p-4 flex flex-col items-start sm:items-center md:items-center lg:items-start">
           <h1 class="text-2xl font-bold text-start mb-4">Your Uploads</h1>
           <div v-if="previousUploads.length > 0" class="grid grid-cols-2 gap-4">
             <div v-for="image in previousUploads" :key="image.profile_image_id"

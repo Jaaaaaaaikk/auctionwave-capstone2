@@ -52,7 +52,7 @@ export default defineEventHandler(async (event) => {
                             nextBidderId,
                             listing_id,
                             'AuctionWinner',
-                            `Congratulations! You are the winning bidder for auction "${auction_name}". Please complete the cash bond within the next ${remainingTime}. If you fail to respond within the given time, a new winner will be selected.`,
+                            `Congratulations! You are the winning bidder for auction "${auction_name}". Please complete the usage fee within the next ${remainingTime}. If you fail to respond within the given time, a new winner will be selected.`,
                             false
                         ]
                     ); remainingTime
@@ -62,7 +62,7 @@ export default defineEventHandler(async (event) => {
                         recipientId: nextBidderId,
                         notification: {
                             sender_full_name: 'AuctionWave System',
-                            message: `Congratulations! You are the new winner of the auction "${auction_name}". Please proceed with the cash bond payment.`,
+                            message: `Congratulations! You are the new winner of the auction "${auction_name}". Please proceed with the usage fee payment.`,
                             is_read: false
                         }
                     });

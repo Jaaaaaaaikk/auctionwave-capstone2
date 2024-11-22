@@ -96,7 +96,7 @@ export default defineEventHandler(async (event) => {
             sender_full_name: 'AuctionWave System',
             auction_name: auction_name,
             listing_id: listing_id,
-            message: `Congratulations! You are the new winner of the auction "${auction_name}". Please proceed with the cash bond payment.`,
+            message: `Congratulations! You are the new winner of the auction "${auction_name}". Please proceed with the Usage Fee payment.`,
             is_read: false,
             created_at: created_at,
             unreadCount: unreadCount[0]?.unread_count || 0

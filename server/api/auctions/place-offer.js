@@ -145,8 +145,9 @@ export default defineEventHandler(async (event) => {
         console.log('The NotificationDetails in Offer', notificationDetails);
         return { status: 'success', offerId: offerId, results }; // Return the offer ID
     } catch (error) {
-        // Handle database errors
-        console.error('Database error:', error);
+        if (error.statusCode) {
+            throw error; // Re-throw the existing error to preserve its status code and message
+        }
         throw createError({ statusCode: 500, message: 'Internal Server Error' });
     }
 });

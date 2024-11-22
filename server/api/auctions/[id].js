@@ -38,7 +38,8 @@ export default defineEventHandler(async (event) => {
 
   try {
     const [results] = await pool.query(
-      `SELECT 
+      `
+      SELECT 
           al.listing_id AS id, 
           al.name, 
           al.caption,
@@ -50,8 +51,8 @@ export default defineEventHandler(async (event) => {
           al.status,
           al.duration_hours,
           ai.image_url AS image_url,
-          al.end_time,  
-          GROUP_CONCAT(c.category_name ORDER BY c.category_name SEPARATOR ', ') AS categories,
+          al.end_time, 
+          GROUP_CONCAT(DISTINCT c.category_name ORDER BY c.category_name SEPARATOR ', ') AS categories, -- Use DISTINCT to avoid duplication
           CONCAT(u.firstname, ' ', u.lastname) AS auctioneer_name,
           upi.profile_image_url AS auctioneer_profile_image,
           (CASE WHEN COUNT(p.payment_id) > 0 THEN 1 ELSE 0 END) AS email_blast_paid -- Check if email blast fee is paid
@@ -70,7 +71,7 @@ export default defineEventHandler(async (event) => {
       LEFT JOIN
           UserProfileImages upi ON u.user_id = upi.user_id AND upi.is_current_profile_image = TRUE
       LEFT JOIN 
-          Payments p ON al.listing_id = p.listing_id 
+          Payments p ON al.listing_id = p.listing_id AND p.payment_type = 'Emailblast Fee'
       WHERE 
           al.uuid = ?
       GROUP BY 

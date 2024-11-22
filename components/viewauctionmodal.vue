@@ -1,9 +1,9 @@
 <template>
   <div class="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
-    <div class="bg-white rounded-lg shadow-lg w-2/5 max-w-4xl p-6">
+    <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 sm:w-11/12 md:w-3/4 lg:w-2/5">
       <!-- Modal Header -->
-      <div class="flex flex-col   border-gray-400 pb-1">
-        <div class="flex justify-between items-center">
+      <div class="flex flex-col border-gray-400 pb-1">
+        <div class="flex justify-between mb-6 items-center">
           <h2 class="text-3xl font-semibold truncate">{{ auction?.name || 'N/A' }}</h2>
           <button @click="closeModal" class="text-gray-500 hover:text-gray-700">
             <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -13,8 +13,8 @@
           </button>
         </div>
 
-        <!-- Auctioneer Info -->
-        <div class="flex items-center  mb-4">
+
+        <div class="flex items-center mb-3">
           <img v-if="auction?.auctioneer_profile_image && auction.auctioneer_profile_image.length > 0"
             :src="auction.auctioneer_profile_image" class="w-6 h-6 rounded-full mr-2" loading="lazy" />
           <img v-else src="/images/default-profile-image.png" class="w-6 h-6 rounded-full mr-2" alt="No Image Available"

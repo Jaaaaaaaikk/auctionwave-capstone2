@@ -27,23 +27,27 @@ export default defineEventHandler(async (event) => {
     try {
         // Query to get messages for the inbox of the recipient
         const [messages] = await pool.query(`
-            SELECT 
+            SELECT  
                 m.message_id,
                 m.sender_id,
                 CONCAT(u.firstname, 
-                       IFNULL(CONCAT(' ', u.middlename), ''), 
-                       ' ', 
-                       u.lastname) AS sender_name,
+                    IFNULL(CONCAT(' ', u.middlename), ''), 
+                    ' ', 
+                    u.lastname) AS sender_name,
                 m.subject,
                 m.message,
                 mp.is_read,
                 m.created_at,
-                (SELECT upi.profile_image_url FROM UserProfileImages upi LEFT JOIN Users u ON upi.user_id = u.user_id WHERE upi.is_current_profile_image = true LIMIT 1) AS user_profile_image
+                -- Directly query the profile image for the sender
+                (SELECT upi.profile_image_url 
+                FROM UserProfileImages upi 
+                WHERE upi.user_id = m.sender_id AND upi.is_current_profile_image = true 
+                LIMIT 1) AS user_profile_image
             FROM Messages m
             JOIN MessageParticipants mp ON m.message_id = mp.message_id
             JOIN Users u ON m.sender_id = u.user_id 
-                WHERE mp.user_id = ? AND mp.role = 'recipient' AND mp.status = 'Received'
-            ORDER BY m.created_at DESC
+            WHERE mp.user_id = ? AND mp.role = 'recipient' AND mp.status = 'Received'
+            ORDER BY m.created_at DESC;
         `, [userId]);
 
 

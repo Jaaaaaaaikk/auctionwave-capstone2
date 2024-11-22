@@ -60,19 +60,14 @@ export default defineEventHandler(async (event) => {
 
         // Check if an email blast log already exists for this auction
         const [[blastLogCheck]] = await pool.query(
-            `SELECT COUNT(*) AS blastCount FROM Payments WHERE listing_id = ?`,
+            `SELECT COUNT(*) AS blastCount FROM Payments WHERE listing_id = ? AND payment_type = 'Emailblast Fee'`,
             [listingId]
         );
 
         if (blastLogCheck.blastCount > 0) {
             throw createError({
                 statusCode: 400,
-                statusMessage: 'Email blast has already been sent for this auction.',
-                data: {
-                    success: false,
-                    message: 'Email blast has already been sent for this auction',
-                    errorCode: 'EMAIL_BLAST_ALREADY_SENT',
-                }
+                message: 'Email blast has already been sent for this auction.',
             });
         }
 
@@ -96,12 +91,7 @@ export default defineEventHandler(async (event) => {
         if (bidders.length === 0) {
             throw createError({
                 statusCode: 404,
-                statusMessage: 'No bidders found for the selected categories',
-                data: {
-                    success: false,
-                    message: 'No bidders found for the selected categories',
-                    errorCode: 'BIDDERS_NOT_FOUND',
-                }
+                message: 'No bidders found for the selected categories',
             });
         }
 

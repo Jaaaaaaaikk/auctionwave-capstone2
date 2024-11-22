@@ -96,7 +96,7 @@
             </div>
 
 
-            <div class=" gap-2 mb-5">
+            <!-- <div class=" gap-2 mb-5">
               <div class="flex-1 flex flex-col">
                 <label for="category"
                   class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category</label>
@@ -105,7 +105,7 @@
                     class="flex flex-row flex-wrap text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     <li v-for="(name, id) in categoryMap" :key="id"
                       class="flex items-center border-r last:border-0 dark:border-gray-600 w-1/2 sm:w-1/3 md:w-1/6">
-                      <!-- Adjusted item width -->
+
                       <div class="flex items-center px-2 py-1">
                         <input type="checkbox" :id="'category-' + id" :checked="auctionData.categories.includes(id)"
                           @change="handleCategoryChange(id, $event.target.checked)"
@@ -119,8 +119,33 @@
                   </ul>
                 </div>
               </div>
-            </div>
+            </div> -->
 
+            <div class="gap-2 mb-5">
+              <div class="flex-1 flex flex-col">
+                <label for="category"
+                  class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Category</label>
+                <select id="category" v-model="selectedCategory" @change="addCategory"
+                  class="block w-full p-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-custom-bluegreen focus:border-custom-bluegreen dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-custom-bluegreen dark:focus:border-custom-bluegreen">
+                  <option value="" disabled selected>Select Category</option> <!-- Placeholder option -->
+                  <option v-for="(name, id) in categoryMap" :key="id" :value="id">
+                    {{ name }}
+                  </option>
+                </select>
+
+                <!-- Selected Categories Display -->
+                <div class="mb-5">
+                  <span v-for="category in auctionData.categories" :key="id"
+                    class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+                    {{ category }}
+                    <button type="button" @click="removeCategory(category)" class="text-red-500 ml-1">
+                      x
+                    </button>
+                  </span>
+                </div>
+
+              </div>
+            </div>
 
             <!-- Centered Image Upload Section with Preview -->
             <div class="flex justify-center col-span-2 mb-4">
@@ -326,16 +351,22 @@ const createAuction = async () => {
   }
 };
 
-const handleCategoryChange = (categoryId, isChecked) => {
-  if (isChecked) {
-    // Add the category ID if it is checked
-    if (!auctionData.value.categories.includes(categoryId)) {
-      auctionData.value.categories.push(categoryId);
-    }
-  } else {
-    // Remove the category ID if it is unchecked
-    auctionData.value.categories = auctionData.value.categories.filter(id => id !== categoryId);
+// Function to handle adding category to form
+const addCategory = () => {
+  if (
+    selectedCategory.value &&
+    !auctionData.value.categories.includes(selectedCategory.value)
+  ) {
+    auctionData.value.categories.push(selectedCategory.value);
+    selectedCategory.value = "";
   }
+};
+
+// Function to handle removing category from form
+const removeCategory = (category) => {
+  auctionData.value.categories = auctionData.value.categories.filter(
+    (cat) => cat !== category,
+  );
 };
 
 onMounted(() => {

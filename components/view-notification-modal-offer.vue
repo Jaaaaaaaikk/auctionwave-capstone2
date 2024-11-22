@@ -1,7 +1,8 @@
 <template>
     <div class="fixed inset-0 flex items-center justify-center bg-gray-400 bg-opacity-50 modal-background">
         <!-- Modal Content -->
-        <div v-if="winnerDetails" class="bg-white p-6 rounded-lg shadow-lg w-1/3">
+        <div v-if="winnerDetails"
+            class="bg-white p-6 rounded-lg shadow-lg w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-2xl">
             <h2 class="text-xl font-semibold mb-4">Notification From: {{ sender }}</h2>
             <div class="relative"></div>
             <div class="w-full p-4 border border-gray-300 rounded my-4" disabled><span
@@ -139,10 +140,10 @@ import axios from 'axios';
 import { toast } from "vue3-toastify";
 
 const props = defineProps({
-    sender: String,
-    date: String,
-    message: String,
-    listing_id: Number
+    sender: { type: String, default: 'AuctionWave System' },
+    date: { type: String, default: '' },
+    message: { type: String, default: '' },
+    listing_id: { type: Number, required: true } // Assuming this is always required
 });
 
 const paypalStore = usePaypalStore();

@@ -53,7 +53,7 @@ export default defineEventHandler(async (event) => {
         }
 
         // Prepare notification message
-        const notificationMessage = `Auctioneer ${firstname} ${lastname} has marked your transaction as completed for auction "${auction_name}".`;
+        const notificationMessage = `${firstname} ${lastname} auctioneer has marked the transaction as completed for auction "${auction_name}".`;
 
         // Insert notification for bidder
         await pool.query(`

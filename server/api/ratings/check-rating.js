@@ -33,13 +33,13 @@ export default defineEventHandler(async (event) => {
 
         // Check if the auction has been rated by this user (check both tables)
         const [bidderRatingResult] = await pool.query(
-            'SELECT * FROM BidderRatings WHERE listing_id = ? AND auctioneer_id = ?',
-            [listing_id, user_id]
+            'SELECT * FROM BidderRatings WHERE listing_id = ? AND auctioneer_id = ? AND bidder_id = ?',
+            [listing_id, auctioneer_id, user_id]
         );
 
         const [auctioneerRatingResult] = await pool.query(
-            'SELECT * FROM AuctioneerRatings WHERE listing_id = ? AND bidder_id = ?',
-            [listing_id, auctioneer_id]
+            'SELECT * FROM AuctioneerRatings WHERE listing_id = ? AND bidder_id = ? AND auctioneer_id = ?',
+            [listing_id, user_id, auctioneer_id]
         );
 
         // If a rating is found for either bidder or auctioneer, return an error

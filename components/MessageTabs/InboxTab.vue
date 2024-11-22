@@ -130,8 +130,8 @@
                             alt="Auction Image" class="w-11 h-11 rounded-full object-cover flex-shrink-0 ml-4 mr-8"
                             loading="lazy" />
 
-                        <img v-else src="/public/images/no-image.jpg" alt="No Image Available"
-                            class="object-cover w-full h-32 rounded-t-lg" loading="lazy" />
+                        <img v-else src="/images/default-profile-image.png" alt="No Image Available"
+                            class="w-11 h-11 rounded-full object-cover flex-shrink-0 ml-4 mr-8" loading="lazy" />
                         <div class="w-full sm:w-auto lg:w-auto">
                             <!-- From and Date -->
                             <span class="sm:w-48 lg:w-48 w-full truncate">From: {{ message.sender_name }}</span>

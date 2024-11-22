@@ -58,7 +58,11 @@ const submitRating = async () => {
         });
 
         if (response.data.success) {
-            toast.success('Thank you for your feedback!');
+            toast(`Thank you for your feedback!`, {
+                type: 'success',
+                autoClose: 10000,
+                position: 'top-right',
+            });
             closeModal();  // Close the modal after submitting the rating
         }
     } catch (error) {

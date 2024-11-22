@@ -49,6 +49,23 @@ export default defineEventHandler(async (event) => {
       [userId],
     );
 
+
+    // If user is a bidder, get rating from BidderRatings table
+    const [bidderRatings] = await pool.query(
+      `SELECT AVG(rating) as averageRating 
+          FROM BidderRatings 
+          WHERE bidder_id = ?`,
+      [userId] // Use the auctioneerId as bidderId
+    );
+
+    // Handle rating
+    let rating = bidderRatings[0].averageRating;
+    if (rating === null) {
+      rating = 0; // Default rating if no ratings found
+    } else {
+      rating = parseFloat(rating); // Ensure the rating is a float
+    }
+
     // Construct the response
     return {
       profile: {
@@ -59,7 +76,8 @@ export default defineEventHandler(async (event) => {
         location: location.length ? location[0].location_name : "Unknown", // Handle case if location is not found
         categories: categories.map((c) => c.category_name),
         about: user[0].about,
-        user_type: user[0].user_type
+        user_type: user[0].user_type,
+        bidder_rating: rating
       },
     };
 

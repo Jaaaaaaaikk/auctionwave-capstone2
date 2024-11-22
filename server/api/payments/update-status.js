@@ -19,13 +19,13 @@ export default defineEventHandler(async (event) => {
         throw createError({ statusCode: 401, message: 'Invalid token' });
     }
 
-    // Step 2: Get the listing ID and cash bond amount from the request body
+    // Step 2: Get the listing ID from the request body
     const body = await readBody(event);
     const { listing_id, orderID } = body;
 
     // Validate required fields
     if (!listing_id || !orderID) {
-        throw createError({ statusCode: 400, message: "Listing ID, Cash Bond Amount, and Order ID are required." });
+        throw createError({ statusCode: 400, message: "Listing ID, and Order ID are required." });
     }
 
     // Step 3: Get auctioneer_id from AuctionListings table using the listing_id
@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
     );
 
     if (!winningBid || winningBid.length === 0) {
-        throw createError({ statusCode: 404, message: "No cash bond pending bid found for the given listing." });
+        throw createError({ statusCode: 404, message: "No Usage Fee pending bid found for the given listing." });
     }
 
     const { bid_id, bidder_id, bid_amount } = winningBid[0];
@@ -58,7 +58,7 @@ export default defineEventHandler(async (event) => {
         [bid_id]
     );
 
-    // Step 6: Add rows to the Payments table for cash bond and usage fee
+    // Step 6: Add rows to the Payments table for usage fee
     const usageFee = 20.00; // Fixed usage fee for the auction
 
     // Insert payment row for usage fee

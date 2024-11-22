@@ -46,7 +46,8 @@
 
     <section class="bg-white rounded-lg  flex flex-col items-center justify-center w-5/6 mx-auto">
       <!-- Default Message if No Auctions Exist -->
-      <div v-if="auctions.length === 0 && !isSearching && !isLoading" class="flex flex-row items-center space-x-6">
+      <div v-if="filteredAuctions.length === 0 && !isSearching && !isLoading"
+        class="flex flex-row items-center space-x-6">
         <div class="flex-shrink-0">
           <img src="/public/images/auction-image.png" alt="Create Auction" class="w-64 h-auto" />
         </div>
@@ -58,7 +59,7 @@
             Click the button below to create one.
           </p>
           <button @click="create_AuctionModal = true"
-            class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">
+            class="bg-custom-bluegreen hover:bg-green-500 text-white py-2 px-4 rounded">
             Create Auction
           </button>
         </div>
@@ -88,8 +89,6 @@
             <!-- </form> -->
 
             <div>
-              <label for="AuctionStatus"
-                class="sr-only mb-2 block text-sm font-medium text-gray-900 dark:text-white">Auction Status</label>
               <select id="AuctionStatus" v-model="selectedAuctionStatus" @change="resetAuctionStatus" class="block w-full min-w-[8rem] rounded-lg border border-gray-300 bg-gray-50 py-2.5 text-sm
                 text-gray-900 focus:border-custom-bluegreen focus:ring-custom-bluegreen dark:border-gray-600
                 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-custom-bluegreen
@@ -104,9 +103,6 @@
             </div>
 
             <div>
-              <label for="AuctionTransaction
-                Status" class="sr-only mb-2 block text-sm font-medium text-gray-900 dark:text-white">AuctionTransaction
-                Status</label>
               <select id="AuctionTransaction
                 Status" v-model="selectedTransactionStatus" @change="resetTransactionStatus"
                 class="block w-full min-w-[8rem] rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-custom-bluegreen focus:ring-custom-bluegreen dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400 dark:focus:border-custom-bluegreen dark:focus:ring-custom-bluegreen">
@@ -298,7 +294,7 @@
             class="flex-1">
             <dd class="mt-1.5 flex items-center space-x-2">
               <!-- Item Received -->
-              <button v-if="auction.is_rated === 0" :class="{
+              <button :class="{
                 'bg-custom-bluegreen hover:bg-green-500': auction.transaction_status === 'Transaction Pending',
                 'bg-yellow-500 hover:bg-yellow-600': auction.transaction_status === 'Transaction Completed',
               }" class="flex items-center justify-center px-2 py-1 rounded text-white space-x-1"
@@ -306,7 +302,7 @@
                 <svg v-if="auction.transaction_status === 'Transaction Pending'" xmlns="http://www.w3.org/2000/svg"
                   class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fill-rule="evenodd"
-                    d="M16.707 6.707a1 1 0 00-1.414-1.414L8 12.586 4.707 9.293a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l8-8z"
+                    d="M16.707 6.707a1 1 0 00-1.414-1.414L8 12.586 4.707 9.2    93a1 1 0 00-1.414 1.414l4 4a1 1 0 001.414 0l8-8z"
                     clip-rule="evenodd" />
                 </svg>
                 <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -463,8 +459,10 @@
         <!-- ./Recent Activities -->
       </div>
 
-      <CreateAuction_Modal v-if="create_AuctionModal" @close="handleModalClose" />
-
+      <CreateAuction_Modal v-if="create_AuctionModal" @close="handleModalClose" class="z-30" />
+      <ConfirmationModal :isVisible="isConfirmationModalVisible" title="Confirm Action"
+        message="Are you sure you want to mark this transaction as completed?" @confirm="handleConfirm"
+        @cancel="handleCancel" />
     </section>
 
   </NuxtLayout>
@@ -476,8 +474,10 @@ import { ref, onMounted, computed } from "vue";
 import CreateAuction_Modal from "~/components/createauctionmodal.vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
+import ConfirmationModal from "@/components/confirmation-components/confirm-alert.vue";
 import { toast } from "vue3-toastify";
 
+const isConfirmationModalVisible = ref(false);
 const create_AuctionModal = ref(false);
 const auctions = ref([]);
 const currentPage = ref(1);
@@ -497,6 +497,7 @@ const showRateModal = ref(false);
 const selectedAuctionForRating = ref(null);
 const rating = ref(0);
 const isLoading = ref(true);
+let currentTransactionId = ref(null);
 
 
 // Initialize auction status map as an array of strings
@@ -512,6 +513,54 @@ const transactionStatusMap = ref([
   "Transaction Completed",
   "Transaction Failed",
 ]);
+
+const openConfirmationModal = async (transactionId) => {
+  currentTransactionId.value = transactionId; // Store the transaction ID for use in the confirm action
+  isConfirmationModalVisible.value = true;
+};
+
+const handleConfirm = async () => {
+  if (!currentTransactionId.value) {
+    toast.warn('No currentTransactionId');
+    return;
+  }
+
+  isLoading.value = true; // Set loading to true initially
+
+  console.log('currentTransactionId.value', currentTransactionId.value);
+  try {
+    const response = await axios.post("/api/auctions/update-transaction-status", {
+      transaction_id: currentTransactionId.value
+    });
+
+    if (response.data.success) {
+      toast(`Transaction marked as completed.`, {
+        type: 'success',
+        autoClose: 10000,
+        position: 'top-right',
+      });
+      // Optionally, refresh auction list or update UI state
+    } else {
+      toast.error(response.data.message || "Failed to update transaction.");
+    }
+  } catch (error) {
+    // Extract message based on error source
+    const errorMessage = error.response?.data?.message || error.message || "An unknown error occurred.";
+    console.error("Failed to place bid:", errorMessage);
+
+    // Display toast with error message
+    toast.error(`An error occurred while updating the transaction.: ${errorMessage}`);
+
+  } finally {
+    isLoading.value = false;  // Ensure loading is turned off whether success or failure
+    isConfirmationModalVisible.value = false;  // Close the modal after confirmation
+  }
+};
+
+const handleCancel = () => {
+  isLoading.value = false;
+  isConfirmationModalVisible.value = false;  // Close the modal
+};
 
 const setRating = (value) => {
   rating.value = value;
@@ -556,7 +605,11 @@ const submitRating = async () => {
     });
 
     if (response.data.success) {
-      toast.success('Thank you for your feedback!');
+      toast(`Thank you for your feedback!`, {
+        type: 'success',
+        autoClose: 10000,
+        position: 'top-right',
+      });
       closeModal();
     }
   } catch (error) {
@@ -570,37 +623,9 @@ const submitRating = async () => {
 
 const handleButtonClick = (auction) => {
   if (auction.transaction_status === 'Transaction Pending') {
-    handleMarkTransactionPending(auction.transaction_id);
+    openConfirmationModal(auction.transaction_id);
   } else if (auction.transaction_status === 'Transaction Completed') {
     openRateModal(auction);
-  }
-};
-
-const handleMarkTransactionPending = async (transaction_id) => {
-  isLoading.value = true;
-  if (
-    confirm(
-      "This will mark the transaction as successful. Are you sure you want to proceed?"
-    )
-  ) {
-    try {
-      const response = await axios.post(
-        "/api/auctions/update-transaction-status",
-        { transaction_id }
-      );
-
-      if (response.data.success) {
-        toast.success("Transaction marked as completed.");
-        // Optionally, refresh auction list or update UI state
-      } else {
-        toast.error(response.data.message || "Failed to update transaction.");
-      }
-    } catch (error) {
-      console.error("Failed to update transaction status:", error);
-      toast.error("An error occurred while updating the transaction.");
-    } finally {
-      isLoading.value = false;
-    }
   }
 };
 
@@ -731,6 +756,9 @@ const handleSearch = () => {
 
 const handleModalClose = () => {
   create_AuctionModal.value = false;
+  currentPage.value = 1;
+  isSearching.value = true;
+  isFiltered.value = true;
   fetchAuctions(); // Re-fetch auctions after closing the modal
 };
 

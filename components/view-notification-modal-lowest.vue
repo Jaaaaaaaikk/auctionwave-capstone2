@@ -1,11 +1,13 @@
 <template>
     <div class="fixed inset-0 flex items-center justify-center bg-gray-400 bg-opacity-50 modal-background">
         <!-- Modal Content -->
-        <div v-if="winnerDetails" class="bg-white p-6 rounded-lg shadow-lg w-1/3">
-            <h2 class="text-xl font-semibold mb-4">Notification From: {{ sender }}</h2>
+        <div v-if="winnerDetails"
+            class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl">
+            <h2 class="text-xl font-semibold mb-4">Notification From: {{ sender || 'AuctionWave System' }}</h2>
             <div class="relative"></div>
             <div class="w-full p-4 border border-gray-300 rounded my-4" disabled><span
-                    v-if="winnerDetails.status === 'Usage Fee Payment Pending'">🎉</span>{{ message }}</div>
+                    v-if="winnerDetails.status === 'Usage Fee Payment Pending'">🎉</span>{{ message ||
+                        winnerDetails.message }}</div>
             <span v-if="winnerDetails.status === 'Usage Fee Payment Pending'" class="w-full p-2 rounded"><strong
                     class="mr-2">Date:</strong> {{ formatDate(winnerDetails.bid_time)
                 }}</span>
@@ -116,10 +118,10 @@ import axios from 'axios';
 import { toast } from "vue3-toastify";
 
 const props = defineProps({
-    sender: String,
-    date: String,
-    message: String,
-    listing_id: Number
+    sender: { type: String, default: 'AuctionWave System' },
+    date: { type: String, default: '' },
+    message: { type: String, default: '' },
+    listing_id: { type: Number, required: true } // Assuming this is always required
 });
 
 const paypalStore = usePaypalStore();
@@ -209,8 +211,13 @@ const renderPaypalButtons = () => {
                             listing_id: props.listing_id,
                             orderID: data.orderID
                         });
-                        toast.success('Payment successful!');
+                        toast(`Payment successful. Check your payment history`, {
+                            type: 'success',
+                            autoClose: 10000,
+                            position: 'top-right',
+                        });
                         closePaymentModal();
+                        emit('closeAddMessageModal');
                     } else {
                         toast.warn('Payment failed or was not completed.');
                     }

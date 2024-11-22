@@ -160,6 +160,7 @@ export default defineEventHandler(async (event) => {
             notification: {
                 message: notificationMessage,
                 sender_full_name: 'AuctionWave System',
+                user_who_outbid: 'bidderName',
                 bid_time: bid_time,
                 bid_amount: formattedBidAmount
             },
@@ -177,8 +178,10 @@ export default defineEventHandler(async (event) => {
         };
 
     } catch (error) {
-        // Handle database errors
-        console.error('Error processing bid:', error);
+        if (error.statusCode) {
+            throw error; // Re-throw the existing error to preserve its status code and message
+        }
+
         throw createError({ statusCode: 500, message: 'Internal Server Error' });
     }
 });
